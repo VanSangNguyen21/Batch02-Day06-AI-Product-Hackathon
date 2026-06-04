@@ -79,7 +79,20 @@ from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 import logging
 
-from app.api import analyze, chat, feedback, admin, auth, progress
+# ──────────────────────────────────────────────────────────────────────────────
+# Force UTF-8 on stdout/stderr so Vietnamese log messages render correctly
+# on Windows consoles (default codepage = cp1252 → would mangle diacritics).
+# Must run BEFORE logging.basicConfig.
+# ──────────────────────────────────────────────────────────────────────────────
+for _stream in (sys.stdout, sys.stderr):
+    _reconfigure = getattr(_stream, "reconfigure", None)
+    if _reconfigure is not None:
+        try:
+            _reconfigure(encoding="utf-8", errors="backslashreplace")
+        except Exception:
+            pass
+
+from app.api import analyze, chat, feedback, admin, auth, progress, quiz
 from models.database import init_db
 
 # Cấu hình logging / Logging config
@@ -139,7 +152,6 @@ app.include_router(quiz.router,     prefix="/api", tags=["Quiz & RAG"])
 app.include_router(chat.router,    prefix="/api", tags=["Chatbot"])
 app.include_router(feedback.router, prefix="/api", tags=["Feedback"])
 app.include_router(admin.router,   prefix="/api/admin", tags=["Admin"])
-app.include_router(auth.router,     prefix="/api", tags=["Auth"])
 app.include_router(progress.router, prefix="/api", tags=["Progress"])
 
 

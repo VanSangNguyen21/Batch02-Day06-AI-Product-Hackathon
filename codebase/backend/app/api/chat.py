@@ -17,6 +17,7 @@ Every request runs through 7 traced steps:
 
 import os
 import time
+import re
 import asyncio
 import logging
 from collections import defaultdict, deque
@@ -24,7 +25,7 @@ import json
 from typing import List, Optional, Dict, Any
 
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from app.llm_client import LLMError, generate_chat_response, get_model_name, get_provider, is_local_model
 from app.trace import AgentTrace
@@ -71,6 +72,7 @@ class ChatRequest(BaseModel):
 
 
 class ChatResponse(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
     response:     str
     session_id:   str
     tokens_used:  Dict[str, int]

@@ -5558,6 +5558,84 @@
         "correct": 1,
         "explanation": "Đáp án B đúng vì Dữ liệu lớn, nhiều chiều như ảnh/video là lựa chọn phù hợp nhất với nội dung câu hỏi: Khi nào nên dùng DL thay vì ML?"
       }
+    ],
+    [
+      {
+        "id": "ch8-1",
+        "text": "Deep Learning là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Một thuật toán sắp xếp"
+          },
+          {
+            "label": "B",
+            "text": "Một tập con của Machine Learning dựa trên mạng nơ-ron nhân tạo"
+          },
+          {
+            "label": "C",
+            "text": "Một phương pháp lập trình"
+          },
+          {
+            "label": "D",
+            "text": "Không liên quan đến AI"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Deep Learning là một tập con của ML sử dụng các mạng neural nhiều lớp."
+      }
+    ],
+    [
+      {
+        "id": "ch9-1",
+        "text": "NLP viết tắt của từ gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Natural Language Processing"
+          },
+          {
+            "label": "B",
+            "text": "Neural Learning Program"
+          },
+          {
+            "label": "C",
+            "text": "New Language Processor"
+          },
+          {
+            "label": "D",
+            "text": "Node Logic Pattern"
+          }
+        ],
+        "correct": 0,
+        "explanation": "NLP là viết tắt của Natural Language Processing (Xử lý ngôn ngữ tự nhiên)."
+      }
+    ],
+    [
+      {
+        "id": "ch10-1",
+        "text": "Computer Vision (Thị giác máy tính) được dùng để làm gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Xử lý âm thanh"
+          },
+          {
+            "label": "B",
+            "text": "Dịch văn bản"
+          },
+          {
+            "label": "C",
+            "text": "Trích xuất thông tin từ hình ảnh và video"
+          },
+          {
+            "label": "D",
+            "text": "Quản lý cơ sở dữ liệu"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Computer Vision giúp máy tính hiểu và xử lý thông tin từ hình ảnh/video."
+      }
     ]
   ]
 }
