@@ -36,5 +36,10 @@ pytest-asyncio==0.23.7    # Async test support
 # ── Type Hints ─────────────────────────────────────────────
 typing-extensions==4.11.0  # Hỗ trợ type hints nâng cao / Advanced type hint support
 
+# ── RAG & Embeddings ───────────────────────────────────────
+sentence-transformers==3.0.1  # Semantic similarity & embedding / Embedding models for RAG
+scikit-learn==1.5.0        # Cosine similarity & vector math / Vector similarity computation
+numpy==1.24.3              # Numerical arrays / Array operations
+
 # ── Production ─────────────────────────────────────────────
 gunicorn==22.0.0           # Production WSGI server (tuỳ chọn / optional)

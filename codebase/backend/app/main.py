@@ -18,7 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 import logging
 
-from app.api import analyze, chat, feedback, admin, auth, progress
+from app.api import analyze, chat, feedback, admin, auth, progress, quiz
 from models.database import init_db
 
 # Cấu hình logging
@@ -72,6 +72,7 @@ app.add_middleware(
 
 # ==================== ROUTES ====================
 app.include_router(analyze.router, prefix="/api", tags=["Phân tích & Lộ trình"])
+app.include_router(quiz.router,     prefix="/api", tags=["Quiz & RAG"])
 app.include_router(chat.router,    prefix="/api", tags=["Chatbot"])
 app.include_router(feedback.router, prefix="/api", tags=["Feedback"])
 app.include_router(admin.router,   prefix="/api/admin", tags=["Admin"])
