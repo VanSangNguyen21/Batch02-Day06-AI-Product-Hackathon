@@ -1,0 +1,745 @@
+{
+  "version": "1.0.0",
+  "topics": [
+    [
+      {
+        "id": 1,
+        "text": "Trong Python, cấu trúc dữ liệu nào sau đây không cho phép thay đổi giá trị (Immutable) sau khi khởi tạo?",
+        "options": [
+          {
+            "label": "A",
+            "text": "List"
+          },
+          {
+            "label": "B",
+            "text": "Dictionary"
+          },
+          {
+            "label": "C",
+            "text": "Tuple"
+          },
+          {
+            "label": "D",
+            "text": "Set"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Tuple trong Python là cấu trúc dữ liệu không thể thay đổi giá trị (Immutable). Sau khi khởi tạo, bạn không thể thêm, sửa, hoặc xóa các phần tử trong tuple."
+      },
+      {
+        "id": "1b",
+        "text": "Trong Python, cau lenh nao sau day tao ra mot tuple gom 3 phan tu?",
+        "options": [
+          {
+            "label": "A",
+            "text": "[1, 2, 3]"
+          },
+          {
+            "label": "B",
+            "text": "{1, 2, 3}"
+          },
+          {
+            "label": "C",
+            "text": "(1, 2, 3)"
+          },
+          {
+            "label": "D",
+            "text": "{\"a\": 1}"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Tuple duoc tao bang dau ngoac tron, vi du (1, 2, 3), va la cau truc immutable trong Python."
+      },
+      {
+        "id": "1c",
+        "text": "Neu can luu mot tap gia tri khong muon bi sua sau khi tao trong Python, lua chon nao phu hop nhat?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Tuple"
+          },
+          {
+            "label": "B",
+            "text": "List"
+          },
+          {
+            "label": "C",
+            "text": "Dictionary"
+          },
+          {
+            "label": "D",
+            "text": "Set"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Tuple phu hop khi can mot day gia tri co thu tu va khong thay doi sau khi khoi tao."
+      }
+    ],
+    [
+      {
+        "id": 2,
+        "text": "Kết quả của đoạn code sau là gì? print([x**2 for x in range(3)])",
+        "options": [
+          {
+            "label": "A",
+            "text": "[1, 4, 9]"
+          },
+          {
+            "label": "B",
+            "text": "[0, 1, 4]"
+          },
+          {
+            "label": "C",
+            "text": "[0, 1, 2]"
+          },
+          {
+            "label": "D",
+            "text": "Lỗi cú pháp"
+          }
+        ],
+        "correct": 1,
+        "explanation": "range(3) sinh ra dãy số [0, 1, 2]. List comprehension bình phương từng số: 0²=0, 1²=1, 2²=4. Kết quả là [0, 1, 4]."
+      },
+      {
+        "id": "2b",
+        "text": "Ket qua cua doan code sau la gi? print([x + 1 for x in range(3)])",
+        "options": [
+          {
+            "label": "A",
+            "text": "[1, 2, 3]"
+          },
+          {
+            "label": "B",
+            "text": "[0, 1, 2]"
+          },
+          {
+            "label": "C",
+            "text": "[2, 3, 4]"
+          },
+          {
+            "label": "D",
+            "text": "Loi cu phap"
+          }
+        ],
+        "correct": 0,
+        "explanation": "range(3) tao ra 0, 1, 2. Cong them 1 cho moi gia tri se duoc [1, 2, 3]."
+      },
+      {
+        "id": "2c",
+        "text": "Ket qua cua doan code sau la gi? print([x * 2 for x in range(4)])",
+        "options": [
+          {
+            "label": "A",
+            "text": "[0, 2, 4, 6]"
+          },
+          {
+            "label": "B",
+            "text": "[2, 4, 6, 8]"
+          },
+          {
+            "label": "C",
+            "text": "[0, 1, 2, 3]"
+          },
+          {
+            "label": "D",
+            "text": "[1, 2, 3, 4]"
+          }
+        ],
+        "correct": 0,
+        "explanation": "range(4) tao ra 0, 1, 2, 3. Nhan doi tung gia tri se duoc [0, 2, 4, 6]."
+      }
+    ],
+    [
+      {
+        "id": 3,
+        "text": "Khi viết một hàm xử lý ngoại lệ trong Python để tránh chương trình bị crash giữa chừng, cặp từ khóa nào bắt buộc phải sử dụng?",
+        "options": [
+          {
+            "label": "A",
+            "text": "if / else"
+          },
+          {
+            "label": "B",
+            "text": "try / except"
+          },
+          {
+            "label": "C",
+            "text": "for / while"
+          },
+          {
+            "label": "D",
+            "text": "def / return"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Cấu trúc try/except dùng để bắt và xử lý các ngoại lệ (exceptions) giúp chương trình tiếp tục chạy khi gặp lỗi."
+      },
+      {
+        "id": "3b",
+        "text": "Khi muon bat loi chia cho 0 trong Python de chuong trinh khong dung dot ngot, nen dung cau truc nao?",
+        "options": [
+          {
+            "label": "A",
+            "text": "try / except"
+          },
+          {
+            "label": "B",
+            "text": "for / in"
+          },
+          {
+            "label": "C",
+            "text": "class / object"
+          },
+          {
+            "label": "D",
+            "text": "import / from"
+          }
+        ],
+        "correct": 0,
+        "explanation": "try/except dung de bat va xu ly exception, giup chuong trinh tiep tuc chay hoac hien thong bao than thien."
+      },
+      {
+        "id": "3c",
+        "text": "Trong Python, khoi lenh nao se chay khi phan try gap exception phu hop?",
+        "options": [
+          {
+            "label": "A",
+            "text": "return"
+          },
+          {
+            "label": "B",
+            "text": "except"
+          },
+          {
+            "label": "C",
+            "text": "lambda"
+          },
+          {
+            "label": "D",
+            "text": "yield"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Khi khoi try phat sinh exception phu hop, Python chuyen sang khoi except de xu ly loi."
+      }
+    ],
+    [
+      {
+        "id": 4,
+        "text": "Thư viện Python nào sau đây được sử dụng phổ biến nhất để thao tác với dữ liệu bảng (Tabular Data/DataFrame)?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Requests"
+          },
+          {
+            "label": "B",
+            "text": "Matplotlib"
+          },
+          {
+            "label": "C",
+            "text": "Pandas"
+          },
+          {
+            "label": "D",
+            "text": "Os"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Pandas là thư viện hàng đầu của Python dùng để thao tác, phân tích và xử lý cấu trúc dữ liệu dạng bảng (DataFrame)."
+      },
+      {
+        "id": "4b",
+        "text": "Trong Python, DataFrame la cau truc du lieu cot loi cua thu vien nao?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Pandas"
+          },
+          {
+            "label": "B",
+            "text": "Requests"
+          },
+          {
+            "label": "C",
+            "text": "Flask"
+          },
+          {
+            "label": "D",
+            "text": "Pillow"
+          }
+        ],
+        "correct": 0,
+        "explanation": "DataFrame la cau truc du lieu chinh cua Pandas, rat pho bien de lam viec voi du lieu bang."
+      },
+      {
+        "id": "4c",
+        "text": "Neu co file CSV va muon doc thanh bang du lieu de phan tich trong Python, thu vien nao phu hop nhat?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Pandas"
+          },
+          {
+            "label": "B",
+            "text": "Turtle"
+          },
+          {
+            "label": "C",
+            "text": "Random"
+          },
+          {
+            "label": "D",
+            "text": "Datetime"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Pandas co ham read_csv va cac thao tac loc, nhom, tinh toan tren du lieu dang bang."
+      }
+    ],
+    [
+      {
+        "id": 5,
+        "text": "Giá trị trung bình (Mean) của tập dữ liệu [2, 4, 4, 4, 6] là bao nhiêu?",
+        "options": [
+          {
+            "label": "A",
+            "text": "4"
+          },
+          {
+            "label": "B",
+            "text": "3"
+          },
+          {
+            "label": "C",
+            "text": "5"
+          },
+          {
+            "label": "D",
+            "text": "6"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Mean = (2 + 4 + 4 + 4 + 6) / 5 = 20 / 5 = 4."
+      },
+      {
+        "id": "5b",
+        "text": "Gia tri trung binh (Mean) cua tap du lieu [1, 3, 5, 7] la bao nhieu?",
+        "options": [
+          {
+            "label": "A",
+            "text": "3"
+          },
+          {
+            "label": "B",
+            "text": "4"
+          },
+          {
+            "label": "C",
+            "text": "5"
+          },
+          {
+            "label": "D",
+            "text": "6"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Mean = (1 + 3 + 5 + 7) / 4 = 16 / 4 = 4."
+      },
+      {
+        "id": "5c",
+        "text": "Gia tri trung binh (Mean) cua tap du lieu [10, 20, 30] la bao nhieu?",
+        "options": [
+          {
+            "label": "A",
+            "text": "15"
+          },
+          {
+            "label": "B",
+            "text": "20"
+          },
+          {
+            "label": "C",
+            "text": "25"
+          },
+          {
+            "label": "D",
+            "text": "30"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Mean = (10 + 20 + 30) / 3 = 60 / 3 = 20."
+      }
+    ],
+    [
+      {
+        "id": 6,
+        "text": "Trong đại số tuyến tính, một ma trận có kích thước 3×2 nhân với một ma trận kích thước 2×4 sẽ tạo ra một ma trận mới có kích thước bao nhiêu?",
+        "options": [
+          {
+            "label": "A",
+            "text": "2×2"
+          },
+          {
+            "label": "B",
+            "text": "3×4"
+          },
+          {
+            "label": "C",
+            "text": "2×4"
+          },
+          {
+            "label": "D",
+            "text": "Không thể nhân được"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Phép nhân ma trận kích thước (m×n) và (n×p) sẽ cho kết quả có kích thước (m×p). Ở đây (3×2) và (2×4) cho kết quả (3×4)."
+      },
+      {
+        "id": "6b",
+        "text": "Mot ma tran kich thuoc 2x3 nhan voi ma tran 3x5 se cho ket qua co kich thuoc nao?",
+        "options": [
+          {
+            "label": "A",
+            "text": "2x5"
+          },
+          {
+            "label": "B",
+            "text": "3x3"
+          },
+          {
+            "label": "C",
+            "text": "5x2"
+          },
+          {
+            "label": "D",
+            "text": "Khong nhan duoc"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Quy tac nhan ma tran: (m x n) nhan (n x p) cho ket qua (m x p), nen 2x3 nhan 3x5 thanh 2x5."
+      },
+      {
+        "id": "6c",
+        "text": "Mot ma tran 4x2 co the nhan voi ma tran nao sau day?",
+        "options": [
+          {
+            "label": "A",
+            "text": "3x4"
+          },
+          {
+            "label": "B",
+            "text": "2x3"
+          },
+          {
+            "label": "C",
+            "text": "5x2"
+          },
+          {
+            "label": "D",
+            "text": "4x4"
+          }
+        ],
+        "correct": 1,
+        "explanation": "So cot cua ma tran dau (2) phai bang so hang cua ma tran sau, nen 4x2 co the nhan voi 2x3."
+      }
+    ],
+    [
+      {
+        "id": 7,
+        "text": "Nếu xác suất để một email là spam là 20%, và bộ lọc AI nhận diện chính xác 90% số email spam đó, xác suất một email vừa là spam vừa bị lọc trúng là bao nhiêu?",
+        "options": [
+          {
+            "label": "A",
+            "text": "11%"
+          },
+          {
+            "label": "B",
+            "text": "18%"
+          },
+          {
+            "label": "C",
+            "text": "70%"
+          },
+          {
+            "label": "D",
+            "text": "2%"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Xác suất giao nhau P(Spam ∩ Lọc) = P(Spam) × P(Lọc|Spam) = 20% × 90% = 18%."
+      },
+      {
+        "id": "7b",
+        "text": "Neu P(A)=30% va P(B|A)=50%, xac suat A va B cung xay ra la bao nhieu?",
+        "options": [
+          {
+            "label": "A",
+            "text": "15%"
+          },
+          {
+            "label": "B",
+            "text": "20%"
+          },
+          {
+            "label": "C",
+            "text": "50%"
+          },
+          {
+            "label": "D",
+            "text": "80%"
+          }
+        ],
+        "correct": 0,
+        "explanation": "P(A va B) = P(A) x P(B|A) = 30% x 50% = 15%."
+      },
+      {
+        "id": "7c",
+        "text": "Neu 10% nguoi dung click vao quang cao va 40% trong so do mua hang, ti le vua click vua mua la bao nhieu?",
+        "options": [
+          {
+            "label": "A",
+            "text": "4%"
+          },
+          {
+            "label": "B",
+            "text": "10%"
+          },
+          {
+            "label": "C",
+            "text": "40%"
+          },
+          {
+            "label": "D",
+            "text": "50%"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Xac suat vua click vua mua = 10% x 40% = 4%."
+      }
+    ],
+    [
+      {
+        "id": 8,
+        "text": "Trong các mô hình ngôn ngữ lớn (LLM) như GPT-4, cơ chế kiến trúc cốt lõi nào giúp mô hình hiểu được mối liên hệ giữa các từ trong câu cách xa nhau?",
+        "options": [
+          {
+            "label": "A",
+            "text": "RNN (Recurrent Neural Network)"
+          },
+          {
+            "label": "B",
+            "text": "CNN (Convolutional Neural Network)"
+          },
+          {
+            "label": "C",
+            "text": "Attention / Transformer"
+          },
+          {
+            "label": "D",
+            "text": "K-Means Clustering"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Cơ chế Attention trong kiến trúc Transformer giúp các LLM theo dõi mối liên hệ giữa tất cả các từ trong ngữ cảnh mà không bị giới hạn khoảng cách."
+      },
+      {
+        "id": "8b",
+        "text": "Trong Transformer, co che nao giup model tap trung vao cac token quan trong trong ngu canh?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Attention"
+          },
+          {
+            "label": "B",
+            "text": "K-Means"
+          },
+          {
+            "label": "C",
+            "text": "SQL Join"
+          },
+          {
+            "label": "D",
+            "text": "Gradient Descent duy nhat"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Attention giup model can trong so muc do lien quan giua cac token trong ngu canh."
+      },
+      {
+        "id": "8c",
+        "text": "Kien truc nao la nen tang cua phan lon mo hinh ngon ngu lon hien dai?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Decision Tree"
+          },
+          {
+            "label": "B",
+            "text": "Transformer"
+          },
+          {
+            "label": "C",
+            "text": "Linear Regression"
+          },
+          {
+            "label": "D",
+            "text": "Naive Bayes co ban"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Transformer voi co che attention la kien truc nen tang cua nhieu LLM hien dai."
+      }
+    ],
+    [
+      {
+        "id": 9,
+        "text": "Hiện tượng một mô hình ngôn ngữ lớn (LLM) tự tin sinh ra thông tin sai lệch, không có trong dữ liệu huấn luyện hoặc thực tế được gọi là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Overfitting"
+          },
+          {
+            "label": "B",
+            "text": "Hallucination (Ảo giác)"
+          },
+          {
+            "label": "C",
+            "text": "Underfitting"
+          },
+          {
+            "label": "D",
+            "text": "Tokenization"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Hallucination (Ảo giác) là hiện tượng mô hình sinh ra câu từ trôi chảy, tự tin nhưng thông tin hoàn toàn sai lệch hoặc không có thực."
+      },
+      {
+        "id": "9b",
+        "text": "Khi chatbot tu tin dua ra mot link khoa hoc khong ton tai, day la vi du cua hien tuong nao?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Hallucination"
+          },
+          {
+            "label": "B",
+            "text": "Tokenization"
+          },
+          {
+            "label": "C",
+            "text": "Caching"
+          },
+          {
+            "label": "D",
+            "text": "Compression"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Hallucination la khi model tao thong tin nghe co ve hop ly nhung sai hoac khong ton tai."
+      },
+      {
+        "id": "9c",
+        "text": "Mot LLM tra loi rat mach lac nhung noi sai su that. Rui ro nay duoc goi la gi?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Overfitting"
+          },
+          {
+            "label": "B",
+            "text": "Hallucination"
+          },
+          {
+            "label": "C",
+            "text": "Underflow"
+          },
+          {
+            "label": "D",
+            "text": "Dataframe"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Day la hallucination: cau tra loi co ve tu tin va troi chay nhung noi sai su that."
+      }
+    ],
+    [
+      {
+        "id": 10,
+        "text": "Kỹ thuật nào giúp điều chỉnh hoặc hướng dẫn hành vi của một mô hình ngôn ngữ lớn (LLM) mà không cần cập nhật lại trọng số (weights) của mô hình?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Fine-tuning"
+          },
+          {
+            "label": "B",
+            "text": "Prompt Engineering (Kỹ thuật đặt câu lệnh)"
+          },
+          {
+            "label": "C",
+            "text": "Pre-training"
+          },
+          {
+            "label": "D",
+            "text": "Backpropagation"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Prompt Engineering là việc thiết kế các chỉ dẫn đầu vào tối ưu để kiểm soát đầu ra của LLM mà không cần huấn luyện lại hay cập nhật tham số."
+      },
+      {
+        "id": "10b",
+        "text": "Cach nao sau day dieu huong dau ra cua LLM ma khong can huan luyen lai model?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Prompt Engineering"
+          },
+          {
+            "label": "B",
+            "text": "Pre-training tu dau"
+          },
+          {
+            "label": "C",
+            "text": "Thay GPU"
+          },
+          {
+            "label": "D",
+            "text": "Xoa dataset"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Prompt Engineering thiet ke dau vao de dieu huong hanh vi model ma khong cap nhat trong so."
+      },
+      {
+        "id": "10c",
+        "text": "Neu muon LLM tra ve JSON dung schema, ky thuat dau tien nen cai thien la gi?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Viet prompt ro dinh dang dau ra"
+          },
+          {
+            "label": "B",
+            "text": "Tang do sang man hinh"
+          },
+          {
+            "label": "C",
+            "text": "Doi ngon ngu CSS"
+          },
+          {
+            "label": "D",
+            "text": "Tat validation"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Prompt can neu ro schema, rang buoc va vi du output de LLM tra ve dung dinh dang mong muon."
+      }
+    ]
+  ]
+}

@@ -1,0 +1,206 @@
+{
+  "version": "1.0.0",
+  "defaultRoadmap": {
+    "title": "Lộ trình học AI cơ bản",
+    "subtitle": "Từ zero đến AI practitioner trong 6–12 tháng",
+    "phases": [
+      {
+        "id": "phase-1",
+        "number": 1,
+        "title": "Nền tảng Toán học & Lập trình",
+        "duration": "4–6 tuần",
+        "milestones": [
+          {
+            "id": "m-1-1",
+            "icon": "🔢",
+            "status": "active",
+            "title": "Đại số tuyến tính cơ bản",
+            "desc": "Vector, ma trận, phép nhân ma trận, trị riêng — nền tảng cho ML.",
+            "tags": [
+              "Toán học",
+              "Cơ bản"
+            ],
+            "time": "1–2 tuần"
+          },
+          {
+            "id": "m-1-2",
+            "icon": "📊",
+            "status": "locked",
+            "title": "Xác suất & Thống kê",
+            "desc": "Phân phối xác suất, kỳ vọng, variance, Bayes theorem.",
+            "tags": [
+              "Toán học",
+              "Thống kê"
+            ],
+            "time": "1–2 tuần"
+          },
+          {
+            "id": "m-1-3",
+            "icon": "🐍",
+            "status": "locked",
+            "title": "Python cho Data Science",
+            "desc": "NumPy, Pandas, Matplotlib — bộ công cụ thiết yếu.",
+            "tags": [
+              "Python",
+              "Công cụ"
+            ],
+            "time": "1–2 tuần"
+          }
+        ]
+      },
+      {
+        "id": "phase-2",
+        "number": 2,
+        "title": "Machine Learning cơ bản",
+        "duration": "6–8 tuần",
+        "milestones": [
+          {
+            "id": "m-2-1",
+            "icon": "📈",
+            "status": "locked",
+            "title": "Supervised Learning",
+            "desc": "Linear/Logistic Regression, Decision Trees, SVM, k-NN.",
+            "tags": [
+              "ML",
+              "Supervised"
+            ],
+            "time": "2–3 tuần"
+          },
+          {
+            "id": "m-2-2",
+            "icon": "🔍",
+            "status": "locked",
+            "title": "Unsupervised Learning",
+            "desc": "K-Means, PCA, DBSCAN — tìm kiếm pattern trong dữ liệu.",
+            "tags": [
+              "ML",
+              "Unsupervised"
+            ],
+            "time": "1–2 tuần"
+          },
+          {
+            "id": "m-2-3",
+            "icon": "🛠️",
+            "status": "locked",
+            "title": "Model Evaluation & Tuning",
+            "desc": "Cross-validation, grid search, bias-variance tradeoff.",
+            "tags": [
+              "ML",
+              "Kỹ thuật"
+            ],
+            "time": "1–2 tuần"
+          }
+        ]
+      },
+      {
+        "id": "phase-3",
+        "number": 3,
+        "title": "Deep Learning & Neural Networks",
+        "duration": "8–10 tuần",
+        "milestones": [
+          {
+            "id": "m-3-1",
+            "icon": "🧠",
+            "status": "locked",
+            "title": "Neural Networks & Backpropagation",
+            "desc": "Kiến trúc MLP, activation functions, gradient descent.",
+            "tags": [
+              "Deep Learning",
+              "Core"
+            ],
+            "time": "2–3 tuần"
+          },
+          {
+            "id": "m-3-2",
+            "icon": "👁️",
+            "status": "locked",
+            "title": "Computer Vision với CNN",
+            "desc": "Convolutional layers, image classification, object detection.",
+            "tags": [
+              "CNN",
+              "Vision"
+            ],
+            "time": "2–3 tuần"
+          },
+          {
+            "id": "m-3-3",
+            "icon": "💬",
+            "status": "locked",
+            "title": "NLP & Transformers",
+            "desc": "RNN, LSTM, Attention, BERT, GPT — nền tảng LLM.",
+            "tags": [
+              "NLP",
+              "Transformer"
+            ],
+            "time": "3–4 tuần"
+          }
+        ]
+      },
+      {
+        "id": "phase-4",
+        "number": 4,
+        "title": "Dự án thực tế & Triển khai",
+        "duration": "4–6 tuần",
+        "milestones": [
+          {
+            "id": "m-4-1",
+            "icon": "🚀",
+            "status": "locked",
+            "title": "Xây dựng dự án AI hoàn chỉnh",
+            "desc": "End-to-end ML pipeline: thu thập data → model → API → UI.",
+            "tags": [
+              "Project",
+              "Production"
+            ],
+            "time": "2–3 tuần"
+          },
+          {
+            "id": "m-4-2",
+            "icon": "☁️",
+            "status": "locked",
+            "title": "Triển khai & MLOps cơ bản",
+            "desc": "Docker, REST API, model serving, monitoring cơ bản.",
+            "tags": [
+              "MLOps",
+              "Deploy"
+            ],
+            "time": "2–3 tuần"
+          }
+        ]
+      }
+    ]
+  },
+  "starLabels": {
+    "1": "😞 Rất không phù hợp",
+    "2": "😕 Không phù hợp",
+    "3": "😐 Tạm được",
+    "4": "😊 Phù hợp",
+    "5": "🤩 Rất phù hợp! Xuất sắc!"
+  },
+  "scoreLevels": [
+    {
+      "min": 0,
+      "max": 3,
+      "label": "🌱 Mới bắt đầu",
+      "badge": "Beginner"
+    },
+    {
+      "min": 4,
+      "max": 6,
+      "label": "📘 Đang phát triển",
+      "badge": "Intermediate"
+    },
+    {
+      "min": 7,
+      "max": 8,
+      "label": "🔥 Khá tốt",
+      "badge": "Advanced Beginner"
+    },
+    {
+      "min": 9,
+      "max": 10,
+      "label": "⚡ Nâng cao",
+      "badge": "Advanced"
+    }
+  ]
+}

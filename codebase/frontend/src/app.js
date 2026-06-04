@@ -64,7 +64,7 @@ const AppState = {
   // Quiz
   quiz: {
     currentIndex: 0,
-    answers: new Array(10).fill(null), // index → selected option index
+    answers: [], // index → selected option index
     startTime:  null,
     endTime:    null,
     timerInterval: null,
@@ -114,268 +114,108 @@ function setState(path, value) {
   obj[keys[keys.length - 1]] = value;
 }
 
-/* ─── QUIZ DATA (10 Vietnamese AI Questions) ─────────────────── */
-const QUIZ_QUESTIONS = [
-  {
-    id: 1,
-    text: 'Trong Python, cấu trúc dữ liệu nào sau đây không cho phép thay đổi giá trị (Immutable) sau khi khởi tạo?',
-    options: [
-      { label: 'A', text: 'List' },
-      { label: 'B', text: 'Dictionary' },
-      { label: 'C', text: 'Tuple' },
-      { label: 'D', text: 'Set' },
-    ],
-    correct: 2, // C = Tuple
-    explanation: 'Tuple trong Python là cấu trúc dữ liệu không thể thay đổi giá trị (Immutable). Sau khi khởi tạo, bạn không thể thêm, sửa, hoặc xóa các phần tử trong tuple.',
-  },
-  {
-    id: 2,
-    text: 'Kết quả của đoạn code sau là gì? print([x**2 for x in range(3)])',
-    options: [
-      { label: 'A', text: '[1, 4, 9]' },
-      { label: 'B', text: '[0, 1, 4]' },
-      { label: 'C', text: '[0, 1, 2]' },
-      { label: 'D', text: 'Lỗi cú pháp' },
-    ],
-    correct: 1, // B = [0, 1, 4]
-    explanation: 'range(3) sinh ra dãy số [0, 1, 2]. List comprehension bình phương từng số: 0²=0, 1²=1, 2²=4. Kết quả là [0, 1, 4].',
-  },
-  {
-    id: 3,
-    text: 'Khi viết một hàm xử lý ngoại lệ trong Python để tránh chương trình bị crash giữa chừng, cặp từ khóa nào bắt buộc phải sử dụng?',
-    options: [
-      { label: 'A', text: 'if / else' },
-      { label: 'B', text: 'try / except' },
-      { label: 'C', text: 'for / while' },
-      { label: 'D', text: 'def / return' },
-    ],
-    correct: 1, // B = try / except
-    explanation: 'Cấu trúc try/except dùng để bắt và xử lý các ngoại lệ (exceptions) giúp chương trình tiếp tục chạy khi gặp lỗi.',
-  },
-  {
-    id: 4,
-    text: 'Thư viện Python nào sau đây được sử dụng phổ biến nhất để thao tác với dữ liệu bảng (Tabular Data/DataFrame)?',
-    options: [
-      { label: 'A', text: 'Requests' },
-      { label: 'B', text: 'Matplotlib' },
-      { label: 'C', text: 'Pandas' },
-      { label: 'D', text: 'Os' },
-    ],
-    correct: 2, // C = Pandas
-    explanation: 'Pandas là thư viện hàng đầu của Python dùng để thao tác, phân tích và xử lý cấu trúc dữ liệu dạng bảng (DataFrame).',
-  },
-  {
-    id: 5,
-    text: 'Giá trị trung bình (Mean) của tập dữ liệu [2, 4, 4, 4, 6] là bao nhiêu?',
-    options: [
-      { label: 'A', text: '4' },
-      { label: 'B', text: '3' },
-      { label: 'C', text: '5' },
-      { label: 'D', text: '6' },
-    ],
-    correct: 0, // A = 4
-    explanation: 'Mean = (2 + 4 + 4 + 4 + 6) / 5 = 20 / 5 = 4.',
-  },
-  {
-    id: 6,
-    text: 'Trong đại số tuyến tính, một ma trận có kích thước 3×2 nhân với một ma trận kích thước 2×4 sẽ tạo ra một ma trận mới có kích thước bao nhiêu?',
-    options: [
-      { label: 'A', text: '2×2' },
-      { label: 'B', text: '3×4' },
-      { label: 'C', text: '2×4' },
-      { label: 'D', text: 'Không thể nhân được' },
-    ],
-    correct: 1, // B = 3x4
-    explanation: 'Phép nhân ma trận kích thước (m×n) và (n×p) sẽ cho kết quả có kích thước (m×p). Ở đây (3×2) và (2×4) cho kết quả (3×4).',
-  },
-  {
-    id: 7,
-    text: 'Nếu xác suất để một email là spam là 20%, và bộ lọc AI nhận diện chính xác 90% số email spam đó, xác suất một email vừa là spam vừa bị lọc trúng là bao nhiêu?',
-    options: [
-      { label: 'A', text: '11%' },
-      { label: 'B', text: '18%' },
-      { label: 'C', text: '70%' },
-      { label: 'D', text: '2%' },
-    ],
-    correct: 1, // B = 18%
-    explanation: 'Xác suất giao nhau P(Spam ∩ Lọc) = P(Spam) × P(Lọc|Spam) = 20% × 90% = 18%.',
-  },
-  {
-    id: 8,
-    text: 'Trong các mô hình ngôn ngữ lớn (LLM) như GPT-4, cơ chế kiến trúc cốt lõi nào giúp mô hình hiểu được mối liên hệ giữa các từ trong câu cách xa nhau?',
-    options: [
-      { label: 'A', text: 'RNN (Recurrent Neural Network)' },
-      { label: 'B', text: 'CNN (Convolutional Neural Network)' },
-      { label: 'C', text: 'Attention / Transformer' },
-      { label: 'D', text: 'K-Means Clustering' },
-    ],
-    correct: 2, // C = Attention / Transformer
-    explanation: 'Cơ chế Attention trong kiến trúc Transformer giúp các LLM theo dõi mối liên hệ giữa tất cả các từ trong ngữ cảnh mà không bị giới hạn khoảng cách.',
-  },
-  {
-    id: 9,
-    text: 'Hiện tượng một mô hình ngôn ngữ lớn (LLM) tự tin sinh ra thông tin sai lệch, không có trong dữ liệu huấn luyện hoặc thực tế được gọi là gì?',
-    options: [
-      { label: 'A', text: 'Overfitting' },
-      { label: 'B', text: 'Hallucination (Ảo giác)' },
-      { label: 'C', text: 'Underfitting' },
-      { label: 'D', text: 'Tokenization' },
-    ],
-    correct: 1, // B = Hallucination
-    explanation: 'Hallucination (Ảo giác) là hiện tượng mô hình sinh ra câu từ trôi chảy, tự tin nhưng thông tin hoàn toàn sai lệch hoặc không có thực.',
-  },
-  {
-    id: 10,
-    text: 'Kỹ thuật nào giúp điều chỉnh hoặc hướng dẫn hành vi của một mô hình ngôn ngữ lớn (LLM) mà không cần cập nhật lại trọng số (weights) của mô hình?',
-    options: [
-      { label: 'A', text: 'Fine-tuning' },
-      { label: 'B', text: 'Prompt Engineering (Kỹ thuật đặt câu lệnh)' },
-      { label: 'C', text: 'Pre-training' },
-      { label: 'D', text: 'Backpropagation' },
-    ],
-    correct: 1, // B = Prompt Engineering
-    explanation: 'Prompt Engineering là việc thiết kế các chỉ dẫn đầu vào tối ưu để kiểm soát đầu ra của LLM mà không cần huấn luyện lại hay cập nhật tham số.',
-  },
-];
+/* --- DATA LOADING ------------------------------------------------ */
+let QUIZ_QUESTIONS = [];
+let QUIZ_QUESTION_BANK = [];
+let DEFAULT_ROADMAP = null;
+let STAR_LABELS = {};
+let SCORE_LEVELS = [];
 
-/* ─── DEFAULT ROADMAP DATA ───────────────────────────────────── */
-/**
- * Baseline roadmap shown in fallback/failure mode.
- * Production system generates this from /api/analyze.
- */
-const DEFAULT_ROADMAP = {
-  title:    'Lộ trình học AI cơ bản',
-  subtitle: 'Từ zero đến AI practitioner trong 6–12 tháng',
-  phases: [
-    {
-      id: 'phase-1',
-      number: 1,
-      title: 'Nền tảng Toán học & Lập trình',
-      duration: '4–6 tuần',
-      milestones: [
-        {
-          id: 'm-1-1', icon: '🔢', status: 'active',
-          title: 'Đại số tuyến tính cơ bản',
-          desc:  'Vector, ma trận, phép nhân ma trận, trị riêng — nền tảng cho ML.',
-          tags:  ['Toán học', 'Cơ bản'],
-          time:  '1–2 tuần',
-        },
-        {
-          id: 'm-1-2', icon: '📊', status: 'locked',
-          title: 'Xác suất & Thống kê',
-          desc:  'Phân phối xác suất, kỳ vọng, variance, Bayes theorem.',
-          tags:  ['Toán học', 'Thống kê'],
-          time:  '1–2 tuần',
-        },
-        {
-          id: 'm-1-3', icon: '🐍', status: 'locked',
-          title: 'Python cho Data Science',
-          desc:  'NumPy, Pandas, Matplotlib — bộ công cụ thiết yếu.',
-          tags:  ['Python', 'Công cụ'],
-          time:  '1–2 tuần',
-        },
-      ],
-    },
-    {
-      id: 'phase-2',
-      number: 2,
-      title: 'Machine Learning cơ bản',
-      duration: '6–8 tuần',
-      milestones: [
-        {
-          id: 'm-2-1', icon: '📈', status: 'locked',
-          title: 'Supervised Learning',
-          desc:  'Linear/Logistic Regression, Decision Trees, SVM, k-NN.',
-          tags:  ['ML', 'Supervised'],
-          time:  '2–3 tuần',
-        },
-        {
-          id: 'm-2-2', icon: '🔍', status: 'locked',
-          title: 'Unsupervised Learning',
-          desc:  'K-Means, PCA, DBSCAN — tìm kiếm pattern trong dữ liệu.',
-          tags:  ['ML', 'Unsupervised'],
-          time:  '1–2 tuần',
-        },
-        {
-          id: 'm-2-3', icon: '🛠️', status: 'locked',
-          title: 'Model Evaluation & Tuning',
-          desc:  'Cross-validation, grid search, bias-variance tradeoff.',
-          tags:  ['ML', 'Kỹ thuật'],
-          time:  '1–2 tuần',
-        },
-      ],
-    },
-    {
-      id: 'phase-3',
-      number: 3,
-      title: 'Deep Learning & Neural Networks',
-      duration: '8–10 tuần',
-      milestones: [
-        {
-          id: 'm-3-1', icon: '🧠', status: 'locked',
-          title: 'Neural Networks & Backpropagation',
-          desc:  'Kiến trúc MLP, activation functions, gradient descent.',
-          tags:  ['Deep Learning', 'Core'],
-          time:  '2–3 tuần',
-        },
-        {
-          id: 'm-3-2', icon: '👁️', status: 'locked',
-          title: 'Computer Vision với CNN',
-          desc:  'Convolutional layers, image classification, object detection.',
-          tags:  ['CNN', 'Vision'],
-          time:  '2–3 tuần',
-        },
-        {
-          id: 'm-3-3', icon: '💬', status: 'locked',
-          title: 'NLP & Transformers',
-          desc:  'RNN, LSTM, Attention, BERT, GPT — nền tảng LLM.',
-          tags:  ['NLP', 'Transformer'],
-          time:  '3–4 tuần',
-        },
-      ],
-    },
-    {
-      id: 'phase-4',
-      number: 4,
-      title: 'Dự án thực tế & Triển khai',
-      duration: '4–6 tuần',
-      milestones: [
-        {
-          id: 'm-4-1', icon: '🚀', status: 'locked',
-          title: 'Xây dựng dự án AI hoàn chỉnh',
-          desc:  'End-to-end ML pipeline: thu thập data → model → API → UI.',
-          tags:  ['Project', 'Production'],
-          time:  '2–3 tuần',
-        },
-        {
-          id: 'm-4-2', icon: '☁️', status: 'locked',
-          title: 'Triển khai & MLOps cơ bản',
-          desc:  'Docker, REST API, model serving, monitoring cơ bản.',
-          tags:  ['MLOps', 'Deploy'],
-          time:  '2–3 tuần',
-        },
-      ],
-    },
-  ],
-};
+async function loadJsonData(path, label) {
+  const response = await fetch(path, { cache: 'no-store' });
+  if (!response.ok) throw new Error(`${label} HTTP ${response.status}`);
+  return response.json();
+}
 
-/* ─── STAR RATING LABELS ─────────────────────────────────────── */
-const STAR_LABELS = {
-  1: '😞 Rất không phù hợp',
-  2: '😕 Không phù hợp',
-  3: '😐 Tạm được',
-  4: '😊 Phù hợp',
-  5: '🤩 Rất phù hợp! Xuất sắc!',
-};
+async function loadAppData() {
+  try {
+    const data = await loadJsonData('src/app_data.json', 'App data');
+    if (!data || !data.defaultRoadmap || !data.starLabels || !Array.isArray(data.scoreLevels)) {
+      throw new Error('app_data.json is missing required fields');
+    }
 
-const SCORE_LEVELS = [
-  { min: 0,  max: 3,  label: '🌱 Mới bắt đầu',       badge: 'Beginner' },
-  { min: 4,  max: 6,  label: '📘 Đang phát triển',    badge: 'Intermediate' },
-  { min: 7,  max: 8,  label: '🔥 Khá tốt',            badge: 'Advanced Beginner' },
-  { min: 9,  max: 10, label: '⚡ Nâng cao',           badge: 'Advanced' },
-];
+    DEFAULT_ROADMAP = data.defaultRoadmap;
+    STAR_LABELS = data.starLabels;
+    SCORE_LEVELS = data.scoreLevels;
+  } catch (err) {
+    console.error('[App Data] Could not load app_data.json:', err.message);
+    DEFAULT_ROADMAP = null;
+    STAR_LABELS = {};
+    SCORE_LEVELS = [];
+  }
+}
 
-/* ─── DOM REFERENCES (cached on init) ───────────────────────── */
+function isValidQuestion(question) {
+  return Boolean(
+    question &&
+    typeof question.text === 'string' &&
+    Array.isArray(question.options) &&
+    question.options.length >= 2 &&
+    Number.isInteger(question.correct) &&
+    question.correct >= 0 &&
+    question.correct < question.options.length
+  );
+}
+
+async function loadQuizQuestionBank() {
+  try {
+    const data = await loadJsonData('src/quiz_questions.json', 'Quiz bank');
+    const topics = Array.isArray(data) ? data : data.topics;
+    if (!Array.isArray(topics) || topics.length !== 10) {
+      throw new Error('Quiz bank must contain exactly 10 topics');
+    }
+
+    const normalizedTopics = topics.map((variants, topicIndex) => {
+      if (!Array.isArray(variants) || variants.length === 0) {
+        throw new Error(`Topic ${topicIndex + 1} has no variants`);
+      }
+      const validVariants = variants.filter(isValidQuestion);
+      if (validVariants.length === 0) {
+        throw new Error(`Topic ${topicIndex + 1} has no valid variants`);
+      }
+      return validVariants;
+    });
+
+    QUIZ_QUESTION_BANK = normalizedTopics;
+    QUIZ_QUESTIONS = normalizedTopics.map((variants, topicIndex) => cloneQuizQuestion(variants[0], topicIndex, 0));
+  } catch (err) {
+    console.error('[Quiz Bank] Could not load quiz_questions.json:', err.message);
+    QUIZ_QUESTION_BANK = [];
+    QUIZ_QUESTIONS = [];
+  }
+}
+
+function cloneQuizQuestion(question, topicIndex, variantIndex) {
+  return {
+    ...question,
+    id: `${topicIndex + 1}-${question.id || variantIndex + 1}`,
+    options: question.options.map(option => ({ ...option })),
+  };
+}
+
+let lastQuizSignature = '';
+
+function buildRandomQuizQuestions() {
+  if (!Array.isArray(QUIZ_QUESTION_BANK) || QUIZ_QUESTION_BANK.length === 0) {
+    return [];
+  }
+
+  let selectedIndexes = [];
+  let signature = '';
+
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    selectedIndexes = QUIZ_QUESTION_BANK.map(variants => Math.floor(Math.random() * variants.length));
+    signature = selectedIndexes.join('-');
+    if (signature !== lastQuizSignature) break;
+  }
+
+  lastQuizSignature = signature;
+  return QUIZ_QUESTION_BANK.map((variants, topicIndex) => (
+    cloneQuizQuestion(variants[selectedIndexes[topicIndex]], topicIndex, selectedIndexes[topicIndex])
+  ));
+}
+
+/* --- DOM REFERENCES (cached on init) ---------------------------- */
 const $ = (id) => document.getElementById(id);
 const $$ = (sel) => document.querySelectorAll(sel);
 
@@ -623,8 +463,14 @@ const Quiz = {
   },
 
   start() {
+    QUIZ_QUESTIONS = buildRandomQuizQuestions();
+    if (QUIZ_QUESTIONS.length === 0) {
+      Toast.error('Không tải được câu hỏi', 'Kiểm tra file src/quiz_questions.json rồi tải lại trang.');
+      return;
+    }
+
     AppState.quiz.currentIndex = 0;
-    AppState.quiz.answers      = new Array(10).fill(null);
+    AppState.quiz.answers      = new Array(QUIZ_QUESTIONS.length).fill(null);
     AppState.quiz.startTime    = Date.now();
 
     // Build dots
@@ -785,15 +631,16 @@ const Quiz = {
     AppState.results.score = score;
 
     // Determine level
-    const levelInfo = SCORE_LEVELS.find(l => score >= l.min && score <= l.max) || SCORE_LEVELS[0];
+    const levelInfo = SCORE_LEVELS.find(l => score >= l.min && score <= l.max) || SCORE_LEVELS[0] || { badge: 'Beginner' };
     AppState.results.level = levelInfo.badge;
 
     // Calculate confidence (0–100)
     // Base: (score/10) * 80 + 20 (min 20%)
     // Reduce if many unanswered (shouldn't happen but guard)
     const answered = AppState.quiz.answers.filter(a => a !== null).length;
-    const base = (score / 10) * 80 + 20;
-    const completionFactor = answered / 10;
+    const totalQuestions = QUIZ_QUESTIONS.length;
+    const base = (score / totalQuestions) * 80 + 20;
+    const completionFactor = answered / totalQuestions;
     AppState.results.confidence = Math.round(base * completionFactor);
 
     // Determine fallback mode
@@ -1714,7 +1561,7 @@ const SupportModal = {
   _resetSession() {
     // Reset state
     AppState.userData          = { goal_why: '', goal_time: '', goal_job: '', goal_bg: '' };
-    AppState.quiz              = { currentIndex: 0, answers: new Array(10).fill(null), startTime: null, endTime: null, timerInterval: null };
+    AppState.quiz              = { currentIndex: 0, answers: new Array(QUIZ_QUESTIONS.length).fill(null), startTime: null, endTime: null, timerInterval: null };
     AppState.results           = { score: 0, confidence: 0, level: '', roadmap: null, isFallback: false, isFailure: false, sessionId: null };
     AppState.chat              = { history: [], rateLimit: { remaining: 5, max: 5, resetAt: null, countdown: null }, totalTokens: 0, totalCostUSD: 0, isLoading: false };
     AppState.completedMilestones = new Set();
@@ -1814,9 +1661,14 @@ function ensureResultsHidden() {
 }
 
 /* ─── MAIN INIT ──────────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   console.log('🚀 AI Learning Path Personalizer — Initializing...');
   console.log('   VinUni Batch 02 | Day 05');
+
+  await Promise.all([
+    loadAppData(),
+    loadQuizQuestionBank(),
+  ]);
 
   // Core systems
   Toast.init();
@@ -1859,5 +1711,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /* ─── EXPOSE FOR DEBUGGING (dev only) ───────────────────────── */
 if (typeof window !== 'undefined') {
-  window.__APP__ = { AppState, Quiz, Roadmap, ChatUI, Toast, DEFAULT_ROADMAP, QUIZ_QUESTIONS };
+  window.__APP__ = {
+    AppState,
+    Quiz,
+    Roadmap,
+    ChatUI,
+    Toast,
+    getDefaultRoadmap: () => DEFAULT_ROADMAP,
+    getQuizQuestions: () => QUIZ_QUESTIONS,
+    getQuizQuestionBank: () => QUIZ_QUESTION_BANK,
+  };
 }
