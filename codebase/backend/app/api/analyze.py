@@ -13,7 +13,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
-from app.llm_client import LLMError, generate_roadmap, get_model_name
+from app.llm_client import LLMError, generate_roadmap, get_model_name, get_provider
 from middleware.cost_logger import log_cost
 from middleware.data_masking import mask_sensitive_data
 from middleware.guardrails import guardrail_manager
@@ -21,18 +21,24 @@ from middleware.guardrails import guardrail_manager
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-# Đọc System Prompt từ file
-SYSTEM_PROMPT_PATH = os.path.join(
-    os.path.dirname(__file__), "..", "..", "..", "prompts", "system_prompt.txt"
-)
+_BASE = os.path.dirname(__file__)
 
-def load_system_prompt() -> str:
-    try:
-        with open(SYSTEM_PROMPT_PATH, "r", encoding="utf-8") as f:
-            return f.read()
-    except FileNotFoundError:
-        logger.warning("⚠️ System prompt file không tìm thấy, dùng prompt mặc định")
-        return "You are an AI learning path advisor. Return JSON with milestones."
+# Rich few-shot prompt — works for all providers (Ollama, Claude, OpenAI)
+SYSTEM_PROMPT_PATH = os.path.normpath(os.path.join(_BASE, "..", "..", "..", "prompts", "system_prompt.txt"))
+# Backup: simpler backend-local prompt
+LOCAL_SYSTEM_PROMPT_PATH = os.path.normpath(os.path.join(_BASE, "..", "..", "prompts", "system_prompt.txt"))
+
+
+def load_system_prompt(provider: str = "ollama") -> str:
+    for path in (SYSTEM_PROMPT_PATH, LOCAL_SYSTEM_PROMPT_PATH):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                logger.info(f"📄 Loaded system prompt ({provider}): {path}")
+                return f.read()
+        except FileNotFoundError:
+            continue
+    logger.warning("⚠️ No system prompt file found, using minimal default")
+    return "You are an AI learning path advisor. Return JSON with milestones."
 
 
 def save_to_sandbox_storage(data: dict):
@@ -138,7 +144,8 @@ async def analyze_profile(req: AnalyzeRequest):
         quiz_summary += f"\nCác topic đã trả lời: {', '.join(correct_topics) if correct_topics else 'Chưa có'}"
 
     user_prompt = f"""
-Hãy phân tích hồ sơ người học và thiết kế lộ trình học AI cá nhân hóa:
+Hãy phân tích hồ sơ người học SAU ĐÂY và thiết kế lộ trình học AI CÁ NHÂN HÓA RIÊNG BIỆT cho họ.
+QUAN TRỌNG: Tạo lộ trình HOÀN TOÀN MỚI dựa trên thông tin cụ thể bên dưới. KHÔNG sao chép các ví dụ mẫu.
 
 THÔNG TIN NGƯỜI HỌC:
 - Mục tiêu: {req.goal_description}
@@ -152,13 +159,14 @@ Trả về JSON theo đúng schema đã định nghĩa. KHÔNG thêm text ngoài
 
     # Gọi LLM API
     model = get_model_name()
+    provider = get_provider(model)
     roadmap_data = None
     input_tokens = 0
     output_tokens = 0
 
     try:
-        logger.info(f"🤖 Generating roadmap with model {model}")
-        roadmap_data = await generate_roadmap(load_system_prompt(), user_prompt, model)
+        logger.info(f"🤖 Generating roadmap with model {model} (provider={provider})")
+        roadmap_data = await generate_roadmap(load_system_prompt(provider), user_prompt, model)
         usage = roadmap_data.pop("_usage", {})
         input_tokens = usage.get("input_tokens", 0)
         output_tokens = usage.get("output_tokens", 0)
