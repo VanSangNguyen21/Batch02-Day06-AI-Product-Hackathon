@@ -620,7 +620,6 @@ const Quiz = {
     this._nextBtn      = $('btn-quiz-next');
 
     this._prevBtn.addEventListener('click', () => this._navigate(-1));
-    this._nextBtn.addEventListener('click', () => this._navigate(1));
   },
 
   start() {
