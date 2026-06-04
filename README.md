@@ -9,12 +9,12 @@
 
 | Tên tài khoản | Họ và tên | Vai trò |
 |---|---|---|
-| **VanSangNguyen21** (sangthon2003@gmail.com) | Nguyễn Văn Sang | Product Manager / Lead |
+| **VanSangNguyen21** (sangthon2003@gmail.com) | Nguyễn Văn Sáng | Product Manager / Lead |
 | **phammaianh11102005@gmail.com** | Phạm Mai Anh | Prompt / AI Engineer |
-| **Shiner-2** | Phan Nhật Huy | Backend Core Developer |
+| **Shiner-2** | Phạm Ngọc Hải Dương | Backend Core Developer |
 | **letho1608** | Lê Quang Thọ | Backend Data & Ops |
 | **DoTrungDuc1908** | Đỗ Trung Đức | Frontend UI/UX Developer |
-| **nguyetbinh** | Nguyễn Nguyệt Bình | QA / Test & Pitching |
+| **nguyetbinh** | Vương Nguyệt Bình | QA / Test & Pitching |
 
 ---
 
