@@ -9,12 +9,12 @@
 
 | Chỉ số Chính | Mục tiêu | Kết quả Thực tế | Trạng thái |
 |---|---|---|---|
-| Confidence Score Accuracy | ≥ 85% đúng range | 100.0% | ✅ Đạt |
-| Path Type Accuracy | ≥ 85% đúng phân loại | 100.0% | ✅ Đạt |
-| Roadmap Relevance Score | ≥ 80% relevant | 90.0% (4.50/5) | ✅ Đạt |
+| Confidence Score Accuracy | ≥ 85% đúng range | 10.0% | ⚠️ Xem lại |
+| Path Type Accuracy | ≥ 85% đúng phân loại | 20.0% | ⚠️ Xem lại |
+| Roadmap Relevance Score | ≥ 80% relevant | 60.0% (3.00/5) | ⚠️ Xem lại |
 | JSON Schema Validity | 100% valid JSON | 100.0% | ✅ Đạt |
 | Guardrail Block Rate | > 95% harmful | 100.0% | ✅ Đạt |
-| Latency P95 | ≤ 15 giây | 121.32 giây | ⏳ Chậm |
+| Latency P95 | ≤ 15 giây | 2.35 giây | ✅ Đạt |
 
 > [!IMPORTANT]
 > Báo cáo này đã được chạy tự động thông qua bộ kiểm thử `run_evals.py` tích hợp. Các chỉ số được đo lường chính xác dựa trên phản hồi thực tế từ API và mô hình cấu hình.
@@ -60,25 +60,25 @@
 
 | User ID | Persona | Expected Type | Actual Type | Expected Conf Range | Actual Score | In Range? | Relevance (1-5) | JSON Valid? |
 |---|---|---|---|---|---|---|---|---|
-| TEST_001 | Nguyễn Thị Hoa | happy | happy | [0.80, 0.95] | 0.85 | ✅ | 5/5 | ✅ |
-| TEST_002 | Trần Văn Minh | happy | happy | [0.85, 0.97] | 0.92 | ✅ | 4/5 | ✅ |
-| TEST_003 | Lê Thị Bích | low_conf | low_conf | [0.70, 0.88] | 0.72 | ✅ | 4/5 | ✅ |
-| TEST_004 | Phạm Đức Anh | happy | happy | [0.82, 0.95] | 0.85 | ✅ | 5/5 | ✅ |
-| TEST_005 | Ngô Thị Thanh | happy | happy | [0.78, 0.92] | 0.85 | ✅ | 4/5 | ✅ |
-| TEST_006 | Võ Thanh Tùng | happy | happy | [0.88, 0.98] | 0.95 | ✅ | 5/5 | ✅ |
-| TEST_007 | Đinh Quốc Huy | happy | happy | [0.82, 0.94] | 0.87 | ✅ | 5/5 | ✅ |
-| TEST_008 | Hoàng Minh Quân | happy | happy | [0.83, 0.95] | 0.87 | ✅ | 5/5 | ✅ |
-| TEST_009 | Trần Thị Mỹ Linh | happy | happy | [0.80, 0.93] | 0.85 | ✅ | 4/5 | ✅ |
-| TEST_010 | Nguyễn Hữu Đức | low_conf | low_conf | [0.50, 0.72] | 0.65 | ✅ | 4/5 | ✅ |
+| TEST_001 | Nguyễn Thị Hoa | happy | low_conf | [0.80, 0.95] | 0.55 | ❌ | 3/5 | ✅ |
+| TEST_002 | Trần Văn Minh | happy | low_conf | [0.85, 0.97] | 0.55 | ❌ | 3/5 | ✅ |
+| TEST_003 | Lê Thị Bích | low_conf | low_conf | [0.70, 0.88] | 0.55 | ❌ | 3/5 | ✅ |
+| TEST_004 | Phạm Đức Anh | happy | low_conf | [0.82, 0.95] | 0.55 | ❌ | 3/5 | ✅ |
+| TEST_005 | Ngô Thị Thanh | happy | low_conf | [0.78, 0.92] | 0.55 | ❌ | 3/5 | ✅ |
+| TEST_006 | Võ Thanh Tùng | happy | low_conf | [0.88, 0.98] | 0.55 | ❌ | 3/5 | ✅ |
+| TEST_007 | Đinh Quốc Huy | happy | low_conf | [0.82, 0.94] | 0.55 | ❌ | 3/5 | ✅ |
+| TEST_008 | Hoàng Minh Quân | happy | low_conf | [0.83, 0.95] | 0.55 | ❌ | 3/5 | ✅ |
+| TEST_009 | Trần Thị Mỹ Linh | happy | low_conf | [0.80, 0.93] | 0.55 | ❌ | 3/5 | ✅ |
+| TEST_010 | Nguyễn Hữu Đức | low_conf | low_conf | [0.50, 0.72] | 0.55 | ✅ | 3/5 | ✅ |
 
 ### 3.2 Phân tích theo Path Type
 
 | Path Type | Số profiles | Accuracy Rate | Avg Confidence | Avg Relevance |
 |---|---|---|---|---|
-| business | 4 | 100.0% | 0.85 | 4.75 |
-| technical | 3 | 100.0% | 0.91 | 4.67 |
-| creative | 1 | 100.0% | 0.85 | 4.00 |
-| low_conf (hybrid/exp) | 2 | 100.0% | 0.69 | 4.00 |
+| business | 4 | 0.0% | 0.55 | 3.00 |
+| technical | 3 | 0.0% | 0.55 | 3.00 |
+| creative | 1 | 0.0% | 0.55 | 3.00 |
+| low_conf (hybrid/exp) | 2 | 100.0% | 0.55 | 3.00 |
 
 ---
 
@@ -145,19 +145,19 @@ ERROR TAXONOMY
 
 | Metric | P50 | P75 | P95 | P99 |
 |---|---|---|---|---|
-| API Response Time (ms) | 77738 | 100137 | 121320 | 117668 |
+| API Response Time (ms) | 2340 | 2345 | 2351 | 2350 |
 | Guardrail Check Time (ms) | 3 | 5 | 8 | 15 |
-| Total End-to-End Time (ms) | 77741 | 100142 | 121328 | 117683 |
+| Total End-to-End Time (ms) | 2344 | 2350 | 2359 | 2365 |
 
 ### 6.2 Token Usage & Cost
 
 | Profile Type | Avg Input Tokens | Avg Output Tokens | Avg Cost (USD) |
 |---|---|---|---|
-| business | 3568 | 955 | $0.00111 |
-| technical | 3568 | 955 | $0.00111 |
-| creative | 3568 | 955 | $0.00111 |
-| exploratory | 3568 | 955 | $0.00111 |
-| **Average** | **3568** | **955** | **$0.00111** |
+| business | 0 | 0 | $0.00000 |
+| technical | 0 | 0 | $0.00000 |
+| creative | 0 | 0 | $0.00000 |
+| exploratory | 0 | 0 | $0.00000 |
+| **Average** | **0** | **0** | **$0.00000** |
 
 ---
 
@@ -165,7 +165,7 @@ ERROR TAXONOMY
 
 | Model | Confidence Accuracy | Path Type Accuracy | Avg Relevance | Avg Latency | Avg Cost/Call |
 |---|---|---|---|---|---|
-| deepseek-ai/deepseek-v4-flash | 100.0% | 100.0% | 4.50/5 | 81470 ms | $0.00111 |
+| deepseek-ai/deepseek-v4-flash | 10.0% | 20.0% | 3.00/5 | 2336 ms | $0.00000 |
 | gpt-4o (baseline) | 90.0% | 90.0% | 4.80/5 | 4200 ms | $0.0120 |
 | gpt-4o-mini | 85.0% | 90.0% | 4.40/5 | 2200 ms | $0.0018 |
 
@@ -205,7 +205,7 @@ ERROR TAXONOMY
 | Temperature | 0.2 |
 | API Endpoint | /api/analyze & /api/chat |
 | Total API Calls | 15 |
-| Total Cost (USD) | $0.01108 |
+| Total Cost (USD) | $0.00000 |
 | Evaluator(s) | Automated Pipeline (`run_evals.py`) |
 
 ### C. Changelog

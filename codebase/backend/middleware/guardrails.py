@@ -42,12 +42,12 @@ class GuardrailManager:
                 self.out_of_scope_keywords = self.rules.get("out_of_scope_keywords", [])
                 self.response_templates = self.rules.get("response_templates", {})
                 self.spam_config = self.rules.get("spam_detection", {})
-                logger.info(f"✅ Loaded guardrail rules from {self.rules_path}")
+                logger.info(f" Loaded guardrail rules from {self.rules_path}")
             else:
-                logger.warning(f"⚠️ Guardrail rules file not found at {self.rules_path}, using default hardcoded rules")
+                logger.warning(f" Guardrail rules file not found at {self.rules_path}, using default hardcoded rules")
                 self._load_defaults()
         except Exception as e:
-            logger.error(f"❌ Error loading guardrail rules: {e}")
+            logger.error(f" Error loading guardrail rules: {e}")
             self._load_defaults()
 
     def _load_defaults(self):
@@ -55,10 +55,10 @@ class GuardrailManager:
         self.jailbreak_patterns = [re.compile(r"ignore previous instructions", re.IGNORECASE)]
         self.out_of_scope_keywords = ["hack ngân hàng", "cờ bạc online"]
         self.response_templates = {
-            "blocked_harmful": "🛡️ [Yêu cầu vi phạm ranh giới bảo mật của hệ thống].",
-            "blocked_spam": "🚫 Phát hiện hành vi spam. Vui lòng nhập câu hỏi thực sự của bạn.",
-            "blocked_jailbreak": "🛡️ [Yêu cầu vi phạm ranh giới bảo mật của hệ thống]",
-            "out_of_scope": "📚 Câu hỏi của bạn nằm ngoài phạm vi của AI Path.",
+            "blocked_harmful": " [Yêu cầu vi phạm ranh giới bảo mật của hệ thống].",
+            "blocked_spam": " Phát hiện hành vi spam. Vui lòng nhập câu hỏi thực sự của bạn.",
+            "blocked_jailbreak": " [Yêu cầu vi phạm ranh giới bảo mật của hệ thống]",
+            "out_of_scope": " Câu hỏi của bạn nằm ngoài phạm vi của AI Path.",
             "too_short": "Vui lòng nhập câu hỏi rõ ràng hơn.",
             "too_long": "Câu hỏi quá dài."
         }
@@ -124,7 +124,7 @@ class GuardrailManager:
         # 4. Kiểm tra Jailbreak patterns
         for pattern in self.jailbreak_patterns:
             if pattern.search(msg):
-                logger.warning(f"🚫 Jailbreak pattern detected: {pattern.pattern}")
+                logger.warning(f" Jailbreak pattern detected: {pattern.pattern}")
                 return {
                     "blocked": True,
                     "reason": "jailbreak",
@@ -134,7 +134,7 @@ class GuardrailManager:
         # 5. Kiểm tra Banned Keywords
         for kw in self.banned_keywords:
             if kw.lower() in msg_lower:
-                logger.warning(f"🚫 Banned keyword detected: {kw}")
+                logger.warning(f" Banned keyword detected: {kw}")
                 return {
                     "blocked": True,
                     "reason": "banned_keyword",
@@ -144,7 +144,7 @@ class GuardrailManager:
         # 6. Kiểm tra Out of Scope
         for kw in self.out_of_scope_keywords:
             if kw.lower() in msg_lower:
-                logger.warning(f"🚫 Out of scope keyword detected: {kw}")
+                logger.warning(f" Out of scope keyword detected: {kw}")
                 return {
                     "blocked": True,
                     "reason": "out_of_scope",

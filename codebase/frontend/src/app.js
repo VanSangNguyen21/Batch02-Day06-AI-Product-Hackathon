@@ -21,10 +21,9 @@
 /* ─── API CONFIGURATION ──────────────────────────────────────── */
 const API_BASE = (() => {
   const origin = window.location.origin;
-  if (origin && origin !== 'null' && /^https?:\/\//.test(origin)) {
-    return origin;
-  }
-  return localStorage.getItem('AI_PATH_API_BASE') || 'http://127.0.0.1:8000';
+  const isLocalFile = !origin || origin === 'null' || origin.startsWith('file:');
+  if (isLocalFile) return 'http://127.0.0.1:8000';
+  return origin;
 })();
 const ENDPOINTS = {
   analyze:  `${API_BASE}/api/analyze`,
@@ -1170,7 +1169,7 @@ const ResultsUI = {
     };
 
     try {
-      const response = await fetch(ENDPOINTS.analyze, {
+      const response = await fetchWithAuth(ENDPOINTS.analyze, {
         method:  'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -1706,7 +1705,7 @@ Lộ trình học của bạn đã được tạo ở khung **Lộ trình học*
     const typingEl = this._showTyping();
 
     try {
-      const response = await fetch(ENDPOINTS.chat, {
+      const response = await fetchWithAuth(ENDPOINTS.chat, {
         method:  'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -1904,7 +1903,7 @@ const FeedbackModal = {
     };
 
     try {
-      const response = await fetch(ENDPOINTS.feedback, {
+      const response = await fetchWithAuth(ENDPOINTS.feedback, {
         method:  'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -2243,14 +2242,149 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 /* ─── EXPOSE FOR DEBUGGING (dev only) ───────────────────────── */
 if (typeof window !== 'undefined') {
-  window.__APP__ = {
-    AppState,
-    Quiz,
-    Roadmap,
-    ChatUI,
-    Toast,
-    getDefaultRoadmap: () => DEFAULT_ROADMAP,
-    getQuizQuestions: () => QUIZ_QUESTIONS,
-    getQuizQuestionBank: () => QUIZ_QUESTION_BANK,
+  window.__APP__ = { AppState, Quiz, Roadmap, ChatUI, Toast, DEFAULT_ROADMAP, QUIZ_QUESTIONS };
+
+  /* ─── ADMIN DASHBOARD (reviewer / admin only) ────────────── */
+  const Admin = {
+    async loadReviewQueue(status = 'pending') {
+      const tbody = document.getElementById('review-tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '<tr><td colspan="7" class="admin-empty">Đang tải...</td></tr>';
+      try {
+        const res = await fetchWithAuth(`${API_BASE}/api/admin/review-queue?status=${encodeURIComponent(status)}`, { method: 'GET' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const items = (data.items || data.review_queue || data.entries || []);
+        if (!items.length) {
+          tbody.innerHTML = '<tr><td colspan="7" class="admin-empty">Không có mục nào.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = items.map(it => `
+          <tr data-id="${it.id}">
+            <td>${it.id}</td>
+            <td>${escapeHtml(it.user_id || '')}</td>
+            <td>${escapeHtml(it.reason || '')}</td>
+            <td>${it.confidence_score != null ? it.confidence_score.toFixed(2) : '—'}</td>
+            <td>${it.rating != null ? it.rating + '⭐' : '—'}</td>
+            <td><span class="badge badge-${it.status || 'pending'}">${it.status || 'pending'}</span></td>
+            <td>${it.status === 'pending' && AuthState.role === 'admin'
+                ? `<button class="btn-primary btn-sm btn-resolve" data-id="${it.id}">Giải quyết</button>`
+                : '<span style="color:#94a3b8">—</span>'}</td>
+          </tr>
+        `).join('');
+        // Wire resolve buttons
+        tbody.querySelectorAll('.btn-resolve').forEach(btn => {
+          btn.addEventListener('click', () => Admin.promptResolve(btn.dataset.id));
+        });
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="7" class="admin-empty">Lỗi: ${escapeHtml(e.message)}</td></tr>`;
+      }
+    },
+
+    async promptResolve(itemId) {
+      const notes = prompt(`Ghi chú giải quyết cho mục #${itemId}:`);
+      if (notes == null) return;
+      try {
+        const res = await fetchWithAuth(`${API_BASE}/api/admin/resolve`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ item_id: Number(itemId), reviewer_notes: notes }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ detail: res.statusText }));
+          throw new Error(err.detail || `HTTP ${res.status}`);
+        }
+        Toast.success('Đã giải quyết', `Mục #${itemId} đã được đánh dấu resolved.`);
+        Admin.loadReviewQueue(document.getElementById('review-status-filter')?.value || 'pending');
+      } catch (e) {
+        Toast.error('Lỗi', e.message);
+      }
+    },
+
+    async loadCostReport(dateStr) {
+      const tbody = document.getElementById('cost-tbody');
+      const summary = document.getElementById('cost-summary');
+      if (!tbody) return;
+      tbody.innerHTML = '<tr><td colspan="5" class="admin-empty">Đang tải...</td></tr>';
+      try {
+        const url = `${API_BASE}/api/admin/cost-report` + (dateStr ? `?date=${encodeURIComponent(dateStr)}` : '');
+        const res = await fetchWithAuth(url, { method: 'GET' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const entries = (data.entries || []);
+        const totalCost = data.total_cost ?? entries.reduce((a, e) => a + (e.total_cost || 0), 0);
+        const totalUsers = data.total_users ?? entries.length;
+        const grandTokens = entries.reduce((a, e) => a + (e.total_input_tokens || 0) + (e.total_output_tokens || 0), 0);
+        if (summary) {
+          summary.innerHTML = `
+            <div class="stat"><div class="stat-label">Tổng chi phí</div><div class="stat-value">$${(totalCost || 0).toFixed(4)}</div></div>
+            <div class="stat"><div class="stat-label">Số users</div><div class="stat-value">${totalUsers}</div></div>
+            <div class="stat"><div class="stat-label">Tổng tokens</div><div class="stat-value">${grandTokens.toLocaleString()}</div></div>
+          `;
+        }
+        if (!entries.length) {
+          tbody.innerHTML = '<tr><td colspan="5" class="admin-empty">Không có dữ liệu.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = entries.map(e => `
+          <tr>
+            <td>${escapeHtml(e.user_id || '')}</td>
+            <td>${e.request_count || 0}</td>
+            <td>${(e.total_input_tokens || 0).toLocaleString()}</td>
+            <td>${(e.total_output_tokens || 0).toLocaleString()}</td>
+            <td>$${(e.total_cost || 0).toFixed(4)}</td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="5" class="admin-empty">Lỗi: ${escapeHtml(e.message)}</td></tr>`;
+      }
+    },
+
+    init() {
+      const today = new Date().toISOString().slice(0, 10);
+      const dateEl = document.getElementById('cost-date');
+      if (dateEl) dateEl.value = today;
+
+      // Tab switching
+      document.querySelectorAll('.admin-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.admin-panel').forEach(p => p.classList.add('hidden'));
+          tab.classList.add('active');
+          const target = tab.dataset.tab;
+          document.getElementById(`admin-panel-${target}`)?.classList.remove('hidden');
+          if (target === 'review') Admin.loadReviewQueue();
+          if (target === 'cost')   Admin.loadCostReport(dateEl?.value || '');
+        });
+      });
+
+      document.getElementById('btn-refresh-review')?.addEventListener('click', () => {
+        Admin.loadReviewQueue(document.getElementById('review-status-filter')?.value || 'pending');
+      });
+      document.getElementById('review-status-filter')?.addEventListener('change', e => {
+        Admin.loadReviewQueue(e.target.value);
+      });
+      document.getElementById('btn-refresh-cost')?.addEventListener('click', () => {
+        Admin.loadCostReport(document.getElementById('cost-date')?.value || '');
+      });
+
+      // Nav link scrolls to dashboard + auto-loads
+      document.getElementById('nav-admin')?.addEventListener('click', e => {
+        e.preventDefault();
+        document.getElementById('admin-dashboard')?.classList.remove('hidden');
+        document.getElementById('admin-dashboard')?.scrollIntoView({ behavior: 'smooth' });
+        Admin.loadReviewQueue();
+      });
+
+      // Initial load (only if dashboard is visible)
+      const dash = document.getElementById('admin-dashboard');
+      if (dash && !dash.classList.contains('hidden')) Admin.loadReviewQueue();
+    },
   };
+
+  // Init admin when auth becomes available
+  document.addEventListener('DOMContentLoaded', () => setTimeout(() => Admin.init(), 50));
+  // Also try after a short delay (in case DOMContentLoaded already fired)
+  setTimeout(() => Admin.init(), 200);
 }
+

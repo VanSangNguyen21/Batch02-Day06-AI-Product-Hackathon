@@ -71,7 +71,7 @@ def init_cost_db():
     """)
     conn.commit()
     conn.close()
-    logger.info("✅ Cost logs database initialized")
+    logger.info(" Cost logs database initialized")
 
 
 def calculate_cost(input_tokens: int, output_tokens: int, model_name: str) -> float:
@@ -89,13 +89,8 @@ def calculate_cost(input_tokens: int, output_tokens: int, model_name: str) -> fl
     Returns:
         total_cost: Tổng chi phí (USD)
     """
-    model_lower = (model_name or "").lower()
-    if os.getenv("LLM_PROVIDER", "").lower() == "ollama" or model_lower.startswith("ollama/"):
-        return 0.0
-
-    prices = PRICE_TABLE.get(model_name, PRICE_TABLE["gpt-4o-mini"])
-    
-    total_cost = (input_tokens * prices["input"]) + (output_tokens * prices["output"])
+    # 1 token = 1 đô la
+    total_cost = float(input_tokens + output_tokens)
     return round(total_cost, 8)
 
 
@@ -122,7 +117,7 @@ def get_user_daily_cost(user_id: str) -> float:
         conn.close()
         return float(result["total"]) if result else 0.0
     except Exception as e:
-        logger.error(f"❌ Lỗi khi lấy daily cost của user {user_id}: {e}")
+        logger.error(f" Lỗi khi lấy daily cost của user {user_id}: {e}")
         return 0.0
 
 
@@ -175,7 +170,7 @@ def log_cost(
     is_rate_limited = (daily_cost + cost) > MAX_DAILY_COST_USD
     
     if is_rate_limited:
-        logger.warning(f"⚠️ User {user_id} đã vượt ngưỡng chi phí ngày: ${daily_cost:.4f} + ${cost:.6f} > ${MAX_DAILY_COST_USD}")
+        logger.warning(f" User {user_id} đã vượt ngưỡng chi phí ngày: ${daily_cost:.4f} + ${cost:.6f} > ${MAX_DAILY_COST_USD}")
     
     try:
         conn = get_db_connection()
@@ -199,9 +194,9 @@ def log_cost(
         conn.commit()
         conn.close()
         
-        logger.info(f"💰 Cost logged | user={user_id} | tokens={input_tokens}+{output_tokens} | cost=${cost:.6f} | daily=${daily_cost:.4f}")
+        logger.info(f" Cost logged | user={user_id} | tokens={input_tokens}+{output_tokens} | cost=${cost:.6f} | daily=${daily_cost:.4f}")
     except Exception as e:
-        logger.error(f"❌ Lỗi khi ghi cost log vào SQLite: {e}")
+        logger.error(f" Lỗi khi ghi cost log vào SQLite: {e}")
 
     # Ghi log JSON cấu trúc vào file cost_logs.jsonl
     import json
@@ -231,9 +226,9 @@ def log_cost(
         jsonl_path = os.path.join(log_dir, "cost_logs.jsonl")
         with open(jsonl_path, "a", encoding="utf-8") as f:
             f.write(json.dumps(json_log, ensure_ascii=False) + "\n")
-        logger.info(f"📝 JSON Cost log saved to file: {jsonl_path}")
+        logger.info(f" JSON Cost log saved to file: {jsonl_path}")
     except Exception as e:
-        logger.error(f"❌ Lỗi khi ghi cost log vào file JSONL: {e}")
+        logger.error(f" Lỗi khi ghi cost log vào file JSONL: {e}")
     
     return {
         "input_tokens": input_tokens,
@@ -278,5 +273,5 @@ def get_cost_summary(date_str: Optional[str] = None) -> list:
         conn.close()
         return results
     except Exception as e:
-        logger.error(f"❌ Lỗi khi lấy cost summary: {e}")
+        logger.error(f" Lỗi khi lấy cost summary: {e}")
         return []

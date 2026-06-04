@@ -1,178 +1,316 @@
 """
-auth.py - Lightweight local registration/login endpoints.
+auth.py - Authentication & session management endpoints.
+POST   /api/auth/login    -> {token, user_id, role, expires_at}
+POST   /api/auth/logout   -> invalidate session
+GET    /api/auth/me       -> current session info
+GET    /api/auth/whoami   -> convenience wrapper
+
+Sessions are stored in-memory (process-local). Tokens are opaque random
+strings. For a production system, swap with JWT + Redis/Postgres.
+
+Auth flow:
+  1. Client POST /api/auth/login with {user_id, api_key?}
+  2. Server resolves role via existing API_KEYS table (admin/premium) or
+     issues a default STUDENT session for any user_id.
+  3. Server returns a 32-byte token; client stores in localStorage.
+  4. Subsequent requests send "Authorization: Bearer <token>".
+  5. /api/auth/logout invalidates the token.
+
+Demo accounts (use the matching api_key, or leave blank for STUDENT):
+  - ADMIN    : api_key = ADMIN_API_KEY   (default "dev-admin-key-...")
+  - REVIEWER : api_key = REVIEWER_API_KEY
+  - PREMIUM  : api_key = PREMIUM_API_KEY
+  - STUDENT  : any user_id, no api_key
 """
-
-import base64
-import hashlib
-import hmac
-import re
+import os
 import secrets
-from datetime import datetime, timedelta
-from typing import Optional
-from uuid import uuid4
+import logging
+from datetime import datetime, timezone, timedelta
+from typing import Optional, Dict, Any
+from threading import Lock
 
-from fastapi import APIRouter, Cookie, HTTPException, Response
-from pydantic import BaseModel, Field, field_validator
+from fastapi import APIRouter, HTTPException, Header, Depends
+from pydantic import BaseModel, Field
 
-from models.database import (
-    create_auth_session,
-    create_user,
-    delete_auth_session,
-    get_user_by_email,
-    get_user_by_session_token,
+from middleware.auth import (
+    Role,
+    RATE_LIMITS,
+    COST_LIMITS,
+    get_role_limits,
 )
+from models.database import (
+    get_user_by_username,
+    create_user,
+    verify_password,
+    hash_password,
+)
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-SESSION_COOKIE = "ai_path_session"
-SESSION_DAYS = 7
-PBKDF2_ITERATIONS = 180_000
+# Session TTL (default 8 hours)
+SESSION_TTL_HOURS = int(os.getenv("SESSION_TTL_HOURS", "8"))
 
 
-class AuthUser(BaseModel):
-    user_id: str
-    name: str
-    email: str
+# ──────────────────────────────────────────────────────────────────────────────
+# In-memory session store: token -> {user_id, role, expires_at, created_at}
+# ──────────────────────────────────────────────────────────────────────────────
+class _Session:
+    __slots__ = ("user_id", "role", "created_at", "expires_at", "label")
+
+    def __init__(self, user_id: str, role: Role, ttl_hours: int = SESSION_TTL_HOURS, label: str = ""):
+        now = datetime.now(timezone.utc)
+        self.user_id    = user_id
+        self.role       = role
+        self.created_at = now
+        self.expires_at = now + timedelta(hours=ttl_hours)
+        self.label      = label
+
+    def to_public(self) -> Dict[str, Any]:
+        return {
+            "user_id":    self.user_id,
+            "role":       self.role.value,
+            "created_at": self.created_at.isoformat(),
+            "expires_at": self.expires_at.isoformat(),
+            "label":      self.label,
+        }
 
 
-class AuthResponse(BaseModel):
-    authenticated: bool
-    user: AuthUser
+_sessions: Dict[str, _Session] = {}
+_sessions_lock = Lock()
 
+
+def _new_token() -> str:
+    """Generate a 32-byte URL-safe token."""
+    return secrets.token_urlsafe(32)
+
+
+def _create_session(user_id: str, role: Any, label: str = "") -> Dict[str, Any]:
+    if not isinstance(role, Role):
+        try:
+            role = Role(str(role).lower())
+        except ValueError:
+            raise HTTPException(status_code=400, detail=f"Invalid role: {role}")
+    token = _new_token()
+    sess  = _Session(user_id, role, label=label)
+    with _sessions_lock:
+        _sessions[token] = sess
+    logger.info(f"Session created: user={user_id} role={role.value} label='{label}'")
+    return {
+        "token":      token,
+        "user_id":    sess.user_id,
+        "role":       sess.role.value,
+        "expires_at": sess.expires_at.isoformat(),
+        "limits":     get_role_limits(role),
+    }
+
+
+def _revoke_session(token: str) -> bool:
+    with _sessions_lock:
+        sess = _sessions.pop(token, None)
+    if sess:
+        logger.info(f"Session revoked: user={sess.user_id} role={sess.role.value}")
+        return True
+    return False
+
+
+def _get_session(token: str) -> Optional[_Session]:
+    sess = _sessions.get(token)
+    if not sess:
+        return None
+    if datetime.now(timezone.utc) >= sess.expires_at:
+        _revoke_session(token)
+        return None
+    return sess
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Pydantic models
+# ──────────────────────────────────────────────────────────────────────────────
+class LoginRequest(BaseModel):
+    """Login payload."""
+    username: str = Field(..., min_length=1, max_length=64, description="User identifier")
+    password: str = Field(..., min_length=1, max_length=256, description="Password")
 
 class RegisterRequest(BaseModel):
-    name: str = Field(..., min_length=2, max_length=80)
-    email: str = Field(..., min_length=5, max_length=120)
-    password: str = Field(..., min_length=8, max_length=128)
-
-    @field_validator("email")
-    @classmethod
-    def validate_email(cls, value: str) -> str:
-        email = value.strip().lower()
-        if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email):
-            raise ValueError("Email không hợp lệ.")
-        return email
+    """Register payload."""
+    username: str = Field(..., min_length=1, max_length=64, description="User identifier")
+    password: str = Field(..., min_length=6, max_length=256, description="Password")
 
 
-class LoginRequest(BaseModel):
-    email: str = Field(..., min_length=5, max_length=120)
-    password: str = Field(..., min_length=1, max_length=128)
-
-    @field_validator("email")
-    @classmethod
-    def validate_email(cls, value: str) -> str:
-        email = value.strip().lower()
-        if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email):
-            raise ValueError("Email không hợp lệ.")
-        return email
+class LoginResponse(BaseModel):
+    token:      str
+    user_id:    str
+    role:       str
+    expires_at: str
+    limits:     Dict[str, float]
 
 
-def _public_user(user: dict) -> AuthUser:
-    return AuthUser(user_id=user["user_id"], name=user["name"], email=user["email"])
+class MeResponse(BaseModel):
+    user_id:    str
+    role:       str
+    created_at: str
+    expires_at: str
+    limits:     Dict[str, float]
 
 
-def require_auth_user(ai_path_session: Optional[str]) -> dict:
-    if not ai_path_session:
-        raise HTTPException(status_code=401, detail="Chưa đăng nhập.")
+class LogoutResponse(BaseModel):
+    revoked: bool
+    message: str
 
-    user = get_user_by_session_token(ai_path_session)
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Dependencies
+# ──────────────────────────────────────────────────────────────────────────────
+def get_current_session(
+    authorization: Optional[str] = Header(None, alias="Authorization"),
+    x_api_key:     Optional[str] = Header(None, alias="X-API-Key"),
+    x_role:        Optional[str] = Header(None, alias="X-Role"),
+    x_user_id:     Optional[str] = Header(None, alias="X-User-Id"),
+) -> _Session:
+    """
+    Resolve the current user/session.
+    Priority:
+      1. Authorization: Bearer <token>  -> look up session
+      2. X-API-Key + X-User-Id         -> ephemeral role (no session)
+      3. X-Role + X-User-Id            -> dev mode
+    Returns the session object so handlers can read user_id and role.
+    """
+    # 1. Bearer token (the proper flow)
+    if authorization:
+        scheme, _, token = authorization.partition(" ")
+        if scheme.lower() != "bearer" or not token:
+            raise HTTPException(status_code=401, detail="Invalid Authorization header (expected 'Bearer <token>')")
+        sess = _get_session(token)
+        if not sess:
+            raise HTTPException(status_code=401, detail="Session expired or invalid. Please log in again.")
+        return sess
+
+    raise HTTPException(status_code=401, detail="Missing Authorization header")
+
+
+def require_session_role(*allowed: Role):
+    """Dependency factory: requires an active session whose role is in `allowed`."""
+    allowed_set = set(allowed)
+
+    def _checker(
+        authorization: Optional[str] = Header(None, alias="Authorization"),
+        x_api_key:     Optional[str] = Header(None, alias="X-API-Key"),
+        x_role:        Optional[str] = Header(None, alias="X-Role"),
+        x_user_id:     Optional[str] = Header(None, alias="X-User-Id"),
+    ) -> _Session:
+        sess = get_current_session(authorization, x_api_key, x_role, x_user_id)
+        if sess.role not in allowed_set:
+            raise HTTPException(
+                status_code=403,
+                detail=f"Role '{sess.role.value}' is not authorized. Required: {[r.value for r in allowed_set]}",
+            )
+        return sess
+
+    return _checker
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Endpoints
+# ──────────────────────────────────────────────────────────────────────────────
+@router.post("/login", response_model=LoginResponse)
+def login(payload: LoginRequest):
+    """
+    Authenticate a user using username and password.
+    """
+    username = payload.username.strip()
+    if not username:
+        raise HTTPException(status_code=400, detail="username is required")
+
+    user = get_user_by_username(username)
     if not user:
-        raise HTTPException(status_code=401, detail="Phiên đăng nhập đã hết hạn.")
-    return user
-
-
-def _hash_password(password: str, salt: Optional[bytes] = None) -> str:
-    salt = salt or secrets.token_bytes(16)
-    digest = hashlib.pbkdf2_hmac(
-        "sha256",
-        password.encode("utf-8"),
-        salt,
-        PBKDF2_ITERATIONS,
-    )
-    return "pbkdf2_sha256${}${}${}".format(
-        PBKDF2_ITERATIONS,
-        base64.b64encode(salt).decode("ascii"),
-        base64.b64encode(digest).decode("ascii"),
-    )
-
-
-def _verify_password(password: str, stored_hash: str) -> bool:
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+        
+    if not verify_password(user["password_hash"], payload.password):
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+        
     try:
-        algorithm, iterations, salt_b64, digest_b64 = stored_hash.split("$", 3)
-        if algorithm != "pbkdf2_sha256":
-            return False
-        salt = base64.b64decode(salt_b64.encode("ascii"))
-        expected = base64.b64decode(digest_b64.encode("ascii"))
-        actual = hashlib.pbkdf2_hmac(
-            "sha256",
-            password.encode("utf-8"),
-            salt,
-            int(iterations),
-        )
-        return hmac.compare_digest(actual, expected)
-    except Exception:
-        return False
+        role = Role(user.get("role", "student").lower())
+    except ValueError:
+        role = Role.STUDENT
+        
+    return _create_session(user_id=username, role=role, label="db_auth")
+
+@router.post("/register", response_model=LoginResponse)
+def register(payload: RegisterRequest):
+    """
+    Register a new user account.
+    """
+    username = payload.username.strip()
+    if not username:
+        raise HTTPException(status_code=400, detail="username is required")
+        
+    existing = get_user_by_username(username)
+    if existing:
+        raise HTTPException(status_code=400, detail="Username already exists")
+        
+    hashed = hash_password(payload.password)
+    try:
+        create_user(username, hashed, role="student")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Failed to create user: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create user")
+        
+    return _create_session(user_id=username, role=Role.STUDENT, label="db_auth")
 
 
-def _validate_password_strength(password: str) -> None:
-    if len(password) < 8:
-        raise HTTPException(status_code=400, detail="Mật khẩu cần ít nhất 8 ký tự.")
-    if not re.search(r"[A-Za-z]", password) or not re.search(r"\d", password):
-        raise HTTPException(status_code=400, detail="Mật khẩu cần có cả chữ và số.")
-
-
-def _set_session_cookie(response: Response, user_id: str) -> None:
-    token = secrets.token_urlsafe(32)
-    expires_at = datetime.utcnow() + timedelta(days=SESSION_DAYS)
-    create_auth_session(token=token, user_id=user_id, expires_at=expires_at.isoformat())
-    response.set_cookie(
-        key=SESSION_COOKIE,
-        value=token,
-        max_age=SESSION_DAYS * 24 * 60 * 60,
-        httponly=True,
-        samesite="lax",
-        secure=False,
-        path="/",
+@router.post("/logout", response_model=LogoutResponse)
+def logout(authorization: Optional[str] = Header(None, alias="Authorization")):
+    """Revoke the bearer token from the Authorization header."""
+    if not authorization:
+        return LogoutResponse(revoked=False, message="No session to revoke (missing Authorization header)")
+    scheme, _, token = authorization.partition(" ")
+    if scheme.lower() != "bearer" or not token:
+        return LogoutResponse(revoked=False, message="Invalid Authorization header")
+    ok = _revoke_session(token)
+    return LogoutResponse(
+        revoked=ok,
+        message="Session revoked" if ok else "Token not found or already expired",
     )
 
 
-@router.post("/auth/register", response_model=AuthResponse)
-async def register(payload: RegisterRequest, response: Response):
-    _validate_password_strength(payload.password)
-
-    email = payload.email.lower()
-    if get_user_by_email(email):
-        raise HTTPException(status_code=409, detail="Email này đã được đăng ký.")
-
-    user = create_user(
-        user_id=f"user_{uuid4().hex[:12]}",
-        name=payload.name.strip(),
-        email=email,
-        password_hash=_hash_password(payload.password),
+@router.get("/me", response_model=MeResponse)
+def me(sess: _Session = Depends(get_current_session)):
+    """Return information about the current session."""
+    return MeResponse(
+        user_id    = sess.user_id,
+        role       = sess.role.value,
+        created_at = sess.created_at.isoformat(),
+        expires_at = sess.expires_at.isoformat(),
+        limits     = get_role_limits(sess.role),
     )
-    _set_session_cookie(response, user["user_id"])
-    return AuthResponse(authenticated=True, user=_public_user(user))
 
 
-@router.post("/auth/login", response_model=AuthResponse)
-async def login(payload: LoginRequest, response: Response):
-    user = get_user_by_email(payload.email.lower())
-    if not user or not _verify_password(payload.password, user["password_hash"]):
-        raise HTTPException(status_code=401, detail="Email hoặc mật khẩu không đúng.")
-
-    _set_session_cookie(response, user["user_id"])
-    return AuthResponse(authenticated=True, user=_public_user(user))
-
-
-@router.post("/auth/logout")
-async def logout(response: Response, ai_path_session: Optional[str] = Cookie(default=None)):
-    if ai_path_session:
-        delete_auth_session(ai_path_session)
-    response.delete_cookie(SESSION_COOKIE, path="/")
-    return {"success": True}
+@router.get("/whoami")
+def whoami(sess: _Session = Depends(get_current_session)):
+    """Lightweight identity check used by the frontend on page load."""
+    return {
+        "authenticated": True,
+        "user_id":       sess.user_id,
+        "role":          sess.role.value,
+        "rate_limit":    RATE_LIMITS.get(sess.role, 5),
+    }
 
 
-@router.get("/auth/me", response_model=AuthResponse)
-async def me(ai_path_session: Optional[str] = Cookie(default=None)):
-    user = require_auth_user(ai_path_session)
-    return AuthResponse(authenticated=True, user=_public_user(user))
+# ──────────────────────────────────────────────────────────────────────────────
+# Admin helpers (optional)
+# ──────────────────────────────────────────────────────────────────────────────
+@router.get("/sessions")
+def list_sessions(sess: _Session = Depends(require_session_role(Role.ADMIN))):
+    """List all active sessions. Admin only."""
+    now = datetime.now(timezone.utc)
+    with _sessions_lock:
+        items = [
+            {"token_prefix": tok[:8] + "…", **s.to_public()}
+            for tok, s in _sessions.items()
+            if s.expires_at > now
+        ]
+    return {"active_sessions": len(items), "sessions": items}

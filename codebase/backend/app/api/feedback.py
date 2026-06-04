@@ -8,10 +8,13 @@ Tác giả / Author: AI VinUni Batch02-Day05
 import logging
 from typing import Optional, List, Any, Dict
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field, field_validator
 
 from models.database import insert_feedback, insert_human_review, insert_bad_feedback
+# from middleware.auth import require_student_or_above (removed)
+from app.api.auth import get_current_session, require_session_role, _Session
+from middleware.auth import Role
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +105,7 @@ def should_flag_for_review(
 # ──────────────────────────────────────────────────────────────────────────────
 
 @router.post("/feedback", response_model=FeedbackResponse, summary="Submit user feedback")
-async def submit_feedback(payload: FeedbackRequest):
+async def submit_feedback(payload: FeedbackRequest, sess: _Session = Depends(require_session_role(Role.STUDENT, Role.PREMIUM, Role.ADMIN))):
     """
     ## Nhận và lưu phản hồi người dùng, tự động gắn cờ khi cần
     ## Accept and save user feedback, auto-flag for human review when needed
@@ -126,7 +129,7 @@ async def submit_feedback(payload: FeedbackRequest):
 
     if flagged:
         logger.info(
-            f"🚩 Feedback flagged for review | user='{user_id}' | "
+            f"Feedback flagged for review | user='{user_id}' | "
             f"rating={rating} | reason='{flag_reason}'"
         )
 
@@ -141,7 +144,7 @@ async def submit_feedback(payload: FeedbackRequest):
             confidence_score=confidence_score,
             flagged=flagged,
         )
-        logger.info(f"✅ Feedback saved | id={feedback_id} | user='{user_id}' | rating={rating}")
+        logger.info(f"Feedback saved | id={feedback_id} | user='{user_id}' | rating={rating}")
         
         # If low rating (<= 2), also insert into bad_feedback_logs for Regression Test dataset
         if rating <= 2:
@@ -156,11 +159,11 @@ async def submit_feedback(payload: FeedbackRequest):
                     confidence_score=confidence_score,
                     comment=payload.comment
                 )
-                logger.info(f"📉 low rating feedback copied to bad_feedback_logs | bad_id={bad_id}")
+                logger.info(f"low rating feedback copied to bad_feedback_logs | bad_id={bad_id}")
             except Exception as ex:
-                logger.error(f"❌ Failed to save copy to bad_feedback_logs: {ex}")
+                logger.error(f"Failed to save copy to bad_feedback_logs: {ex}")
     except Exception as e:
-        logger.error(f"❌ Failed to save feedback: {e}")
+        logger.error(f"Failed to save feedback: {e}")
         raise HTTPException(
             status_code=500,
             detail="Không thể lưu phản hồi. Vui lòng thử lại. / Could not save feedback. Please try again."
@@ -179,14 +182,14 @@ async def submit_feedback(payload: FeedbackRequest):
                 confidence_score=confidence_score,
                 rating=rating,
             )
-            logger.info(f"🔍 Added to review queue | review_id={review_id} | feedback_id={feedback_id}")
+            logger.info(f"Added to review queue | review_id={review_id} | feedback_id={feedback_id}")
         except Exception as e:
             # Không để lỗi DB review queue phá vỡ flow chính / Don't let review queue error break main flow
-            logger.error(f"❌ Failed to add to review queue: {e}")
+            logger.error(f"Failed to add to review queue: {e}")
 
     # ── Bước 4: Tạo thông điệp phản hồi / Step 4: Build response message ─────
     if rating >= 4:
-        message = "🎉 Cảm ơn bạn đã phản hồi tích cực! Chúng tôi sẽ tiếp tục cải thiện."
+        message = "Cảm ơn bạn đã phản hồi tích cực! Chúng tôi sẽ tiếp tục cải thiện."
     elif rating == 3:
         message = "Cảm ơn phản hồi của bạn! Chúng tôi đang nỗ lực cải thiện hệ thống."
     else:

@@ -17,12 +17,13 @@ Every request runs through 7 traced steps:
 
 import os
 import time
-import logging
 import asyncio
+import logging
 from collections import defaultdict, deque
-from typing import Any, Dict, List, Optional
+import json
+from typing import List, Optional, Dict, Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 
 from app.llm_client import LLMError, generate_chat_response, get_model_name, get_provider, is_local_model
@@ -30,6 +31,17 @@ from app.trace import AgentTrace
 from middleware.cost_logger import log_cost, is_user_rate_limited
 from middleware.data_masking import mask_sensitive_data
 from middleware.guardrails import guardrail_manager
+from middleware.auth import Role, get_role_limits
+from app.api.auth import get_current_session, require_session_role, _Session
+from app.llm_providers import resolve_config, chat_ollama, LLMProvider
+import requests
+import base64
+from openai import OpenAI, AsyncOpenAI
+
+from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel, Field
+
+from middleware.cost_logger import log_cost, is_user_rate_limited
 from models.database import upsert_session, get_session
 
 logger = logging.getLogger(__name__)
@@ -47,12 +59,15 @@ _rate_limit_lock = asyncio.Lock()
 # ── Pydantic models ────────────────────────────────────────────────────────────
 
 class ChatRequest(BaseModel):
-    user_id:            str  = Field(..., description="User identifier")
-    message:            str  = Field(..., min_length=1, max_length=2000)
-    session_id:         str  = Field(..., description="Session identifier")
-    quiz_completed:     bool = Field(False)
-    questions_answered: int  = Field(0, ge=0)
-    model_override:     Optional[str] = Field(None)
+    """Yêu cầu chat / Chat request payload."""
+    model_config = {"protected_namespaces": ()}
+
+    user_id:          str  = Field(..., description="ID người dùng / User identifier")
+    message:          str  = Field(..., min_length=1, max_length=2000, description="Tin nhắn người dùng / User message")
+    session_id:       str  = Field(..., description="ID phiên hội thoại / Session identifier")
+    quiz_completed:   bool = Field(False, description="Người dùng đã hoàn thành quiz chưa / Whether quiz is complete")
+    questions_answered: int = Field(0, ge=0, description="Số câu quiz đã trả lời / Number of quiz questions answered")
+    model_override:  Optional[str] = Field(None, description="Ghi đè mô hình / Override model")
 
 
 class ChatResponse(BaseModel):
@@ -68,8 +83,55 @@ class ChatResponse(BaseModel):
 
 # ── Rate limiter ───────────────────────────────────────────────────────────────
 
-async def _check_rate_limit(user_id: str) -> bool:
-    """Return True if user is rate-limited (too many messages)."""
+# Danh sách từ khoá gây hại / Harmful keyword list
+HARMFUL_KEYWORDS = [
+    # Bạo lực / Violence
+    r"\b(giết|tự tử|tự sát|chết chóc|vũ khí|bom|nổ)\b",
+    # Nội dung người lớn / Adult content
+    r"\b(sex|porn|khiêu dâm|18\+)\b",
+    # Thông tin cá nhân nhạy cảm / Sensitive personal data
+    r"\b(cccd|cmnd|passport|số thẻ tín dụng|credit card)\b",
+    # Tấn công hệ thống / System attack attempts
+    r"(ignore previous|jailbreak|bypass|as an ai you have no|forget your instructions)",
+    # Ngôn từ thù hận / Hate speech
+    r"\b(phân biệt chủng tộc|kỳ thị|kỳ thị người)\b",
+]
+
+HARMFUL_PATTERNS = [re.compile(p, re.IGNORECASE | re.UNICODE) for p in HARMFUL_KEYWORDS]
+
+
+def check_guardrails(message: str) -> Optional[str]:
+    """
+    Kiểm tra nội dung tin nhắn vi phạm
+    Check message content against guardrail rules.
+
+    Returns:
+        Lý do chặn nếu vi phạm / Block reason string, or None if clean
+    """
+    for pattern in HARMFUL_PATTERNS:
+        if pattern.search(message):
+            logger.warning(f" Guardrail triggered for pattern: {pattern.pattern}")
+            return "Tin nhắn chứa nội dung không phù hợp / Message contains inappropriate content"
+
+    # Kiểm tra độ dài bất thường / Check for abnormally long repetitive content
+    if len(message) > 1500 and len(set(message.split())) < 20:
+        return "Tin nhắn lặp lại bất thường / Abnormally repetitive message"
+
+    return None
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Rate limiter
+# ──────────────────────────────────────────────────────────────────────────────
+
+async def check_rate_limit(user_id: str) -> bool:
+    """
+    Kiểm tra giới hạn tốc độ gửi tin nhắn (5 tin/phút per user)
+    Check in-memory rate limit (5 messages/minute per user).
+
+    Returns:
+        True nếu bị giới hạn / True if rate limited
+    """
     async with _rate_limit_lock:
         now = time.time()
         window_start = now - 60.0
@@ -90,48 +152,248 @@ def _messages_used(user_id: str) -> int:
     return sum(1 for t in q if t >= window_start)
 
 
-# ── Chat system prompt ─────────────────────────────────────────────────────────
+async def call_chat_llm(
+    messages: List[Dict[str, str]],
+) -> Dict[str, Any]:
+    """
+    Gọi LLM cho hội thoại chat.
+    Dispatch theo LLM_PROVIDER env (openai | ollama | gemini | nvidia | deepseek).
+    """
+    cfg = resolve_config()
+    full_messages = [{"role": "system", "content": CHAT_SYSTEM_PROMPT}] + messages
 
-CHAT_SYSTEM_PROMPT = (
-    "Bạn là trợ lý AI chuyên về học tập và phát triển kỹ năng AI/ML tại VinUni. "
-    "Hãy trả lời ngắn gọn, thực tế và động viên người dùng. "
-    "Nếu người dùng hỏi ngoài chủ đề học tập AI, nhẹ nhàng hướng họ về đúng hướng.\n\n"
-    "You are an AI learning assistant. Be concise, practical, and encouraging."
-)
+    if cfg.provider == LLMProvider.OLLAMA:
+        try:
+            logger.info(f"Ollama chat at {cfg.base_url} with model {cfg.model}")
+            return await chat_ollama(full_messages, cfg, temperature=0.7, max_tokens=1024)
+        except Exception as e:
+            logger.error(f"Ollama chat error: {e}")
+            raise HTTPException(status_code=502, detail=f"Ollama error: {str(e)}")
+
+    if cfg.provider == LLMProvider.GEMINI:
+        return await _call_gemini_chat(full_messages, cfg.model)
+
+    # OpenAI / NVIDIA / DeepSeek
+    return await _call_openai_chat(full_messages, cfg.model)
 
 
 async def _call_chat_llm(messages: List[Dict[str, str]], model_name: str) -> Dict[str, Any]:
     full_messages = [{"role": "system", "content": CHAT_SYSTEM_PROMPT}] + messages
     try:
-        return await generate_chat_response(full_messages, model_name)
-    except LLMError as exc:
-        raise HTTPException(status_code=502, detail=str(exc)) from exc
-    except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"Unexpected LLM error: {exc}") from exc
+        api_key = os.getenv("OPENAI_API_KEY")
+        base_url = os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1")
+        
+        # Override API key for Nvidia models or if using Nvidia base URL
+        if "nvidia" in model_name.lower() or "nemotron" in model_name.lower() or "nvidia" in base_url.lower():
+            api_key = os.getenv("NVIDIA_API_KEY") or os.getenv("OPENAI_API_KEY")
+            base_url = os.getenv("NVIDIA_API_BASE", "https://integrate.api.nvidia.com/v1")
+
+        if not api_key:
+            raise HTTPException(status_code=500, detail="API key not configured")
+
+        # Chèn system message / Prepend system message
+        full_messages = [{"role": "system", "content": CHAT_SYSTEM_PROMPT}] + messages
+
+        try:
+            client = AsyncOpenAI(api_key=api_key, base_url=base_url)
+            kwargs = {
+                "model": model_name,
+                "messages": full_messages,
+                "temperature": 0.7,
+                "max_tokens": 1024,
+            }
+
+            # Handle DeepSeek specific prompt kwargs
+            if "deepseek" in model_name.lower():
+                kwargs["extra_body"] = {"chat_template_kwargs": {"thinking": True, "reasoning_effort": "high"}}
+
+            response = await client.chat.completions.create(**kwargs)
+            
+            # Check for reasoning/thinking block if any
+            reasoning = getattr(response.choices[0].message, "reasoning", None) or getattr(response.choices[0].message, "reasoning_content", None)
+            content = response.choices[0].message.content
+            if reasoning:
+                content = f"> **Thinking:**\n> {reasoning.strip()}\n\n{content}"
+
+            return {
+                "content":       content,
+                "input_tokens":  response.usage.prompt_tokens if response.usage else 0,
+                "output_tokens": response.usage.completion_tokens if response.usage else 0,
+            }
+        except Exception as api_err:
+            logger.warning(f"AsyncOpenAI failed, trying requests fallback: {api_err}")
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+            payload = {
+                "model": model_name,
+                "messages": full_messages,
+                "temperature": 0.7,
+                "max_tokens": 1024,
+            }
+            if "deepseek" in model_name.lower():
+                payload["extra_body"] = {"chat_template_kwargs": {"thinking": True, "reasoning_effort": "high"}}
+                
+            loop = asyncio.get_event_loop()
+            
+            def _post():
+                url = f"{base_url.rstrip('/')}/chat/completions"
+                return requests.post(url, headers=headers, json=payload, timeout=30)
+                
+            res = await loop.run_in_executor(None, _post)
+            if res.status_code != 200:
+                raise Exception(f"HTTP {res.status_code}: {res.text}")
+                
+            data = res.json()
+            content = data["choices"][0]["message"]["content"]
+            
+            reasoning = data["choices"][0]["message"].get("reasoning_content") or data["choices"][0]["message"].get("reasoning")
+            if reasoning:
+                content = f"> **Thinking:**\n> {reasoning.strip()}\n\n{content}"
+                
+            usage = data.get("usage", {})
+            return {
+                "content": content,
+                "input_tokens": usage.get("prompt_tokens", 0),
+                "output_tokens": usage.get("completion_tokens", 0)
+            }
+
+    except Exception as e:
+        logger.error(f"OpenAI/Nvidia chat error: {e}")
+        raise HTTPException(status_code=502, detail=f"LLM API error: {str(e)}")
 
 
 # ── Main endpoint ──────────────────────────────────────────────────────────────
 
-@router.post("/chat", response_model=ChatResponse, summary="Conversational AI chat with trace")
-async def chat(payload: ChatRequest):
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel(
+            model_name=model_name,
+            system_instruction=CHAT_SYSTEM_PROMPT,
+            generation_config=genai.GenerationConfig(
+                temperature=0.7,
+                max_output_tokens=1024,
+            ),
+        )
+
+        # Chuyển đổi định dạng messages cho Gemini / Convert message format for Gemini
+        gemini_history = []
+        for msg in messages[:-1]:  # Tất cả trừ tin nhắn cuối / All except last
+            role = "user" if msg["role"] == "user" else "model"
+            gemini_history.append({"role": role, "parts": [msg["content"]]})
+
+        chat = model.start_chat(history=gemini_history)
+        # Gửi tin nhắn cuối cùng / Send the last message
+        last_message = messages[-1]["content"] if messages else ""
+        response = chat.send_message(last_message)
+
+        input_tokens  = response.usage_metadata.prompt_token_count     if response.usage_metadata else 100
+        output_tokens = response.usage_metadata.candidates_token_count if response.usage_metadata else 50
+
+        return {
+            "content":       response.text,
+            "input_tokens":  input_tokens,
+            "output_tokens": output_tokens,
+        }
+    except ImportError:
+        raise HTTPException(status_code=500, detail="google-generativeai package not installed")
+    except Exception as e:
+        logger.error(f"Gemini chat error: {e}")
+        raise HTTPException(status_code=502, detail=f"Gemini API error: {str(e)}")
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Offline fallback khi LLM không khả dụng
+# ──────────────────────────────────────────────────────────────────────────────
+
+def _offline_chat_fallback(conversation_history: List[Dict[str, str]]) -> str:
+    """
+    Trả lời offline dựa trên từ khoá khi LLM API không hoạt động.
+    Used when Ollama/OpenAI/Gemini endpoints fail or are not configured.
+    """
+    last_user_msg = ""
+    for msg in reversed(conversation_history):
+        if msg.get("role") == "user":
+            last_user_msg = msg.get("content", "")
+            break
+
+    msg_lower = last_user_msg.lower()
+
+    if any(kw in msg_lower for kw in ["python", "lap trinh", "code", "coding"]):
+        return (
+            "Python cho AI/ML — lo trinh goi y:\n\n"
+            "1. Python co ban: bien, vong lap, ham, OOP\n"
+            "2. NumPy — tinh toan ma tran hieu qua\n"
+            "3. Pandas — xu ly du lieu bang\n"
+            "4. Matplotlib / Seaborn — truc quan hoa\n\n"
+            "Tai nguyen mien phi: Kaggle Learn, CS50P Harvard."
+        )
+    if any(kw in msg_lower for kw in ["deep learning", "neural", "dl", "mang noron"]):
+        return (
+            "Deep Learning nam o Giai doan 3 trong lo trinh cua ban. "
+            "Bat dau voi MLP / Backpropagation, sau do toi CNN (thi giac) "
+            "va Transformer (NLP/LLM). Tai nguyen: fast.ai, DeepLearning.AI."
+        )
+    if any(kw in msg_lower for kw in ["tai lieu", "sach", "course", "khoa hoc", "hoc o dau"]):
+        return (
+            "Tai nguyen hoc AI goi y:\n\n"
+            "- Coursera — Machine Learning Specialization (Andrew Ng)\n"
+            "- fast.ai — Practical Deep Learning\n"
+            "- Google ML Crash Course\n"
+            "- Kaggle Learn (mien phi)\n"
+            "- 'Hands-On ML' — Aurelien Geron (sach)"
+        )
+    if any(kw in msg_lower for kw in ["bao lau", "thoi gian", "how long"]):
+        return (
+            "Voi lich hoc deu dan (4–10 gio/tuan), lo trinh 4 giai doan "
+            "thuong mat khoang 6–9 thang de hoan thanh. Ban co the di nhanh hon "
+            "neu da co nen tang toan/lap trinh vung."
+        )
+    if any(kw in msg_lower for kw in ["lo trinh", "roadmap", "ke hoach", "buoc"]):
+        return (
+            "Lo trinh cua ban gom 4 giai doan:\n"
+            "1. Nen tang Toan & Python\n"
+            "2. Machine Learning co ban\n"
+            "3. Deep Learning & Neural Networks\n"
+            "4. Du an thuc te & Trien khai\n\n"
+            "Ban co the xem chi tiet trong tab Lo trinh hoc."
+        )
+    return (
+        "Xin chao! Hien tai may chu AI dang ban (che do offline). "
+        "Duoi day la vai goi y chung:\n\n"
+        "- Tap trung vao milestone dang active trong lo trinh\n"
+        "- Thuc hanh code moi ngay, du chi 30 phut\n"
+        "- Hoi cu the ve Python / ML / Deep Learning / tai lieu de nhan cau tra loi chinh xac hon."
+    )
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Endpoint chính / Main endpoint
+# ──────────────────────────────────────────────────────────────────────────────
+
+@router.post("/chat", response_model=ChatResponse, summary="Conversational AI chat")
+async def chat(payload: ChatRequest, sess: _Session = Depends(require_session_role(Role.STUDENT, Role.PREMIUM, Role.ADMIN))):
     """
     7-step traced chat endpoint.
 
-    Thought → Action → Observation for each step:
-      1. check_rate_limit
-      2. check_guardrails
-      3. check_quiz_gate
-      4. check_daily_cost   (skipped for local models)
-      5. load_conversation_history
-      6. call_llm
-      7. save_session
+    **Quy trình / Flow:**
+    1. Role check: STUDENT / PREMIUM / ADMIN
+    2. Rate limit check: per-role (STUDENT=5, PREMIUM=20, ADMIN=60 msg/min)
+    3. Guardrail check: từ khóa & regex
+    4. Quiz gate: nếu chưa trả lời đủ 3 câu → chặn thân thiện
+    5. Daily cost check
+    6. Tải lịch sử hội thoại từ DB / Load conversation history from DB
+    7. Gọi LLM / Call LLM
+    8. Lưu lịch sử + ghi chi phí / Save history + log cost
     """
     user_id    = payload.user_id
     session_id = payload.session_id
     message    = mask_sensitive_data(payload.message.strip())
-    model_name = get_model_name(payload.model_override)
-    provider   = get_provider(model_name)
-    is_local   = is_local_model(model_name)
+    model_name = payload.model_override or os.getenv("MODEL_NAME", "gpt-4o")
+    role       = sess.role
+    limits     = get_role_limits(role)
+    logger.info(f"Chat request | user={user_id} role={role.value} rate_limit={limits['rate_per_minute']}/min cost_limit=${limits['daily_cost_usd']}/day")
 
     trace = AgentTrace(session_id=session_id, user_id=user_id, user_message=message)
 
@@ -196,11 +458,9 @@ async def chat(payload: ChatRequest):
 
     guard_result = guardrail_manager.check_message(message)
     if guard_result and guard_result.get("blocked"):
-        reason       = guard_result.get("reason", "blocked")
-        block_resp   = guard_result.get("response", "[Yêu cầu bị từ chối]")
-        trace.block(step2, f"Guardrail TRIGGERED — reason: {reason}")
-        trace.finish("blocked", reason)
-        logger.warning("[%s] 🚫 Guardrail blocked user '%s': %s", session_id, user_id, reason)
+        reason = guard_result.get("reason", "blocked")
+        response_text = guard_result.get("response", "[Yêu cầu truy cập thông tin hệ thống bị từ chối do vi phạm quy tắc an toàn quốc tế]")
+        logger.info(f" Message blocked for user '{user_id}': {reason}")
         return ChatResponse(
             response=block_resp,
             session_id=session_id,
@@ -222,12 +482,92 @@ async def chat(payload: ChatRequest):
         questions_answered = max(questions_answered, session_data.get("questions_answered", 0))
         quiz_completed     = quiz_completed or bool(session_data.get("quiz_completed", False))
 
-    step3 = trace.begin(
-        thought=(
-            f"Kiểm tra quiz gate — user phải trả lời ít nhất {MIN_QUIZ_QUESTIONS} câu "
-            "trước khi chat để AI có đủ ngữ cảnh cá nhân hóa phản hồi."
-        ),
-        action="check_quiz_gate",
+    if not quiz_completed and questions_answered < MIN_QUIZ_QUESTIONS:
+        friendly_block = (
+            f" Chào bạn! Để tôi có thể hỗ trợ tốt hơn, "
+            f"bạn cần hoàn thành ít nhất {MIN_QUIZ_QUESTIONS} câu hỏi khảo sát trước nhé.\n"
+            f"Bạn đã trả lời {questions_answered}/{MIN_QUIZ_QUESTIONS} câu. "
+            f"Hãy quay lại phần khảo sát để tiếp tục! \n\n"
+            f"Hi there! To provide you with better support, please complete at least "
+            f"{MIN_QUIZ_QUESTIONS} quiz questions first. "
+            f"You've answered {questions_answered}/{MIN_QUIZ_QUESTIONS}. "
+            f"Please go back to the quiz section to continue!"
+        )
+        return ChatResponse(
+            response=friendly_block,
+            session_id=session_id,
+            tokens_used={"input": 0, "output": 0, "total": 0},
+            cost={"request_cost_usd": 0.0, "daily_cost_usd": 0.0, "rate_limited": False},
+            blocked=True,
+            block_reason="quiz_not_completed",
+        )
+
+    # ── Bước 4: Kiểm tra chi phí ngày / Step 4: Daily cost limit ─────────────
+    if is_user_rate_limited(user_id):
+        raise HTTPException(
+            status_code=429,
+            detail={
+                "error": "daily_cost_limit_exceeded",
+                "message": "Bạn đã vượt giới hạn chi phí ngày hôm nay. Vui lòng thử lại vào ngày mai.",
+            }
+        )
+
+    # ── Bước 5: Tải lịch sử / Step 5: Load conversation history ──────────────
+    conversation_history: List[Dict[str, str]] = []
+    if session_data and session_data.get("conversation_history"):
+        conversation_history = session_data["conversation_history"]
+
+    # Giữ lại MAX_HISTORY_TURNS lượt gần nhất / Keep only recent turns
+    if len(conversation_history) > MAX_HISTORY_TURNS * 2:
+        conversation_history = conversation_history[-(MAX_HISTORY_TURNS * 2):]
+
+    # Thêm tin nhắn mới / Add new user message
+    conversation_history.append({"role": "user", "content": message})
+
+    # ── Bước 6: Gọi LLM / Step 6: Call LLM ──────────────────────────────────
+    logger.info(f"Chat LLM call for user '{user_id}' | session='{session_id}' | model='{model_name}'")
+    try:
+        llm_result   = await call_chat_llm(conversation_history)
+        ai_response  = llm_result["content"]
+        input_tokens = llm_result["input_tokens"]
+        output_tokens = llm_result["output_tokens"]
+    except HTTPException as http_err:
+        logger.warning(f"LLM API failed for chat ({http_err.detail}); using offline fallback")
+        ai_response = _offline_chat_fallback(conversation_history)
+        input_tokens  = sum(len(str(m.get("content", ""))) for m in conversation_history) // 4
+        output_tokens = len(ai_response) // 4
+    except Exception as e:
+        logger.error(f"Unexpected chat LLM error: {e}; using offline fallback")
+        ai_response = _offline_chat_fallback(conversation_history)
+        input_tokens  = sum(len(str(m.get("content", ""))) for m in conversation_history) // 4
+        output_tokens = len(ai_response) // 4
+
+    # Phản hồi fallback khi không chắc chắn câu trả lời / Fallback response if AI is uncertain
+    uncertainty_keywords = [
+        "tôi không biết", "tôi không chắc", "nằm ngoài phạm vi", 
+        "không thể trả lời", "không thuộc chuyên môn", "không rõ", 
+        "chưa có câu trả lời", "không thể hỗ trợ", "sorry, i don't know", 
+        "i'm not sure", "out of scope", "i cannot answer"
+    ]
+    
+    ai_response_lower = ai_response.lower()
+    is_uncertain = any(uk in ai_response_lower for uk in uncertainty_keywords)
+    
+    if is_uncertain:
+        logger.info(f" Detected low-confidence/uncertain AI chat response for user '{user_id}'. Appending human fallback information.")
+        ai_response += (
+            "\n\n---"
+            "\n *Chú ý: Câu hỏi này có vẻ nằm ngoài phạm vi học tập thông thường của tôi hoặc tôi chưa hoàn toàn chắc chắn. "
+            "Nếu bạn cần thêm thông tin chính xác, bạn có thể liên hệ trực tiếp với Cố vấn học tập VinUni qua email: "
+            "[ai-support@vinuni.edu.vn](mailto:ai-support@vinuni.edu.vn) hoặc bấm nút Trợ giúp (biểu tượng  ở góc trên bên phải) để được hỗ trợ.*"
+        )
+
+    # ── Bước 7: Lưu lịch sử & ghi chi phí / Step 7: Save history & log cost ─
+    conversation_history.append({"role": "assistant", "content": ai_response})
+
+    upsert_session(
+        session_id=session_id,
+        user_id=user_id,
         quiz_completed=quiz_completed,
         questions_answered=questions_answered,
         min_required=MIN_QUIZ_QUESTIONS,
@@ -431,36 +771,7 @@ async def chat(payload: ChatRequest):
         output_tokens=output_tokens,
     )
 
-    try:
-        conversation_history.append({"role": "assistant", "content": ai_response})
-        upsert_session(
-            session_id=session_id,
-            user_id=user_id,
-            quiz_completed=quiz_completed,
-            questions_answered=questions_answered,
-            conversation_history=conversation_history,
-        )
-        cost_info = log_cost(
-            user_id=user_id,
-            input_tokens=input_tokens,
-            output_tokens=output_tokens,
-            model_name=model_name,
-            endpoint="/api/chat",
-            quiz_score=f"{questions_answered}/10",
-            intent_detected="chat_conversation",
-        )
-        trace.ok(
-            step7,
-            f"Session saved — {len(conversation_history)} messages persisted. "
-            f"Cost: ${cost_info['calculated_cost']:.6f} | Daily: ${cost_info['daily_cost_total']:.4f}."
-        )
-    except Exception as exc:
-        trace.error(step7, f"Save failed: {exc}", "Response still returned to user.")
-        logger.error("[%s] Failed to save session or log cost: %s", session_id, exc, exc_info=True)
-        cost_info = {"calculated_cost": 0.0, "daily_cost_total": 0.0, "rate_limited": False}
-
-    trace.finish("success")
-    logger.info("[%s] ✅ Chat complete — cost=$%.6f", session_id, cost_info["calculated_cost"])
+    logger.info(f" Chat response sent | user='{user_id}' | cost=${cost_info['calculated_cost']:.6f}")
 
     return ChatResponse(
         response=ai_response,
