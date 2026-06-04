@@ -3,554 +3,588 @@
   "topics": [
     [
       {
-        "id": 1,
-        "text": "Trong Python, cấu trúc dữ liệu nào sau đây không cho phép thay đổi giá trị (Immutable) sau khi khởi tạo?",
+        "id": "ch1-1",
+        "text": "Machine Learning là gì?",
         "options": [
           {
             "label": "A",
-            "text": "List"
+            "text": "Một nhánh của thiết kế phần mềm truyền thống"
           },
           {
             "label": "B",
-            "text": "Dictionary"
+            "text": "Hệ thống dựa trên luật được lập trình thủ công"
           },
           {
             "label": "C",
-            "text": "Tuple"
+            "text": "Một lĩnh vực nghiên cứu cho phép máy học từ dữ liệu mà không cần lập trình tường minh"
           },
           {
             "label": "D",
-            "text": "Set"
+            "text": "Một phương pháp mã hóa dữ liệu"
           }
         ],
         "correct": 2,
-        "explanation": "Tuple trong Python là cấu trúc dữ liệu không thể thay đổi giá trị (Immutable). Sau khi khởi tạo, bạn không thể thêm, sửa, hoặc xóa các phần tử trong tuple."
+        "explanation": "Đáp án C đúng vì Một lĩnh vực nghiên cứu cho phép máy học từ dữ liệu mà không cần lập trình tường minh là lựa chọn phù hợp nhất với nội dung câu hỏi: Machine Learning là gì?"
       },
       {
-        "id": "1b",
-        "text": "Trong Python, cau lenh nao sau day tao ra mot tuple gom 3 phan tu?",
+        "id": "ch1-2",
+        "text": "Ai là người đã định nghĩa ML là “Field of study that gives computers the ability to learn without being explicitly programmed”?",
         "options": [
           {
             "label": "A",
-            "text": "[1, 2, 3]"
+            "text": "Andrew Ng"
           },
           {
             "label": "B",
-            "text": "{1, 2, 3}"
+            "text": "Arthur Samuel"
           },
           {
             "label": "C",
-            "text": "(1, 2, 3)"
+            "text": "Tom Mitchell"
           },
           {
             "label": "D",
-            "text": "{\"a\": 1}"
+            "text": "Alan Turing"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Arthur Samuel là lựa chọn phù hợp nhất với nội dung câu hỏi: Ai là người đã định nghĩa ML là “Field of study that gives computers the ability to learn without being explicitly programmed”?"
+      },
+      {
+        "id": "ch1-3",
+        "text": "Tom Mitchell định nghĩa ML như thế nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "ML là quá trình phân tích dữ liệu bằng tay"
+          },
+          {
+            "label": "B",
+            "text": "ML là mô hình hoá các lý thuyết thống kê"
+          },
+          {
+            "label": "C",
+            "text": "Một chương trình học từ kinh nghiệm E với nhiệm vụ T và đo lường P nếu hiệu suất tăng theo kinh nghiệm"
+          },
+          {
+            "label": "D",
+            "text": "ML là việc lập trình các thuật toán tối ưu"
           }
         ],
         "correct": 2,
-        "explanation": "Tuple duoc tao bang dau ngoac tron, vi du (1, 2, 3), va la cau truc immutable trong Python."
+        "explanation": "Đáp án C đúng vì Một chương trình học từ kinh nghiệm E với nhiệm vụ T và đo lường P nếu hiệu suất tăng theo kinh nghiệm là lựa chọn phù hợp nhất với nội dung câu hỏi: Tom Mitchell định nghĩa ML như thế nào?"
       },
       {
-        "id": "1c",
-        "text": "Neu can luu mot tap gia tri khong muon bi sua sau khi tao trong Python, lua chon nao phu hop nhat?",
+        "id": "ch1-4",
+        "text": "Mục tiêu chính của Machine Learning là gì?",
         "options": [
           {
             "label": "A",
-            "text": "Tuple"
+            "text": "Viết càng nhiều dòng code càng tốt"
           },
           {
             "label": "B",
-            "text": "List"
+            "text": "Tạo hệ thống dựa trên luật cứng"
           },
           {
             "label": "C",
-            "text": "Dictionary"
+            "text": "Xây dựng mô hình tổng quát hoá tốt trên dữ liệu chưa thấy"
           },
           {
             "label": "D",
-            "text": "Set"
-          }
-        ],
-        "correct": 0,
-        "explanation": "Tuple phu hop khi can mot day gia tri co thu tu va khong thay doi sau khi khoi tao."
-      }
-    ],
-    [
-      {
-        "id": 2,
-        "text": "Kết quả của đoạn code sau là gì? print([x**2 for x in range(3)])",
-        "options": [
-          {
-            "label": "A",
-            "text": "[1, 4, 9]"
-          },
-          {
-            "label": "B",
-            "text": "[0, 1, 4]"
-          },
-          {
-            "label": "C",
-            "text": "[0, 1, 2]"
-          },
-          {
-            "label": "D",
-            "text": "Lỗi cú pháp"
-          }
-        ],
-        "correct": 1,
-        "explanation": "range(3) sinh ra dãy số [0, 1, 2]. List comprehension bình phương từng số: 0²=0, 1²=1, 2²=4. Kết quả là [0, 1, 4]."
-      },
-      {
-        "id": "2b",
-        "text": "Ket qua cua doan code sau la gi? print([x + 1 for x in range(3)])",
-        "options": [
-          {
-            "label": "A",
-            "text": "[1, 2, 3]"
-          },
-          {
-            "label": "B",
-            "text": "[0, 1, 2]"
-          },
-          {
-            "label": "C",
-            "text": "[2, 3, 4]"
-          },
-          {
-            "label": "D",
-            "text": "Loi cu phap"
-          }
-        ],
-        "correct": 0,
-        "explanation": "range(3) tao ra 0, 1, 2. Cong them 1 cho moi gia tri se duoc [1, 2, 3]."
-      },
-      {
-        "id": "2c",
-        "text": "Ket qua cua doan code sau la gi? print([x * 2 for x in range(4)])",
-        "options": [
-          {
-            "label": "A",
-            "text": "[0, 2, 4, 6]"
-          },
-          {
-            "label": "B",
-            "text": "[2, 4, 6, 8]"
-          },
-          {
-            "label": "C",
-            "text": "[0, 1, 2, 3]"
-          },
-          {
-            "label": "D",
-            "text": "[1, 2, 3, 4]"
-          }
-        ],
-        "correct": 0,
-        "explanation": "range(4) tao ra 0, 1, 2, 3. Nhan doi tung gia tri se duoc [0, 2, 4, 6]."
-      }
-    ],
-    [
-      {
-        "id": 3,
-        "text": "Khi viết một hàm xử lý ngoại lệ trong Python để tránh chương trình bị crash giữa chừng, cặp từ khóa nào bắt buộc phải sử dụng?",
-        "options": [
-          {
-            "label": "A",
-            "text": "if / else"
-          },
-          {
-            "label": "B",
-            "text": "try / except"
-          },
-          {
-            "label": "C",
-            "text": "for / while"
-          },
-          {
-            "label": "D",
-            "text": "def / return"
-          }
-        ],
-        "correct": 1,
-        "explanation": "Cấu trúc try/except dùng để bắt và xử lý các ngoại lệ (exceptions) giúp chương trình tiếp tục chạy khi gặp lỗi."
-      },
-      {
-        "id": "3b",
-        "text": "Khi muon bat loi chia cho 0 trong Python de chuong trinh khong dung dot ngot, nen dung cau truc nao?",
-        "options": [
-          {
-            "label": "A",
-            "text": "try / except"
-          },
-          {
-            "label": "B",
-            "text": "for / in"
-          },
-          {
-            "label": "C",
-            "text": "class / object"
-          },
-          {
-            "label": "D",
-            "text": "import / from"
-          }
-        ],
-        "correct": 0,
-        "explanation": "try/except dung de bat va xu ly exception, giup chuong trinh tiep tuc chay hoac hien thong bao than thien."
-      },
-      {
-        "id": "3c",
-        "text": "Trong Python, khoi lenh nao se chay khi phan try gap exception phu hop?",
-        "options": [
-          {
-            "label": "A",
-            "text": "return"
-          },
-          {
-            "label": "B",
-            "text": "except"
-          },
-          {
-            "label": "C",
-            "text": "lambda"
-          },
-          {
-            "label": "D",
-            "text": "yield"
-          }
-        ],
-        "correct": 1,
-        "explanation": "Khi khoi try phat sinh exception phu hop, Python chuyen sang khoi except de xu ly loi."
-      }
-    ],
-    [
-      {
-        "id": 4,
-        "text": "Thư viện Python nào sau đây được sử dụng phổ biến nhất để thao tác với dữ liệu bảng (Tabular Data/DataFrame)?",
-        "options": [
-          {
-            "label": "A",
-            "text": "Requests"
-          },
-          {
-            "label": "B",
-            "text": "Matplotlib"
-          },
-          {
-            "label": "C",
-            "text": "Pandas"
-          },
-          {
-            "label": "D",
-            "text": "Os"
+            "text": "Tăng tốc độ xử lý máy tính"
           }
         ],
         "correct": 2,
-        "explanation": "Pandas là thư viện hàng đầu của Python dùng để thao tác, phân tích và xử lý cấu trúc dữ liệu dạng bảng (DataFrame)."
+        "explanation": "Đáp án C đúng vì Xây dựng mô hình tổng quát hoá tốt trên dữ liệu chưa thấy là lựa chọn phù hợp nhất với nội dung câu hỏi: Mục tiêu chính của Machine Learning là gì?"
       },
       {
-        "id": "4b",
-        "text": "Trong Python, DataFrame la cau truc du lieu cot loi cua thu vien nao?",
+        "id": "ch1-5",
+        "text": "Dữ liệu trong ML thường được chia thành mấy tập chính?",
         "options": [
           {
             "label": "A",
-            "text": "Pandas"
+            "text": "1"
           },
           {
             "label": "B",
-            "text": "Requests"
+            "text": "2 hoặc 3"
           },
           {
             "label": "C",
-            "text": "Flask"
-          },
-          {
-            "label": "D",
-            "text": "Pillow"
-          }
-        ],
-        "correct": 0,
-        "explanation": "DataFrame la cau truc du lieu chinh cua Pandas, rat pho bien de lam viec voi du lieu bang."
-      },
-      {
-        "id": "4c",
-        "text": "Neu co file CSV va muon doc thanh bang du lieu de phan tich trong Python, thu vien nao phu hop nhat?",
-        "options": [
-          {
-            "label": "A",
-            "text": "Pandas"
-          },
-          {
-            "label": "B",
-            "text": "Turtle"
-          },
-          {
-            "label": "C",
-            "text": "Random"
-          },
-          {
-            "label": "D",
-            "text": "Datetime"
-          }
-        ],
-        "correct": 0,
-        "explanation": "Pandas co ham read_csv va cac thao tac loc, nhom, tinh toan tren du lieu dang bang."
-      }
-    ],
-    [
-      {
-        "id": 5,
-        "text": "Giá trị trung bình (Mean) của tập dữ liệu [2, 4, 4, 4, 6] là bao nhiêu?",
-        "options": [
-          {
-            "label": "A",
             "text": "4"
           },
           {
-            "label": "B",
-            "text": "3"
-          },
-          {
-            "label": "C",
+            "label": "D",
             "text": "5"
-          },
-          {
-            "label": "D",
-            "text": "6"
-          }
-        ],
-        "correct": 0,
-        "explanation": "Mean = (2 + 4 + 4 + 4 + 6) / 5 = 20 / 5 = 4."
-      },
-      {
-        "id": "5b",
-        "text": "Gia tri trung binh (Mean) cua tap du lieu [1, 3, 5, 7] la bao nhieu?",
-        "options": [
-          {
-            "label": "A",
-            "text": "3"
-          },
-          {
-            "label": "B",
-            "text": "4"
-          },
-          {
-            "label": "C",
-            "text": "5"
-          },
-          {
-            "label": "D",
-            "text": "6"
           }
         ],
         "correct": 1,
-        "explanation": "Mean = (1 + 3 + 5 + 7) / 4 = 16 / 4 = 4."
+        "explanation": "Đáp án B đúng vì 2 hoặc 3 là lựa chọn phù hợp nhất với nội dung câu hỏi: Dữ liệu trong ML thường được chia thành mấy tập chính?"
       },
       {
-        "id": "5c",
-        "text": "Gia tri trung binh (Mean) cua tap du lieu [10, 20, 30] la bao nhieu?",
+        "id": "ch1-6",
+        "text": "Supervised Learning cần yếu tố nào dưới đây?",
         "options": [
           {
             "label": "A",
-            "text": "15"
+            "text": "Dữ liệu không nhãn"
           },
           {
             "label": "B",
-            "text": "20"
+            "text": "Dữ liệu có nhãn"
           },
           {
             "label": "C",
-            "text": "25"
+            "text": "Mô hình học tăng cường"
           },
           {
             "label": "D",
-            "text": "30"
+            "text": "Tự phát hiện đặc trưng"
           }
         ],
         "correct": 1,
-        "explanation": "Mean = (10 + 20 + 30) / 3 = 60 / 3 = 20."
-      }
-    ],
-    [
-      {
-        "id": 6,
-        "text": "Trong đại số tuyến tính, một ma trận có kích thước 3×2 nhân với một ma trận kích thước 2×4 sẽ tạo ra một ma trận mới có kích thước bao nhiêu?",
-        "options": [
-          {
-            "label": "A",
-            "text": "2×2"
-          },
-          {
-            "label": "B",
-            "text": "3×4"
-          },
-          {
-            "label": "C",
-            "text": "2×4"
-          },
-          {
-            "label": "D",
-            "text": "Không thể nhân được"
-          }
-        ],
-        "correct": 1,
-        "explanation": "Phép nhân ma trận kích thước (m×n) và (n×p) sẽ cho kết quả có kích thước (m×p). Ở đây (3×2) và (2×4) cho kết quả (3×4)."
+        "explanation": "Đáp án B đúng vì Dữ liệu có nhãn là lựa chọn phù hợp nhất với nội dung câu hỏi: Supervised Learning cần yếu tố nào dưới đây?"
       },
       {
-        "id": "6b",
-        "text": "Mot ma tran kich thuoc 2x3 nhan voi ma tran 3x5 se cho ket qua co kich thuoc nao?",
+        "id": "ch1-7",
+        "text": "Unsupervised Learning hoạt động như thế nào?",
         "options": [
           {
             "label": "A",
-            "text": "2x5"
+            "text": "Dựa vào phản hồi từ người dùng"
           },
           {
             "label": "B",
-            "text": "3x3"
+            "text": "Dựa trên dữ liệu có gán nhãn"
           },
           {
             "label": "C",
-            "text": "5x2"
+            "text": "Phát hiện cấu trúc ẩn từ dữ liệu không nhãn"
           },
           {
             "label": "D",
-            "text": "Khong nhan duoc"
-          }
-        ],
-        "correct": 0,
-        "explanation": "Quy tac nhan ma tran: (m x n) nhan (n x p) cho ket qua (m x p), nen 2x3 nhan 3x5 thanh 2x5."
-      },
-      {
-        "id": "6c",
-        "text": "Mot ma tran 4x2 co the nhan voi ma tran nao sau day?",
-        "options": [
-          {
-            "label": "A",
-            "text": "3x4"
-          },
-          {
-            "label": "B",
-            "text": "2x3"
-          },
-          {
-            "label": "C",
-            "text": "5x2"
-          },
-          {
-            "label": "D",
-            "text": "4x4"
-          }
-        ],
-        "correct": 1,
-        "explanation": "So cot cua ma tran dau (2) phai bang so hang cua ma tran sau, nen 4x2 co the nhan voi 2x3."
-      }
-    ],
-    [
-      {
-        "id": 7,
-        "text": "Nếu xác suất để một email là spam là 20%, và bộ lọc AI nhận diện chính xác 90% số email spam đó, xác suất một email vừa là spam vừa bị lọc trúng là bao nhiêu?",
-        "options": [
-          {
-            "label": "A",
-            "text": "11%"
-          },
-          {
-            "label": "B",
-            "text": "18%"
-          },
-          {
-            "label": "C",
-            "text": "70%"
-          },
-          {
-            "label": "D",
-            "text": "2%"
-          }
-        ],
-        "correct": 1,
-        "explanation": "Xác suất giao nhau P(Spam ∩ Lọc) = P(Spam) × P(Lọc|Spam) = 20% × 90% = 18%."
-      },
-      {
-        "id": "7b",
-        "text": "Neu P(A)=30% va P(B|A)=50%, xac suat A va B cung xay ra la bao nhieu?",
-        "options": [
-          {
-            "label": "A",
-            "text": "15%"
-          },
-          {
-            "label": "B",
-            "text": "20%"
-          },
-          {
-            "label": "C",
-            "text": "50%"
-          },
-          {
-            "label": "D",
-            "text": "80%"
-          }
-        ],
-        "correct": 0,
-        "explanation": "P(A va B) = P(A) x P(B|A) = 30% x 50% = 15%."
-      },
-      {
-        "id": "7c",
-        "text": "Neu 10% nguoi dung click vao quang cao va 40% trong so do mua hang, ti le vua click vua mua la bao nhieu?",
-        "options": [
-          {
-            "label": "A",
-            "text": "4%"
-          },
-          {
-            "label": "B",
-            "text": "10%"
-          },
-          {
-            "label": "C",
-            "text": "40%"
-          },
-          {
-            "label": "D",
-            "text": "50%"
-          }
-        ],
-        "correct": 0,
-        "explanation": "Xac suat vua click vua mua = 10% x 40% = 4%."
-      }
-    ],
-    [
-      {
-        "id": 8,
-        "text": "Trong các mô hình ngôn ngữ lớn (LLM) như GPT-4, cơ chế kiến trúc cốt lõi nào giúp mô hình hiểu được mối liên hệ giữa các từ trong câu cách xa nhau?",
-        "options": [
-          {
-            "label": "A",
-            "text": "RNN (Recurrent Neural Network)"
-          },
-          {
-            "label": "B",
-            "text": "CNN (Convolutional Neural Network)"
-          },
-          {
-            "label": "C",
-            "text": "Attention / Transformer"
-          },
-          {
-            "label": "D",
-            "text": "K-Means Clustering"
+            "text": "Tối ưu hoá hàm mất mát"
           }
         ],
         "correct": 2,
-        "explanation": "Cơ chế Attention trong kiến trúc Transformer giúp các LLM theo dõi mối liên hệ giữa tất cả các từ trong ngữ cảnh mà không bị giới hạn khoảng cách."
+        "explanation": "Đáp án C đúng vì Phát hiện cấu trúc ẩn từ dữ liệu không nhãn là lựa chọn phù hợp nhất với nội dung câu hỏi: Unsupervised Learning hoạt động như thế nào?"
       },
       {
-        "id": "8b",
-        "text": "Trong Transformer, co che nao giup model tap trung vao cac token quan trong trong ngu canh?",
+        "id": "ch1-8",
+        "text": "Bài toán phân cụm là ví dụ của loại học nào?",
         "options": [
           {
             "label": "A",
-            "text": "Attention"
+            "text": "Supervised"
+          },
+          {
+            "label": "B",
+            "text": "Unsupervised"
+          },
+          {
+            "label": "C",
+            "text": "Reinforcement"
+          },
+          {
+            "label": "D",
+            "text": "Semi-supervised"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Unsupervised là lựa chọn phù hợp nhất với nội dung câu hỏi: Bài toán phân cụm là ví dụ của loại học nào?"
+      },
+      {
+        "id": "ch1-9",
+        "text": "Reinforcement Learning khác với Supervised Learning ở điểm nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Không có phản hồi nào"
+          },
+          {
+            "label": "B",
+            "text": "Phản hồi là dạng nhãn tường minh"
+          },
+          {
+            "label": "C",
+            "text": "Phản hồi là phần thưởng hoặc phạt qua từng bước"
+          },
+          {
+            "label": "D",
+            "text": "Dữ liệu được dán nhãn đầy đủ trước"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Phản hồi là phần thưởng hoặc phạt qua từng bước là lựa chọn phù hợp nhất với nội dung câu hỏi: Reinforcement Learning khác với Supervised Learning ở điểm nào?"
+      },
+      {
+        "id": "ch1-10",
+        "text": "Bài toán phân loại (classification) thuộc loại học nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Supervised Learning"
+          },
+          {
+            "label": "B",
+            "text": "Unsupervised Learning"
+          },
+          {
+            "label": "C",
+            "text": "Reinforcement Learning"
+          },
+          {
+            "label": "D",
+            "text": "Deep Learning"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Supervised Learning là lựa chọn phù hợp nhất với nội dung câu hỏi: Bài toán phân loại (classification) thuộc loại học nào?"
+      },
+      {
+        "id": "ch1-11",
+        "text": "Bài toán nào sau đây là Classification?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Dự đoán giá nhà"
+          },
+          {
+            "label": "B",
+            "text": "Dự đoán nhiệt độ ngày mai"
+          },
+          {
+            "label": "C",
+            "text": "Dự đoán email là spam hay không"
+          },
+          {
+            "label": "D",
+            "text": "Phân cụm người dùng theo sở thích"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Dự đoán email là spam hay không là lựa chọn phù hợp nhất với nội dung câu hỏi: Bài toán nào sau đây là Classification?"
+      },
+      {
+        "id": "ch1-12",
+        "text": "Bài toán nào sau đây là Regression?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Phân loại người dùng theo độ tuổi"
+          },
+          {
+            "label": "B",
+            "text": "Dự đoán điểm số sinh viên"
+          },
+          {
+            "label": "C",
+            "text": "Nhận diện chữ số viết tay"
+          },
+          {
+            "label": "D",
+            "text": "Phân cụm tin tức"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Dự đoán điểm số sinh viên là lựa chọn phù hợp nhất với nội dung câu hỏi: Bài toán nào sau đây là Regression?"
+      },
+      {
+        "id": "ch1-13",
+        "text": "Bài toán chơi cờ tự động thường dùng loại học nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Supervised"
+          },
+          {
+            "label": "B",
+            "text": "Unsupervised"
+          },
+          {
+            "label": "C",
+            "text": "Reinforcement"
+          },
+          {
+            "label": "D",
+            "text": "Clustering"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Reinforcement là lựa chọn phù hợp nhất với nội dung câu hỏi: Bài toán chơi cờ tự động thường dùng loại học nào?"
+      },
+      {
+        "id": "ch1-14",
+        "text": "Ví dụ điển hình của Unsupervised Learning là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Dự đoán doanh thu"
+          },
+          {
+            "label": "B",
+            "text": "Phân cụm khách hàng"
+          },
+          {
+            "label": "C",
+            "text": "Nhận dạng tiếng nói"
+          },
+          {
+            "label": "D",
+            "text": "Phân loại bệnh"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Phân cụm khách hàng là lựa chọn phù hợp nhất với nội dung câu hỏi: Ví dụ điển hình của Unsupervised Learning là?"
+      },
+      {
+        "id": "ch1-15",
+        "text": "Trong Supervised Learning, \"label\" là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Tên biến đầu vào"
+          },
+          {
+            "label": "B",
+            "text": "Đáp án đúng của dữ liệu"
+          },
+          {
+            "label": "C",
+            "text": "Một kỹ thuật học sâu"
+          },
+          {
+            "label": "D",
+            "text": "Một loại dữ liệu không nhãn"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Đáp án đúng của dữ liệu là lựa chọn phù hợp nhất với nội dung câu hỏi: Trong Supervised Learning, \"label\" là gì?"
+      },
+      {
+        "id": "ch1-16",
+        "text": "Bước đầu tiên trong quy trình Machine Learning thường là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Huấn luyện mô hình"
+          },
+          {
+            "label": "B",
+            "text": "Thu thập và xử lý dữ liệu"
+          },
+          {
+            "label": "C",
+            "text": "Đánh giá mô hình"
+          },
+          {
+            "label": "D",
+            "text": "Triển khai mô hình"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Thu thập và xử lý dữ liệu là lựa chọn phù hợp nhất với nội dung câu hỏi: Bước đầu tiên trong quy trình Machine Learning thường là gì?"
+      },
+      {
+        "id": "ch1-17",
+        "text": "Mục đích của việc chia tập train và test là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Giúp mô hình học chính xác hơn"
+          },
+          {
+            "label": "B",
+            "text": "Đánh giá khả năng tổng quát hoá"
+          },
+          {
+            "label": "C",
+            "text": "Tăng thời gian huấn luyện"
+          },
+          {
+            "label": "D",
+            "text": "Giảm bộ nhớ"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Đánh giá khả năng tổng quát hoá là lựa chọn phù hợp nhất với nội dung câu hỏi: Mục đích của việc chia tập train và test là gì?"
+      },
+      {
+        "id": "ch1-18",
+        "text": "Overfitting là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Mô hình dự đoán sai toàn bộ dữ liệu"
+          },
+          {
+            "label": "B",
+            "text": "Mô hình học quá kỹ dữ liệu huấn luyện và không tổng quát"
+          },
+          {
+            "label": "C",
+            "text": "Mô hình không học được gì"
+          },
+          {
+            "label": "D",
+            "text": "Quá trình tinh chỉnh siêu tham số"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Mô hình học quá kỹ dữ liệu huấn luyện và không tổng quát là lựa chọn phù hợp nhất với nội dung câu hỏi: Overfitting là gì?"
+      },
+      {
+        "id": "ch1-19",
+        "text": "Cross-validation giúp làm gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Huấn luyện mô hình nhanh hơn"
+          },
+          {
+            "label": "B",
+            "text": "Đánh giá mô hình ổn định hơn bằng nhiều tập kiểm tra"
+          },
+          {
+            "label": "C",
+            "text": "Làm sạch dữ liệu"
+          },
+          {
+            "label": "D",
+            "text": "Chọn mô hình ngẫu nhiên"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Đánh giá mô hình ổn định hơn bằng nhiều tập kiểm tra là lựa chọn phù hợp nhất với nội dung câu hỏi: Cross-validation giúp làm gì?"
+      },
+      {
+        "id": "ch1-20",
+        "text": "Feature trong ML là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Kết quả đầu ra"
+          },
+          {
+            "label": "B",
+            "text": "Đặc trưng đầu vào mô hình"
+          },
+          {
+            "label": "C",
+            "text": "Loại dữ liệu"
+          },
+          {
+            "label": "D",
+            "text": "Số lần huấn luyện"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Đặc trưng đầu vào mô hình là lựa chọn phù hợp nhất với nội dung câu hỏi: Feature trong ML là gì?"
+      },
+      {
+        "id": "ch1-21",
+        "text": "Một mô hình tốt trong ML cần đảm bảo điều gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Accuracy cao trên tập train"
+          },
+          {
+            "label": "B",
+            "text": "Tổng quát tốt trên dữ liệu mới"
+          },
+          {
+            "label": "C",
+            "text": "Có thể viết code ngắn"
+          },
+          {
+            "label": "D",
+            "text": "Tính toán càng phức tạp càng tốt"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Tổng quát tốt trên dữ liệu mới là lựa chọn phù hợp nhất với nội dung câu hỏi: Một mô hình tốt trong ML cần đảm bảo điều gì?"
+      },
+      {
+        "id": "ch1-22",
+        "text": "ML được ứng dụng nhiều nhất trong lĩnh vực nào sau đây?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Sản xuất máy móc"
+          },
+          {
+            "label": "B",
+            "text": "Tài chính, y tế, marketing, hình ảnh"
+          },
+          {
+            "label": "C",
+            "text": "Kỹ thuật xây dựng"
+          },
+          {
+            "label": "D",
+            "text": "Khai thác khoáng sản"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Tài chính, y tế, marketing, hình ảnh là lựa chọn phù hợp nhất với nội dung câu hỏi: ML được ứng dụng nhiều nhất trong lĩnh vực nào sau đây?"
+      },
+      {
+        "id": "ch1-23",
+        "text": "Mối quan hệ giữa dữ liệu, mô hình, và thuật toán là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Dữ liệu được mô hình hoá bằng thuật toán học"
+          },
+          {
+            "label": "B",
+            "text": "Mô hình tạo ra dữ liệu"
+          },
+          {
+            "label": "C",
+            "text": "Thuật toán dự đoán mô hình"
+          },
+          {
+            "label": "D",
+            "text": "Dữ liệu được tạo bởi mô hình"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Dữ liệu được mô hình hoá bằng thuật toán học là lựa chọn phù hợp nhất với nội dung câu hỏi: Mối quan hệ giữa dữ liệu, mô hình, và thuật toán là gì?"
+      },
+      {
+        "id": "ch1-24",
+        "text": "Khi nào nên dùng Unsupervised Learning?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Khi có nhãn dữ liệu đầy đủ"
+          },
+          {
+            "label": "B",
+            "text": "Khi muốn dự đoán một giá trị cụ thể"
+          },
+          {
+            "label": "C",
+            "text": "Khi không có nhãn nhưng muốn phát hiện mẫu"
+          },
+          {
+            "label": "D",
+            "text": "Khi mô hình quá lớn"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Khi không có nhãn nhưng muốn phát hiện mẫu là lựa chọn phù hợp nhất với nội dung câu hỏi: Khi nào nên dùng Unsupervised Learning?"
+      },
+      {
+        "id": "ch1-25",
+        "text": "Thuật toán học máy nào dưới đây là mô hình tuyến tính?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Linear Regression"
           },
           {
             "label": "B",
@@ -558,23 +592,4427 @@
           },
           {
             "label": "C",
-            "text": "SQL Join"
+            "text": "Decision Tree"
           },
           {
             "label": "D",
-            "text": "Gradient Descent duy nhat"
+            "text": "Naive Bayes"
           }
         ],
         "correct": 0,
-        "explanation": "Attention giup model can trong so muc do lien quan giua cac token trong ngu canh."
+        "explanation": "Đáp án A đúng vì Linear Regression là lựa chọn phù hợp nhất với nội dung câu hỏi: Thuật toán học máy nào dưới đây là mô hình tuyến tính?"
       },
       {
-        "id": "8c",
-        "text": "Kien truc nao la nen tang cua phan lon mo hinh ngon ngu lon hien dai?",
+        "id": "ch1-26",
+        "text": "Supervised Learning gồm các bài toán chính nào?",
         "options": [
           {
             "label": "A",
+            "text": "Classification và Regression"
+          },
+          {
+            "label": "B",
+            "text": "Clustering và Classification"
+          },
+          {
+            "label": "C",
+            "text": "Clustering và Dimensionality Reduction"
+          },
+          {
+            "label": "D",
+            "text": "Regression và Reinforcement"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Classification và Regression là lựa chọn phù hợp nhất với nội dung câu hỏi: Supervised Learning gồm các bài toán chính nào?"
+      },
+      {
+        "id": "ch1-27",
+        "text": "Thuật toán Naive Bayes là ví dụ của?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Unsupervised"
+          },
+          {
+            "label": "B",
+            "text": "Supervised"
+          },
+          {
+            "label": "C",
+            "text": "Reinforcement"
+          },
+          {
+            "label": "D",
+            "text": "Deep Learning"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Supervised là lựa chọn phù hợp nhất với nội dung câu hỏi: Thuật toán Naive Bayes là ví dụ của?"
+      },
+      {
+        "id": "ch1-28",
+        "text": "Kết quả của bài toán Regression thường là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Một nhãn phân loại"
+          },
+          {
+            "label": "B",
+            "text": "Một giá trị liên tục"
+          },
+          {
+            "label": "C",
+            "text": "Một nhóm"
+          },
+          {
+            "label": "D",
+            "text": "Một ma trận nhị phân"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Một giá trị liên tục là lựa chọn phù hợp nhất với nội dung câu hỏi: Kết quả của bài toán Regression thường là?"
+      },
+      {
+        "id": "ch1-29",
+        "text": "Ví dụ của Reinforcement Learning là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Phân loại bài viết"
+          },
+          {
+            "label": "B",
+            "text": "Chơi game tự động như AlphaGo"
+          },
+          {
+            "label": "C",
+            "text": "Dự đoán giá nhà"
+          },
+          {
+            "label": "D",
+            "text": "Phân nhóm khách hàng"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Chơi game tự động như AlphaGo là lựa chọn phù hợp nhất với nội dung câu hỏi: Ví dụ của Reinforcement Learning là?"
+      },
+      {
+        "id": "ch1-30",
+        "text": "ML không nên được sử dụng khi nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Có nhiều dữ liệu"
+          },
+          {
+            "label": "B",
+            "text": "Không có dữ liệu hoặc không có vấn đề để học"
+          },
+          {
+            "label": "C",
+            "text": "Có nhiều nhãn chính xác"
+          },
+          {
+            "label": "D",
+            "text": "Khi cần tự động hoá"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Không có dữ liệu hoặc không có vấn đề để học là lựa chọn phù hợp nhất với nội dung câu hỏi: ML không nên được sử dụng khi nào?"
+      }
+    ],
+    [
+      {
+        "id": "ch2-1",
+        "text": "Feature trong ML là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Tên tập dữ liệu"
+          },
+          {
+            "label": "B",
+            "text": "Thuộc tính đầu vào mô hình"
+          },
+          {
+            "label": "C",
+            "text": "Biến ngẫu nhiên"
+          },
+          {
+            "label": "D",
+            "text": "Mã hóa dữ liệu"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Thuộc tính đầu vào mô hình là lựa chọn phù hợp nhất với nội dung câu hỏi: Feature trong ML là gì?"
+      },
+      {
+        "id": "ch2-2",
+        "text": "Tại sao Feature Engineering quan trọng?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Giúc biến đổi dữ liệu sang ngôn ngữ Python"
+          },
+          {
+            "label": "B",
+            "text": "Cải thiện độ chính xác, tốc độ, giảm overfitting"
+          },
+          {
+            "label": "C",
+            "text": "Tăng kích thước dữ liệu"
+          },
+          {
+            "label": "D",
+            "text": "Tự động gán nhãn cho dữ liệu"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Cải thiện độ chính xác, tốc độ, giảm overfitting là lựa chọn phù hợp nhất với nội dung câu hỏi: Tại sao Feature Engineering quan trọng?"
+      },
+      {
+        "id": "ch2-3",
+        "text": "Các loại dữ liệu nào có thể trở thành feature?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Chỉ văn bản"
+          },
+          {
+            "label": "B",
+            "text": "Chỉ hình ảnh"
+          },
+          {
+            "label": "C",
+            "text": "Mọi kiểu dữ liệu: văn bản, số, âm thanh, hình ảnh"
+          },
+          {
+            "label": "D",
+            "text": "Chỉ dữ liệu có nhãn"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Mọi kiểu dữ liệu: văn bản, số, âm thanh, hình ảnh là lựa chọn phù hợp nhất với nội dung câu hỏi: Các loại dữ liệu nào có thể trở thành feature?"
+      },
+      {
+        "id": "ch2-4",
+        "text": "Feature có thể là dạng nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Chỉ số thực"
+          },
+          {
+            "label": "B",
+            "text": "Chỉ chuỗi"
+          },
+          {
+            "label": "C",
+            "text": "Số thực, nhị phân, phân loại, rời rạc..."
+          },
+          {
+            "label": "D",
+            "text": "Chỉ hình ảnh"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Số thực, nhị phân, phân loại, rời rạc... là lựa chọn phù hợp nhất với nội dung câu hỏi: Feature có thể là dạng nào?"
+      },
+      {
+        "id": "ch2-5",
+        "text": "Đặc điểm của Binary feature là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Có nhiều giá trị"
+          },
+          {
+            "label": "B",
+            "text": "Luôn là số thực"
+          },
+          {
+            "label": "C",
+            "text": "Chỉ có 2 trạng thái (0 hoặc 1)"
+          },
+          {
+            "label": "D",
+            "text": "Chỉ áp dụng cho văn bản"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Chỉ có 2 trạng thái (0 hoặc 1) là lựa chọn phù hợp nhất với nội dung câu hỏi: Đặc điểm của Binary feature là gì?"
+      },
+      {
+        "id": "ch2-6",
+        "text": "Feature transformation là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Biến đổi dữ liệu đầu vào cho phù hợp với thuật toán ML"
+          },
+          {
+            "label": "B",
+            "text": "Mã hóa dữ liệu"
+          },
+          {
+            "label": "C",
+            "text": "Huấn luyện mô hình"
+          },
+          {
+            "label": "D",
+            "text": "Gán nhãn cho dữ liệu"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Biến đổi dữ liệu đầu vào cho phù hợp với thuật toán ML là lựa chọn phù hợp nhất với nội dung câu hỏi: Feature transformation là gì?"
+      },
+      {
+        "id": "ch2-7",
+        "text": "Chuẩn hoá (Normalization) là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Gộp nhiều dữ liệu lại"
+          },
+          {
+            "label": "B",
+            "text": "Scale dữ liệu về khoảng [0,1]"
+          },
+          {
+            "label": "C",
+            "text": "Gắn nhãn"
+          },
+          {
+            "label": "D",
+            "text": "Xóa outliers"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Scale dữ liệu về khoảng [0,1] là lựa chọn phù hợp nhất với nội dung câu hỏi: Chuẩn hoá (Normalization) là gì?"
+      },
+      {
+        "id": "ch2-8",
+        "text": "Z-score normalization sử dụng yếu tố nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Trung bình và độ lệch chuẩn"
+          },
+          {
+            "label": "B",
+            "text": "Max-min"
+          },
+          {
+            "label": "C",
+            "text": "Chọn ngẫu nhiên"
+          },
+          {
+            "label": "D",
+            "text": "Mã hóa bí mật"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Trung bình và độ lệch chuẩn là lựa chọn phù hợp nhất với nội dung câu hỏi: Z-score normalization sử dụng yếu tố nào?"
+      },
+      {
+        "id": "ch2-9",
+        "text": "Feature Selection là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Tăng kích thước dữ liệu"
+          },
+          {
+            "label": "B",
+            "text": "Lựa chọn những thuộc tính quan trọng nhất"
+          },
+          {
+            "label": "C",
+            "text": "Thêm ngẫu nhiên feature"
+          },
+          {
+            "label": "D",
+            "text": "Xoá bỏ label"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Lựa chọn những thuộc tính quan trọng nhất là lựa chọn phù hợp nhất với nội dung câu hỏi: Feature Selection là gì?"
+      },
+      {
+        "id": "ch2-10",
+        "text": "PCA là viết tắt của?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Partial Combination Algorithm"
+          },
+          {
+            "label": "B",
+            "text": "Principal Component Analysis"
+          },
+          {
+            "label": "C",
+            "text": "Primary Class Assignment"
+          },
+          {
+            "label": "D",
+            "text": "Python Component Algorithm"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Principal Component Analysis là lựa chọn phù hợp nhất với nội dung câu hỏi: PCA là viết tắt của?"
+      },
+      {
+        "id": "ch2-11",
+        "text": "Data visualization dùng để làm gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Thực thi mô hình"
+          },
+          {
+            "label": "B",
+            "text": "Nhìn thấy xu hướng, mẫu trong dữ liệu"
+          },
+          {
+            "label": "C",
+            "text": "Tăng dữ liệu"
+          },
+          {
+            "label": "D",
+            "text": "Mã hoá dữ liệu"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Nhìn thấy xu hướng, mẫu trong dữ liệu là lựa chọn phù hợp nhất với nội dung câu hỏi: Data visualization dùng để làm gì?"
+      },
+      {
+        "id": "ch2-12",
+        "text": "Biểu đồ bar chart tôt nhất cho?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Dữ liệu theo thời gian"
+          },
+          {
+            "label": "B",
+            "text": "So sánh giá trị các nhóm"
+          },
+          {
+            "label": "C",
+            "text": "Dữ liệu nhỏ"
+          },
+          {
+            "label": "D",
+            "text": "Dữ liệu chuỗi"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì So sánh giá trị các nhóm là lựa chọn phù hợp nhất với nội dung câu hỏi: Biểu đồ bar chart tôt nhất cho?"
+      },
+      {
+        "id": "ch2-13",
+        "text": "Scatter plot dùng cho?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Dữ liệu text"
+          },
+          {
+            "label": "B",
+            "text": "Ảnh"
+          },
+          {
+            "label": "C",
+            "text": "Tìm mối quan hệ giữa 2 biến số"
+          },
+          {
+            "label": "D",
+            "text": "Sắp xếp dữ liệu"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Tìm mối quan hệ giữa 2 biến số là lựa chọn phù hợp nhất với nội dung câu hỏi: Scatter plot dùng cho?"
+      },
+      {
+        "id": "ch2-14",
+        "text": "Thư viện matplotlib dùng để?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Tiền xử dữ liệu"
+          },
+          {
+            "label": "B",
+            "text": "Vẽ biểu đồ trong Python"
+          },
+          {
+            "label": "C",
+            "text": "Gắn nhãn"
+          },
+          {
+            "label": "D",
+            "text": "Tạo mô hình deep learning"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Vẽ biểu đồ trong Python là lựa chọn phù hợp nhất với nội dung câu hỏi: Thư viện matplotlib dùng để?"
+      },
+      {
+        "id": "ch2-15",
+        "text": "Seaborn khác matplotlib ở điểm nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Tính năng yếu hơn"
+          },
+          {
+            "label": "B",
+            "text": "Có theme sẵn, dễ tích hợp với pandas"
+          },
+          {
+            "label": "C",
+            "text": "Chỉ vẽ được line chart"
+          },
+          {
+            "label": "D",
+            "text": "Tự động huấn luyện"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Có theme sẵn, dễ tích hợp với pandas là lựa chọn phù hợp nhất với nội dung câu hỏi: Seaborn khác matplotlib ở điểm nào?"
+      },
+      {
+        "id": "ch2-16",
+        "text": "Loại dữ liệu thiếu MCAR là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Liên quan đến dữ liệu khác"
+          },
+          {
+            "label": "B",
+            "text": "Thiếu hoàn toàn ngẫu nhiên"
+          },
+          {
+            "label": "C",
+            "text": "Luôn bị bỏ qua"
+          },
+          {
+            "label": "D",
+            "text": "Tự sinh ra"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Thiếu hoàn toàn ngẫu nhiên là lựa chọn phù hợp nhất với nội dung câu hỏi: Loại dữ liệu thiếu MCAR là gì?"
+      },
+      {
+        "id": "ch2-17",
+        "text": "Univariate imputation sử dụng yếu tố nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Dữ liệu của các feature khác"
+          },
+          {
+            "label": "B",
+            "text": "Chính cột có giá trị thiếu"
+          },
+          {
+            "label": "C",
+            "text": "Kỹ thuật NLP"
+          },
+          {
+            "label": "D",
+            "text": "Biển ngẫu nhiên"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Chính cột có giá trị thiếu là lựa chọn phù hợp nhất với nội dung câu hỏi: Univariate imputation sử dụng yếu tố nào?"
+      },
+      {
+        "id": "ch2-18",
+        "text": "Noise là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Dữ liệu bình thường"
+          },
+          {
+            "label": "B",
+            "text": "Giá trị sai lệch do lỗi hoặc ngẫu nhiên"
+          },
+          {
+            "label": "C",
+            "text": "Kết quả mong muốn"
+          },
+          {
+            "label": "D",
+            "text": "Hàm xử lý"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Giá trị sai lệch do lỗi hoặc ngẫu nhiên là lựa chọn phù hợp nhất với nội dung câu hỏi: Noise là gì?"
+      },
+      {
+        "id": "ch2-19",
+        "text": "Kỹ thuật binning dùng để?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Chia dữ liệu theo khoảng đều"
+          },
+          {
+            "label": "B",
+            "text": "Xóa dữ liệu"
+          },
+          {
+            "label": "C",
+            "text": "Mã hoá nhị"
+          },
+          {
+            "label": "D",
+            "text": "Tính trung bình"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Chia dữ liệu theo khoảng đều là lựa chọn phù hợp nhất với nội dung câu hỏi: Kỹ thuật binning dùng để?"
+      },
+      {
+        "id": "ch2-20",
+        "text": "Clustering có thể dùng để?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Phát hiện outlier"
+          },
+          {
+            "label": "B",
+            "text": "Loại bỏ model"
+          },
+          {
+            "label": "C",
+            "text": "Gắn label"
+          },
+          {
+            "label": "D",
+            "text": "Sinh dữ liệu mới"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Phát hiện outlier là lựa chọn phù hợp nhất với nội dung câu hỏi: Clustering có thể dùng để?"
+      },
+      {
+        "id": "ch2-21",
+        "text": "Feature extraction là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Tăng số feature"
+          },
+          {
+            "label": "B",
+            "text": "Tạo ra feature mới có ý nghĩa từ dữ liệu gốc"
+          },
+          {
+            "label": "C",
+            "text": "Gộp dữ liệu"
+          },
+          {
+            "label": "D",
+            "text": "Mã hoá bí mật"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Tạo ra feature mới có ý nghĩa từ dữ liệu gốc là lựa chọn phù hợp nhất với nội dung câu hỏi: Feature extraction là gì?"
+      },
+      {
+        "id": "ch2-22",
+        "text": "Bag of Words dùng cho dữ liệu nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Ảnh"
+          },
+          {
+            "label": "B",
+            "text": "Văn bản"
+          },
+          {
+            "label": "C",
+            "text": "Số liệu"
+          },
+          {
+            "label": "D",
+            "text": "Audio"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Văn bản là lựa chọn phù hợp nhất với nội dung câu hỏi: Bag of Words dùng cho dữ liệu nào?"
+      },
+      {
+        "id": "ch2-23",
+        "text": "TF-IDF đo lường gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Tốc độ truy vấn"
+          },
+          {
+            "label": "B",
+            "text": "Độ quan trọng của từ trong tài liệu"
+          },
+          {
+            "label": "C",
+            "text": "Số đục từ"
+          },
+          {
+            "label": "D",
+            "text": "Độ dài câu"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Độ quan trọng của từ trong tài liệu là lựa chọn phù hợp nhất với nội dung câu hỏi: TF-IDF đo lường gì?"
+      },
+      {
+        "id": "ch2-24",
+        "text": "Embedding trong NLP dùng để?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Biến từ thành vector nghĩa"
+          },
+          {
+            "label": "B",
+            "text": "Phân loại câu"
+          },
+          {
+            "label": "C",
+            "text": "Dự đoán từ"
+          },
+          {
+            "label": "D",
+            "text": "Tự động sinh ngôn ngữ"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Biến từ thành vector nghĩa là lựa chọn phù hợp nhất với nội dung câu hỏi: Embedding trong NLP dùng để?"
+      },
+      {
+        "id": "ch2-25",
+        "text": "Giảm số chiều được gọi là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Feature boosting"
+          },
+          {
+            "label": "B",
+            "text": "Dimensionality reduction"
+          },
+          {
+            "label": "C",
+            "text": "Model pruning"
+          },
+          {
+            "label": "D",
+            "text": "Label fusion"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Dimensionality reduction là lựa chọn phù hợp nhất với nội dung câu hỏi: Giảm số chiều được gọi là?"
+      },
+      {
+        "id": "ch2-26",
+        "text": "Mục tiêu của feature selection là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Loại bỏ label"
+          },
+          {
+            "label": "B",
+            "text": "Loại bỏ những feature không hữu ích"
+          },
+          {
+            "label": "C",
+            "text": "Gộp thêm feature"
+          },
+          {
+            "label": "D",
+            "text": "Nhân bản feature"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Loại bỏ những feature không hữu ích là lựa chọn phù hợp nhất với nội dung câu hỏi: Mục tiêu của feature selection là?"
+      },
+      {
+        "id": "ch2-27",
+        "text": "Wrapper method hoạt động như thế nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Dựa vào độ tương quan"
+          },
+          {
+            "label": "B",
+            "text": "Huấn luyện nhiều mô hình trên tập feature khác nhau"
+          },
+          {
+            "label": "C",
+            "text": "Chọn ngẫu nhiên"
+          },
+          {
+            "label": "D",
+            "text": "Gắn nhãn"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Huấn luyện nhiều mô hình trên tập feature khác nhau là lựa chọn phù hợp nhất với nội dung câu hỏi: Wrapper method hoạt động như thế nào?"
+      },
+      {
+        "id": "ch2-28",
+        "text": "Filter method hoạt động như thế nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Dựa trên các mô hình huấn luyện"
+          },
+          {
+            "label": "B",
+            "text": "Dựa trên chỉ số thống kê như Pearson, ANOVA"
+          },
+          {
+            "label": "C",
+            "text": "Dựa trên deep learning"
+          },
+          {
+            "label": "D",
+            "text": "Dựa trên mã hóa"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Dựa trên chỉ số thống kê như Pearson, ANOVA là lựa chọn phù hợp nhất với nội dung câu hỏi: Filter method hoạt động như thế nào?"
+      },
+      {
+        "id": "ch2-29",
+        "text": "Embedded method là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Kết hợp giữa filter và wrapper"
+          },
+          {
+            "label": "B",
+            "text": "Tự động sinh feature"
+          },
+          {
+            "label": "C",
+            "text": "Lưu trữ dữ liệu"
+          },
+          {
+            "label": "D",
+            "text": "Mã hóa"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Kết hợp giữa filter và wrapper là lựa chọn phù hợp nhất với nội dung câu hỏi: Embedded method là gì?"
+      },
+      {
+        "id": "ch2-30",
+        "text": "Lasso Regression giúc làm gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Loại bỏ những đặc trưng không quan trọng (hệ số = 0)"
+          },
+          {
+            "label": "B",
+            "text": "Tăng số feature"
+          },
+          {
+            "label": "C",
+            "text": "Nhân đỉnh outliers"
+          },
+          {
+            "label": "D",
+            "text": "Tự động sinh label"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Loại bỏ những đặc trưng không quan trọng (hệ số = 0) là lựa chọn phù hợp nhất với nội dung câu hỏi: Lasso Regression giúc làm gì?"
+      }
+    ],
+    [
+      {
+        "id": "ch3-1",
+        "text": "Regression là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Phân loại dữ liệu theo nhãn"
+          },
+          {
+            "label": "B",
+            "text": "Dự đoán biến số liên tục"
+          },
+          {
+            "label": "C",
+            "text": "Gắn nhãn cho dữ liệu"
+          },
+          {
+            "label": "D",
+            "text": "Dự đoán chuỗi văn bản"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Dự đoán biến số liên tục là lựa chọn phù hợp nhất với nội dung câu hỏi: Regression là gì?"
+      },
+      {
+        "id": "ch3-2",
+        "text": "Regression thuộc loại học máy nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Unsupervised learning"
+          },
+          {
+            "label": "B",
+            "text": "Supervised learning"
+          },
+          {
+            "label": "C",
+            "text": "Reinforcement learning"
+          },
+          {
+            "label": "D",
+            "text": "Semi-supervised learning"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Supervised learning là lựa chọn phù hợp nhất với nội dung câu hỏi: Regression thuộc loại học máy nào?"
+      },
+      {
+        "id": "ch3-3",
+        "text": "Bài toán dự đoán giá nhà thuộc loại nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Classification"
+          },
+          {
+            "label": "B",
+            "text": "Regression"
+          },
+          {
+            "label": "C",
+            "text": "Clustering"
+          },
+          {
+            "label": "D",
+            "text": "Forecasting"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Regression là lựa chọn phù hợp nhất với nội dung câu hỏi: Bài toán dự đoán giá nhà thuộc loại nào?"
+      },
+      {
+        "id": "ch3-4",
+        "text": "Trong regression, biến mục tiêu y có tính chất gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Rời rạc"
+          },
+          {
+            "label": "B",
+            "text": "Liên tục"
+          },
+          {
+            "label": "C",
+            "text": "Chuỗi"
+          },
+          {
+            "label": "D",
+            "text": "Nhị phân"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Liên tục là lựa chọn phù hợp nhất với nội dung câu hỏi: Trong regression, biến mục tiêu y có tính chất gì?"
+      },
+      {
+        "id": "ch3-5",
+        "text": "Mô hình Regression học gì từ dữ liệu?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Mối quan hệ giữa đầu vào x và đầu ra y"
+          },
+          {
+            "label": "B",
+            "text": "Tốc độ sinh nhản"
+          },
+          {
+            "label": "C",
+            "text": "Ma trận chỉ số"
+          },
+          {
+            "label": "D",
+            "text": "Chuẩn hoá dữ liệu"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Mối quan hệ giữa đầu vào x và đầu ra y là lựa chọn phù hợp nhất với nội dung câu hỏi: Mô hình Regression học gì từ dữ liệu?"
+      },
+      {
+        "id": "ch3-6",
+        "text": "Mễ thuật Linear Regression để làm gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Ước lượng y như là hàm tuyến tính của x"
+          },
+          {
+            "label": "B",
+            "text": "Dự đoán nhãn phân loại"
+          },
+          {
+            "label": "C",
+            "text": "Tính toán mạng nơ-ron"
+          },
+          {
+            "label": "D",
+            "text": "Biến đổi vector"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Ước lượng y như là hàm tuyến tính của x là lựa chọn phù hợp nhất với nội dung câu hỏi: Mễ thuật Linear Regression để làm gì?"
+      },
+      {
+        "id": "ch3-7",
+        "text": "Phép tính của Linear Regression được xác định theo công thức:",
+        "options": [
+          {
+            "label": "A",
+            "text": "f(x) = ax^2 + b"
+          },
+          {
+            "label": "B",
+            "text": "f(x) = w0 + w1x1 + ... + wmxm"
+          },
+          {
+            "label": "C",
+            "text": "f(x) = √(x)"
+          },
+          {
+            "label": "D",
+            "text": "f(x) = log(x)"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì f(x) = w0 + w1x1 + ... + wmxm là lựa chọn phù hợp nhất với nội dung câu hỏi: Phép tính của Linear Regression được xác định theo công thức:"
+      },
+      {
+        "id": "ch3-8",
+        "text": "Bias trong Linear Regression là giá trị nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "w0 (hằng số tự do)"
+          },
+          {
+            "label": "B",
+            "text": "w1"
+          },
+          {
+            "label": "C",
+            "text": "x1"
+          },
+          {
+            "label": "D",
+            "text": "λ"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì w0 (hằng số tự do) là lựa chọn phù hợp nhất với nội dung câu hỏi: Bias trong Linear Regression là giá trị nào?"
+      },
+      {
+        "id": "ch3-9",
+        "text": "Mục tiêu huấn luyện của mô hình Regression là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Tối đa accuracy"
+          },
+          {
+            "label": "B",
+            "text": "Giảm tối đa hàm loss"
+          },
+          {
+            "label": "C",
+            "text": "Tăng số features"
+          },
+          {
+            "label": "D",
+            "text": "Giảm chi phí dữ liệu"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Giảm tối đa hàm loss là lựa chọn phù hợp nhất với nội dung câu hỏi: Mục tiêu huấn luyện của mô hình Regression là?"
+      },
+      {
+        "id": "ch3-10",
+        "text": "Lỗi dự đoán của mô hình Regression được xác định bằng:",
+        "options": [
+          {
+            "label": "A",
+            "text": "Accuracy"
+          },
+          {
+            "label": "B",
+            "text": "f(x) - y"
+          },
+          {
+            "label": "C",
+            "text": "Gradient"
+          },
+          {
+            "label": "D",
+            "text": "x - w"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì f(x) - y là lựa chọn phù hợp nhất với nội dung câu hỏi: Lỗi dự đoán của mô hình Regression được xác định bằng:"
+      },
+      {
+        "id": "ch3-11",
+        "text": "Cost function Mean Squared Error (MSE) được tính theo:",
+        "options": [
+          {
+            "label": "A",
+            "text": "∑|f(x) - y|"
+          },
+          {
+            "label": "B",
+            "text": "∑(f(x) - y)^2"
+          },
+          {
+            "label": "C",
+            "text": "∑(f(x) + y)^2"
+          },
+          {
+            "label": "D",
+            "text": "∑|f(x) + y|"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì ∑(f(x) - y)^2 là lựa chọn phù hợp nhất với nội dung câu hỏi: Cost function Mean Squared Error (MSE) được tính theo:"
+      },
+      {
+        "id": "ch3-12",
+        "text": "Hàm loss luôn âm đúng không?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Đúng"
+          },
+          {
+            "label": "B",
+            "text": "Sai"
+          },
+          {
+            "label": "C",
+            "text": "Tuỳ thuộc dữ liệu"
+          },
+          {
+            "label": "D",
+            "text": "Tùy mô hình"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Sai là lựa chọn phù hợp nhất với nội dung câu hỏi: Hàm loss luôn âm đúng không?"
+      },
+      {
+        "id": "ch3-13",
+        "text": "Mean Absolute Error (MAE) là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Trung bình tổng sai số tuyệt đối"
+          },
+          {
+            "label": "B",
+            "text": "Trung bình tổng sai số bình phương"
+          },
+          {
+            "label": "C",
+            "text": "Chuẩn hoá dữ liệu"
+          },
+          {
+            "label": "D",
+            "text": "Trung bình nhãn"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Trung bình tổng sai số tuyệt đối là lựa chọn phù hợp nhất với nội dung câu hỏi: Mean Absolute Error (MAE) là?"
+      },
+      {
+        "id": "ch3-14",
+        "text": "Tại sao RMSE được ưa chuộng hơn MAE trong nưốc sâu?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Tốc độ nhanh hơn"
+          },
+          {
+            "label": "B",
+            "text": "Nhạy cảm hơn với sai số lớn"
+          },
+          {
+            "label": "C",
+            "text": "Tính toán đơn giản"
+          },
+          {
+            "label": "D",
+            "text": "Áp dụng cho nhãn nhỏ"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Nhạy cảm hơn với sai số lớn là lựa chọn phù hợp nhất với nội dung câu hỏi: Tại sao RMSE được ưa chuộng hơn MAE trong nưốc sâu?"
+      },
+      {
+        "id": "ch3-15",
+        "text": "Cost function trong Linear Regression có đặc điểm gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Lôi lồi lồi (convex)"
+          },
+          {
+            "label": "B",
+            "text": "Lồi phi tuyến tính"
+          },
+          {
+            "label": "C",
+            "text": "Có nhiều cực tiểu"
+          },
+          {
+            "label": "D",
+            "text": "Không xác định"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Lôi lồi lồi (convex) là lựa chọn phù hợp nhất với nội dung câu hỏi: Cost function trong Linear Regression có đặc điểm gì?"
+      },
+      {
+        "id": "ch3-16",
+        "text": "Gradient Descent được dùng để?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Gắn nhãn"
+          },
+          {
+            "label": "B",
+            "text": "Tìm giá trị tham số tối ưu"
+          },
+          {
+            "label": "C",
+            "text": "Tăng accuracy"
+          },
+          {
+            "label": "D",
+            "text": "Phát sinh dữ liệu"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Tìm giá trị tham số tối ưu là lựa chọn phù hợp nhất với nội dung câu hỏi: Gradient Descent được dùng để?"
+      },
+      {
+        "id": "ch3-17",
+        "text": "Trong Gradient Descent, đạo hàm > 0 thì làm gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Tăng giá trị tham số"
+          },
+          {
+            "label": "B",
+            "text": "Giảm giá trị tham số"
+          },
+          {
+            "label": "C",
+            "text": "Dừng cập nhật"
+          },
+          {
+            "label": "D",
+            "text": "Tăng bias"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Giảm giá trị tham số là lựa chọn phù hợp nhất với nội dung câu hỏi: Trong Gradient Descent, đạo hàm > 0 thì làm gì?"
+      },
+      {
+        "id": "ch3-18",
+        "text": "Vai trò của learning rate (λ)?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Xác định bước nhảy khi cập nhật"
+          },
+          {
+            "label": "B",
+            "text": "Tự động huấn luyện"
+          },
+          {
+            "label": "C",
+            "text": "Chọn feature"
+          },
+          {
+            "label": "D",
+            "text": "Gắn nhãn nhị"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Xác định bước nhảy khi cập nhật là lựa chọn phù hợp nhất với nội dung câu hỏi: Vai trò của learning rate (λ)?"
+      },
+      {
+        "id": "ch3-19",
+        "text": "Learning rate quá lớn gây ra?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Tối ưu nhanh hơn"
+          },
+          {
+            "label": "B",
+            "text": "Mô hình chuẩn hơn"
+          },
+          {
+            "label": "C",
+            "text": "Bỏ qua minimum, hoặc không hội tụ"
+          },
+          {
+            "label": "D",
+            "text": "Đạo hàm sai"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Bỏ qua minimum, hoặc không hội tụ là lựa chọn phù hợp nhất với nội dung câu hỏi: Learning rate quá lớn gây ra?"
+      },
+      {
+        "id": "ch3-20",
+        "text": "Learning rate quá nhỏ gây ra?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Sai số lớn"
+          },
+          {
+            "label": "B",
+            "text": "Hôi tụ nhanh"
+          },
+          {
+            "label": "C",
+            "text": "Hội tụ chậm"
+          },
+          {
+            "label": "D",
+            "text": "Tự động mất gradient"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Hội tụ chậm là lựa chọn phù hợp nhất với nội dung câu hỏi: Learning rate quá nhỏ gây ra?"
+      },
+      {
+        "id": "ch3-21",
+        "text": "Overfitting xảy ra khi?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Mô hình không học được"
+          },
+          {
+            "label": "B",
+            "text": "Mô hình học qúa kỹ dữ liệu huấn luyện"
+          },
+          {
+            "label": "C",
+            "text": "Dữ liệu không có nhãn"
+          },
+          {
+            "label": "D",
+            "text": "Mô hình được tối ưu"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Mô hình học qúa kỹ dữ liệu huấn luyện là lựa chọn phù hợp nhất với nội dung câu hỏi: Overfitting xảy ra khi?"
+      },
+      {
+        "id": "ch3-22",
+        "text": "Underfitting xảy ra khi?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Mô hình được tối ưu"
+          },
+          {
+            "label": "B",
+            "text": "Mô hình không bị nhiễu"
+          },
+          {
+            "label": "C",
+            "text": "Mô hình quá đơn giản, không bám dữ liệu"
+          },
+          {
+            "label": "D",
+            "text": "Dữ liệu thừa kém"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Mô hình quá đơn giản, không bám dữ liệu là lựa chọn phù hợp nhất với nội dung câu hỏi: Underfitting xảy ra khi?"
+      },
+      {
+        "id": "ch3-23",
+        "text": "Cross-validation giúp làm gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Huấn luyện mô hình nhanh hơn"
+          },
+          {
+            "label": "B",
+            "text": "Đánh giá khả năng tổng quát hoá của mô hình"
+          },
+          {
+            "label": "C",
+            "text": "Tăng kích thước dữ liệu"
+          },
+          {
+            "label": "D",
+            "text": "Xóa nhãn"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Đánh giá khả năng tổng quát hoá của mô hình là lựa chọn phù hợp nhất với nội dung câu hỏi: Cross-validation giúp làm gì?"
+      },
+      {
+        "id": "ch3-24",
+        "text": "K-fold cross-validation chia dữ liệu như thế nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Tự động random"
+          },
+          {
+            "label": "B",
+            "text": "Chia dữ liệu thành k phần, xoay vòng validation"
+          },
+          {
+            "label": "C",
+            "text": "Chia theo label"
+          },
+          {
+            "label": "D",
+            "text": "Gộp theo nhóm"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Chia dữ liệu thành k phần, xoay vòng validation là lựa chọn phù hợp nhất với nội dung câu hỏi: K-fold cross-validation chia dữ liệu như thế nào?"
+      },
+      {
+        "id": "ch3-25",
+        "text": "Leave-one-out cross-validation là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Lấy ngẫu nhiên 80% training"
+          },
+          {
+            "label": "B",
+            "text": "Lần lượt loại 1 dữ liệu làm test, còn lại train"
+          },
+          {
+            "label": "C",
+            "text": "Test trên tập validation"
+          },
+          {
+            "label": "D",
+            "text": "Cross-validation nhóm 3 phần"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Lần lượt loại 1 dữ liệu làm test, còn lại train là lựa chọn phù hợp nhất với nội dung câu hỏi: Leave-one-out cross-validation là?"
+      },
+      {
+        "id": "ch3-26",
+        "text": "KNN regression dự đoán dựa trên?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Decision tree"
+          },
+          {
+            "label": "B",
+            "text": "Trung bình y của k láng giềng gần nhất"
+          },
+          {
+            "label": "C",
+            "text": "Deep learning"
+          },
+          {
+            "label": "D",
+            "text": "Max pooling"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Trung bình y của k láng giềng gần nhất là lựa chọn phù hợp nhất với nội dung câu hỏi: KNN regression dự đoán dựa trên?"
+      },
+      {
+        "id": "ch3-27",
+        "text": "Trong KNN, k quá nhỏ dẫn đến?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Kết quả rất ổn định"
+          },
+          {
+            "label": "B",
+            "text": "Mẫp với nhiễu nhiễu"
+          },
+          {
+            "label": "C",
+            "text": "Hiệu suất cao"
+          },
+          {
+            "label": "D",
+            "text": "Tự động generalize"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Mẫp với nhiễu nhiễu là lựa chọn phù hợp nhất với nội dung câu hỏi: Trong KNN, k quá nhỏ dẫn đến?"
+      },
+      {
+        "id": "ch3-28",
+        "text": "Trong KNN, k quá lớn dẫn đến?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Tăng noise"
+          },
+          {
+            "label": "B",
+            "text": "Mất nhãn"
+          },
+          {
+            "label": "C",
+            "text": "Bình quân hoá lỏm mất đặc trưng cục bộ"
+          },
+          {
+            "label": "D",
+            "text": "Tăng bias"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Bình quân hoá lỏm mất đặc trưng cục bộ là lựa chọn phù hợp nhất với nội dung câu hỏi: Trong KNN, k quá lớn dẫn đến?"
+      },
+      {
+        "id": "ch3-29",
+        "text": "Logistic Regression dùng cho?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Bài toán Classification"
+          },
+          {
+            "label": "B",
+            "text": "Dự đoán số thực"
+          },
+          {
+            "label": "C",
+            "text": "Tối ưu hoá ma trận"
+          },
+          {
+            "label": "D",
+            "text": "Giảm chiều"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Bài toán Classification là lựa chọn phù hợp nhất với nội dung câu hỏi: Logistic Regression dùng cho?"
+      },
+      {
+        "id": "ch3-30",
+        "text": "Hàm sigmoid dùng trong Logistic Regression trả về giá trị:",
+        "options": [
+          {
+            "label": "A",
+            "text": "[0,∞)"
+          },
+          {
+            "label": "B",
+            "text": "[0,1]"
+          },
+          {
+            "label": "C",
+            "text": "(-∞,+∞)"
+          },
+          {
+            "label": "D",
+            "text": "[-1,1]"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì [0,1] là lựa chọn phù hợp nhất với nội dung câu hỏi: Hàm sigmoid dùng trong Logistic Regression trả về giá trị:"
+      }
+    ],
+    [
+      {
+        "id": "ch4-1",
+        "text": "Classification dùng để làm gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Phân loại dữ liệu theo nhãn rời rạc"
+          },
+          {
+            "label": "B",
+            "text": "Dự đoán số liên tục"
+          },
+          {
+            "label": "C",
+            "text": "Sinh dữ liệu ngẫu nhiên"
+          },
+          {
+            "label": "D",
+            "text": "Tính trung bình dữ liệu"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Phân loại dữ liệu theo nhãn rời rạc là lựa chọn phù hợp nhất với nội dung câu hỏi: Classification dùng để làm gì?"
+      },
+      {
+        "id": "ch4-2",
+        "text": "Dữ liệu trong classification gồm:",
+        "options": [
+          {
+            "label": "A",
+            "text": "Chỉ input features"
+          },
+          {
+            "label": "B",
+            "text": "Chỉ output labels"
+          },
+          {
+            "label": "C",
+            "text": "Cặp (x, y) với x là feature, y là class label"
+          },
+          {
+            "label": "D",
+            "text": "Danh sách class"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Cặp (x, y) với x là feature, y là class label là lựa chọn phù hợp nhất với nội dung câu hỏi: Dữ liệu trong classification gồm:"
+      },
+      {
+        "id": "ch4-3",
+        "text": "Classification khác regression ở điểm nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Dữ liệu ít hơn"
+          },
+          {
+            "label": "B",
+            "text": "Kết quả dự đoán là nhãn rời rạc"
+          },
+          {
+            "label": "C",
+            "text": "Sử dụng kNN"
+          },
+          {
+            "label": "D",
+            "text": "Dự đoán chuỗi"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Kết quả dự đoán là nhãn rời rạc là lựa chọn phù hợp nhất với nội dung câu hỏi: Classification khác regression ở điểm nào?"
+      },
+      {
+        "id": "ch4-4",
+        "text": "Output y trong classification thuộc kiểu dữ liệu nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Số liên tục"
+          },
+          {
+            "label": "B",
+            "text": "Nhãn rời rạc (categorical)"
+          },
+          {
+            "label": "C",
+            "text": "Dữ liệu text"
+          },
+          {
+            "label": "D",
+            "text": "Ma trận"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Nhãn rời rạc (categorical) là lựa chọn phù hợp nhất với nội dung câu hỏi: Output y trong classification thuộc kiểu dữ liệu nào?"
+      },
+      {
+        "id": "ch4-5",
+        "text": "Thuật ngữ \"attribute set\" đồng nghĩa với:",
+        "options": [
+          {
+            "label": "A",
+            "text": "Class"
+          },
+          {
+            "label": "B",
+            "text": "Feature, predictor, input variable"
+          },
+          {
+            "label": "C",
+            "text": "Label"
+          },
+          {
+            "label": "D",
+            "text": "Outcome"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Feature, predictor, input variable là lựa chọn phù hợp nhất với nội dung câu hỏi: Thuật ngữ \"attribute set\" đồng nghĩa với:"
+      },
+      {
+        "id": "ch4-6",
+        "text": "Accuracy là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Tỷ lệ dữ liệu test được dự đoán đúng"
+          },
+          {
+            "label": "B",
+            "text": "Tổng số prediction"
+          },
+          {
+            "label": "C",
+            "text": "Số nhãn huấn luyện"
+          },
+          {
+            "label": "D",
+            "text": "Độ phủ hợp giữa x và y"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Tỷ lệ dữ liệu test được dự đoán đúng là lựa chọn phù hợp nhất với nội dung câu hỏi: Accuracy là gì?"
+      },
+      {
+        "id": "ch4-7",
+        "text": "Error rate = ?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Accuracy + 1"
+          },
+          {
+            "label": "B",
+            "text": "1 - Accuracy"
+          },
+          {
+            "label": "C",
+            "text": "TP / (TP + TN)"
+          },
+          {
+            "label": "D",
+            "text": "FP / (FN + TN)"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì 1 - Accuracy là lựa chọn phù hợp nhất với nội dung câu hỏi: Error rate = ?"
+      },
+      {
+        "id": "ch4-8",
+        "text": "Sensitivity (Recall) đo lường?",
+        "options": [
+          {
+            "label": "A",
+            "text": "TP / (TP + FN)"
+          },
+          {
+            "label": "B",
+            "text": "TP / (TP + FP)"
+          },
+          {
+            "label": "C",
+            "text": "TN / (FP + TN)"
+          },
+          {
+            "label": "D",
+            "text": "1 - Accuracy"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì TP / (TP + FN) là lựa chọn phù hợp nhất với nội dung câu hỏi: Sensitivity (Recall) đo lường?"
+      },
+      {
+        "id": "ch4-9",
+        "text": "Specificity là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "TN / (TP + FN)"
+          },
+          {
+            "label": "B",
+            "text": "TN / (FP + TN)"
+          },
+          {
+            "label": "C",
+            "text": "TP / (TP + TN)"
+          },
+          {
+            "label": "D",
+            "text": "FP / (TP + TN)"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì TN / (FP + TN) là lựa chọn phù hợp nhất với nội dung câu hỏi: Specificity là?"
+      },
+      {
+        "id": "ch4-10",
+        "text": "Precision là:",
+        "options": [
+          {
+            "label": "A",
+            "text": "TP / (TP + FP)"
+          },
+          {
+            "label": "B",
+            "text": "TP / (TP + FN)"
+          },
+          {
+            "label": "C",
+            "text": "TN / (TN + FN)"
+          },
+          {
+            "label": "D",
+            "text": "FN / (TP + FP)"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì TP / (TP + FP) là lựa chọn phù hợp nhất với nội dung câu hỏi: Precision là:"
+      },
+      {
+        "id": "ch4-11",
+        "text": "F1-score là:",
+        "options": [
+          {
+            "label": "A",
+            "text": "TB của precision và recall"
+          },
+          {
+            "label": "B",
+            "text": "Trung bình hại hòa (harmonic mean)"
+          },
+          {
+            "label": "C",
+            "text": "Max precision, recall"
+          },
+          {
+            "label": "D",
+            "text": "TP - FN"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Trung bình hại hòa (harmonic mean) là lựa chọn phù hợp nhất với nội dung câu hỏi: F1-score là:"
+      },
+      {
+        "id": "ch4-12",
+        "text": "ROC curve vẽ mối quan hệ giữa:",
+        "options": [
+          {
+            "label": "A",
+            "text": "TPR (Recall) và FPR"
+          },
+          {
+            "label": "B",
+            "text": "Accuracy và Recall"
+          },
+          {
+            "label": "C",
+            "text": "Precision và F1"
+          },
+          {
+            "label": "D",
+            "text": "TP và TN"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì TPR (Recall) và FPR là lựa chọn phù hợp nhất với nội dung câu hỏi: ROC curve vẽ mối quan hệ giữa:"
+      },
+      {
+        "id": "ch4-13",
+        "text": "AUC là giá trị đại diện cho?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Precision"
+          },
+          {
+            "label": "B",
+            "text": "Diện tích dưới đường cong ROC"
+          },
+          {
+            "label": "C",
+            "text": "Accuracy"
+          },
+          {
+            "label": "D",
+            "text": "TP"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Diện tích dưới đường cong ROC là lựa chọn phù hợp nhất với nội dung câu hỏi: AUC là giá trị đại diện cho?"
+      },
+      {
+        "id": "ch4-14",
+        "text": "AUC = 0.5 mang ý nghĩa?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Mô hình hoàn hảo"
+          },
+          {
+            "label": "B",
+            "text": "Đoán ngẫu nhiên (không phân biệt)"
+          },
+          {
+            "label": "C",
+            "text": "Precision = 1"
+          },
+          {
+            "label": "D",
+            "text": "Recall = 0"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Đoán ngẫu nhiên (không phân biệt) là lựa chọn phù hợp nhất với nội dung câu hỏi: AUC = 0.5 mang ý nghĩa?"
+      },
+      {
+        "id": "ch4-15",
+        "text": "Accuracy cao nhưng Precision thấp đồng nghĩa với?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Mô hình tốt"
+          },
+          {
+            "label": "B",
+            "text": "Nhiều False Positive"
+          },
+          {
+            "label": "C",
+            "text": "Nhiều True Negative"
+          },
+          {
+            "label": "D",
+            "text": "Dữ liệu lớn"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Nhiều False Positive là lựa chọn phù hợp nhất với nội dung câu hỏi: Accuracy cao nhưng Precision thấp đồng nghĩa với?"
+      },
+      {
+        "id": "ch4-16",
+        "text": "kNN dựa vào yếu tố nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Khoảng cách tới k láng giềng gần nhất"
+          },
+          {
+            "label": "B",
+            "text": "Cây quyết định"
+          },
+          {
+            "label": "C",
+            "text": "Tính entropy"
+          },
+          {
+            "label": "D",
+            "text": "Gradient descent"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Khoảng cách tới k láng giềng gần nhất là lựa chọn phù hợp nhất với nội dung câu hỏi: kNN dựa vào yếu tố nào?"
+      },
+      {
+        "id": "ch4-17",
+        "text": "Trong kNN, k quá nhỏ gây ra?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Tổng quát hoá cao"
+          },
+          {
+            "label": "B",
+            "text": "Nhạy với nhiễu hoặc outlier"
+          },
+          {
+            "label": "C",
+            "text": "Bỏ qua outlier"
+          },
+          {
+            "label": "D",
+            "text": "Giảm noise"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Nhạy với nhiễu hoặc outlier là lựa chọn phù hợp nhất với nội dung câu hỏi: Trong kNN, k quá nhỏ gây ra?"
+      },
+      {
+        "id": "ch4-18",
+        "text": "Trong kNN, k quá lớn gây ra?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Mất tính cục bộ, nghiên về đa số"
+          },
+          {
+            "label": "B",
+            "text": "Tăng sai số"
+          },
+          {
+            "label": "C",
+            "text": "Giảm accuracy"
+          },
+          {
+            "label": "D",
+            "text": "Tăng noise"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Mất tính cục bộ, nghiên về đa số là lựa chọn phù hợp nhất với nội dung câu hỏi: Trong kNN, k quá lớn gây ra?"
+      },
+      {
+        "id": "ch4-19",
+        "text": "Để đo khoảng cách trong kNN ta có thể dùng?",
+        "options": [
+          {
+            "label": "A",
+            "text": "MAE"
+          },
+          {
+            "label": "B",
+            "text": "Gradient"
+          },
+          {
+            "label": "C",
+            "text": "Euclidean, Manhattan, Minkowski"
+          },
+          {
+            "label": "D",
+            "text": "Cross entropy"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Euclidean, Manhattan, Minkowski là lựa chọn phù hợp nhất với nội dung câu hỏi: Để đo khoảng cách trong kNN ta có thể dùng?"
+      },
+      {
+        "id": "ch4-20",
+        "text": "KNN thuộc loại học gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Eager learning"
+          },
+          {
+            "label": "B",
+            "text": "Lazy learning (không huấn luyện trước)"
+          },
+          {
+            "label": "C",
+            "text": "Deep learning"
+          },
+          {
+            "label": "D",
+            "text": "Online learning"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Lazy learning (không huấn luyện trước) là lựa chọn phù hợp nhất với nội dung câu hỏi: KNN thuộc loại học gì?"
+      },
+      {
+        "id": "ch4-21",
+        "text": "Naive Bayes dựa trên giả thuyết?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Đồ thị quyết định"
+          },
+          {
+            "label": "B",
+            "text": "Bayes' Theorem"
+          },
+          {
+            "label": "C",
+            "text": "Gradient Descent"
+          },
+          {
+            "label": "D",
+            "text": "SVM Margin"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Bayes' Theorem là lựa chọn phù hợp nhất với nội dung câu hỏi: Naive Bayes dựa trên giả thuyết?"
+      },
+      {
+        "id": "ch4-22",
+        "text": "Giả định lớn nhất trong Naive Bayes dựa trên:",
+        "options": [
+          {
+            "label": "A",
+            "text": "P(Ci|X)"
+          },
+          {
+            "label": "B",
+            "text": "P(X|Ci) + P(Ci)"
+          },
+          {
+            "label": "C",
+            "text": "Accuracy"
+          },
+          {
+            "label": "D",
+            "text": "k-fold"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì P(X|Ci) + P(Ci) là lựa chọn phù hợp nhất với nội dung câu hỏi: Giả định lớn nhất trong Naive Bayes dựa trên:"
+      },
+      {
+        "id": "ch4-23",
+        "text": "Tính độc lập có điều kiện được giả định trong Naive Bayes giúp:",
+        "options": [
+          {
+            "label": "A",
+            "text": "Giảm chi phí tính toán"
+          },
+          {
+            "label": "B",
+            "text": "Tăng độ chính xác"
+          },
+          {
+            "label": "C",
+            "text": "Giảm noise"
+          },
+          {
+            "label": "D",
+            "text": "Tăng recall"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Giảm chi phí tính toán là lựa chọn phù hợp nhất với nội dung câu hỏi: Tính độc lập có điều kiện được giả định trong Naive Bayes giúp:"
+      },
+      {
+        "id": "ch4-24",
+        "text": "Dữ liệu numeric trong Naive Bayes thường dùng?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Random Forest"
+          },
+          {
+            "label": "B",
+            "text": "Phân phối Gaussian"
+          },
+          {
+            "label": "C",
+            "text": "Uniform"
+          },
+          {
+            "label": "D",
+            "text": "MAE"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Phân phối Gaussian là lựa chọn phù hợp nhất với nội dung câu hỏi: Dữ liệu numeric trong Naive Bayes thường dùng?"
+      },
+      {
+        "id": "ch4-25",
+        "text": "Để tránh xác suất = 0 trong Naive Bayes ta dùng?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Laplace Correction (add-one smoothing)"
+          },
+          {
+            "label": "B",
+            "text": "Gradient"
+          },
+          {
+            "label": "C",
             "text": "Decision Tree"
+          },
+          {
+            "label": "D",
+            "text": "kNN tuning"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Laplace Correction (add-one smoothing) là lựa chọn phù hợp nhất với nội dung câu hỏi: Để tránh xác suất = 0 trong Naive Bayes ta dùng?"
+      },
+      {
+        "id": "ch4-26",
+        "text": "Mục tiêu chính của SVM là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Tìm siêu phẳng tối ưu phân tách các lớp"
+          },
+          {
+            "label": "B",
+            "text": "Tối đa số điểm đúng"
+          },
+          {
+            "label": "C",
+            "text": "Giảm MAE"
+          },
+          {
+            "label": "D",
+            "text": "Sinh dữ liệu mới"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Tìm siêu phẳng tối ưu phân tách các lớp là lựa chọn phù hợp nhất với nội dung câu hỏi: Mục tiêu chính của SVM là?"
+      },
+      {
+        "id": "ch4-27",
+        "text": "Margin trong SVM là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Khoảng cách giữa hai điểm"
+          },
+          {
+            "label": "B",
+            "text": "Khoảng cách giữa siêu phẳng và điểm gần nhất"
+          },
+          {
+            "label": "C",
+            "text": "Tổng lỗi mô hình"
+          },
+          {
+            "label": "D",
+            "text": "Trung bình sai số"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Khoảng cách giữa siêu phẳng và điểm gần nhất là lựa chọn phù hợp nhất với nội dung câu hỏi: Margin trong SVM là gì?"
+      },
+      {
+        "id": "ch4-28",
+        "text": "SVM hiệu quả nhất khi dữ liệu",
+        "options": [
+          {
+            "label": "A",
+            "text": "Rất nhiễu"
+          },
+          {
+            "label": "B",
+            "text": "Có thể phân tách tuyến tính tốt"
+          },
+          {
+            "label": "C",
+            "text": "Có nhiều class"
+          },
+          {
+            "label": "D",
+            "text": "Có dạng ảnh"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Có thể phân tách tuyến tính tốt là lựa chọn phù hợp nhất với nội dung câu hỏi: SVM hiệu quả nhất khi dữ liệu"
+      },
+      {
+        "id": "ch4-29",
+        "text": "Kernel trick trong SVM giúp?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Biến dữ liệu phi tuyến thành tuyến tính trong không gian mới"
+          },
+          {
+            "label": "B",
+            "text": "Tối ưu độ chính xác"
+          },
+          {
+            "label": "C",
+            "text": "Xóa nhiễu"
+          },
+          {
+            "label": "D",
+            "text": "Gán nhãn"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Biến dữ liệu phi tuyến thành tuyến tính trong không gian mới là lựa chọn phù hợp nhất với nội dung câu hỏi: Kernel trick trong SVM giúp?"
+      },
+      {
+        "id": "ch4-30",
+        "text": "Một ví dụ kernel phổ biến trong SVM là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "MAE"
+          },
+          {
+            "label": "B",
+            "text": "RBF (Gaussian)"
+          },
+          {
+            "label": "C",
+            "text": "Cross entropy"
+          },
+          {
+            "label": "D",
+            "text": "Manhattan loss"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì RBF (Gaussian) là lựa chọn phù hợp nhất với nội dung câu hỏi: Một ví dụ kernel phổ biến trong SVM là?"
+      },
+      {
+        "id": "ch4-31",
+        "text": "Nếu chọn kernel sai trong SVM, điều gì có thể xảy ra?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Accuracy cao hơn"
+          },
+          {
+            "label": "B",
+            "text": "Mô hình underfitting hoặc overfitting"
+          },
+          {
+            "label": "C",
+            "text": "Không ảnh hưởng"
+          },
+          {
+            "label": "D",
+            "text": "Luôn tốt hơn Logistic Regression"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Mô hình underfitting hoặc overfitting là lựa chọn phù hợp nhất với nội dung câu hỏi: Nếu chọn kernel sai trong SVM, điều gì có thể xảy ra?"
+      },
+      {
+        "id": "ch4-32",
+        "text": "SVM có thể dùng cho?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Regression duy nhất"
+          },
+          {
+            "label": "B",
+            "text": "Classification và Regression"
+          },
+          {
+            "label": "C",
+            "text": "Reinforcement Learning"
+          },
+          {
+            "label": "D",
+            "text": "Clustering"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Classification và Regression là lựa chọn phù hợp nhất với nội dung câu hỏi: SVM có thể dùng cho?"
+      },
+      {
+        "id": "ch4-33",
+        "text": "Hyperparameter C trong SVM ảnh hưởng?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Chiều của dữ liệu"
+          },
+          {
+            "label": "B",
+            "text": "Độ cho phép lỗi – trade-off giữa margin và lỗi"
+          },
+          {
+            "label": "C",
+            "text": "Learning rate"
+          },
+          {
+            "label": "D",
+            "text": "Epoch"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Độ cho phép lỗi – trade-off giữa margin và lỗi là lựa chọn phù hợp nhất với nội dung câu hỏi: Hyperparameter C trong SVM ảnh hưởng?"
+      },
+      {
+        "id": "ch4-34",
+        "text": "Logistic Regression thường dùng cho?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Bài toán phân loại nhị phân"
+          },
+          {
+            "label": "B",
+            "text": "Phân cụm"
+          },
+          {
+            "label": "C",
+            "text": "Dự đoán giá trị liên tục"
+          },
+          {
+            "label": "D",
+            "text": "Tối ưu ma trận"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Bài toán phân loại nhị phân là lựa chọn phù hợp nhất với nội dung câu hỏi: Logistic Regression thường dùng cho?"
+      },
+      {
+        "id": "ch4-35",
+        "text": "Hàm sigmoid trong Logistic Regression giúp?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Sinh nhãn"
+          },
+          {
+            "label": "B",
+            "text": "Biến output thành xác suất trong [0, 1]"
+          },
+          {
+            "label": "C",
+            "text": "Tăng accuracy"
+          },
+          {
+            "label": "D",
+            "text": "Giảm noise"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Biến output thành xác suất trong [0, 1] là lựa chọn phù hợp nhất với nội dung câu hỏi: Hàm sigmoid trong Logistic Regression giúp?"
+      },
+      {
+        "id": "ch4-36",
+        "text": "Output của Logistic Regression thường được xử lý như thế nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Nếu xác suất > 0.5 thì dự đoán class 1, ngược lại class 0"
+          },
+          {
+            "label": "B",
+            "text": "Luôn lấy nhãn lớn hơn"
+          },
+          {
+            "label": "C",
+            "text": "Làm tròn về 0 hoặc 1"
+          },
+          {
+            "label": "D",
+            "text": "Tự động normalize"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Nếu xác suất > 0.5 thì dự đoán class 1, ngược lại class 0 là lựa chọn phù hợp nhất với nội dung câu hỏi: Output của Logistic Regression thường được xử lý như thế nào?"
+      },
+      {
+        "id": "ch4-37",
+        "text": "Hàm mất mát thường dùng trong Logistic Regression?",
+        "options": [
+          {
+            "label": "A",
+            "text": "MAE"
+          },
+          {
+            "label": "B",
+            "text": "MSE"
+          },
+          {
+            "label": "C",
+            "text": "Cross-entropy loss"
+          },
+          {
+            "label": "D",
+            "text": "RMSE"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Cross-entropy loss là lựa chọn phù hợp nhất với nội dung câu hỏi: Hàm mất mát thường dùng trong Logistic Regression?"
+      },
+      {
+        "id": "ch4-38",
+        "text": "Regularization giúp gì cho Logistic Regression?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Tránh overfitting"
+          },
+          {
+            "label": "B",
+            "text": "Tăng precision"
+          },
+          {
+            "label": "C",
+            "text": "Sinh nhãn"
+          },
+          {
+            "label": "D",
+            "text": "Giảm recall"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Tránh overfitting là lựa chọn phù hợp nhất với nội dung câu hỏi: Regularization giúp gì cho Logistic Regression?"
+      },
+      {
+        "id": "ch4-39",
+        "text": "L1 regularization còn gọi là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Lasso"
+          },
+          {
+            "label": "B",
+            "text": "Ridge"
+          },
+          {
+            "label": "C",
+            "text": "ElasticNet"
+          },
+          {
+            "label": "D",
+            "text": "Linear"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Lasso là lựa chọn phù hợp nhất với nội dung câu hỏi: L1 regularization còn gọi là?"
+      },
+      {
+        "id": "ch4-40",
+        "text": "Sự khác biệt chính giữa L1 và L2 trong Logistic Regression?",
+        "options": [
+          {
+            "label": "A",
+            "text": "L1 phạt nhẹ hơn"
+          },
+          {
+            "label": "B",
+            "text": "L2 tạo sparse model"
+          },
+          {
+            "label": "C",
+            "text": "L1 có thể loại bỏ feature (hệ số = 0), L2 thì không"
+          },
+          {
+            "label": "D",
+            "text": "Không có sự khác biệt"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì L1 có thể loại bỏ feature (hệ số = 0), L2 thì không là lựa chọn phù hợp nhất với nội dung câu hỏi: Sự khác biệt chính giữa L1 và L2 trong Logistic Regression?"
+      }
+    ],
+    [
+      {
+        "id": "ch5-1",
+        "text": "Mạng neural là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Mô hình phi tuyến với đầu vào và đầu ra số học"
+          },
+          {
+            "label": "B",
+            "text": "Thuật toán phân cụm"
+          },
+          {
+            "label": "C",
+            "text": "Mô hình xác suất"
+          },
+          {
+            "label": "D",
+            "text": "Hệ thống logic"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Mô hình phi tuyến với đầu vào và đầu ra số học là lựa chọn phù hợp nhất với nội dung câu hỏi: Mạng neural là gì?"
+      },
+      {
+        "id": "ch5-2",
+        "text": "Perceptron là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Bộ phân loại tuyến tính nhị phân đơn lớp"
+          },
+          {
+            "label": "B",
+            "text": "Mạng nhiều lớp"
+          },
+          {
+            "label": "C",
+            "text": "Mô hình hồi quy"
+          },
+          {
+            "label": "D",
+            "text": "Mạng hồi tiếp"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Bộ phân loại tuyến tính nhị phân đơn lớp là lựa chọn phù hợp nhất với nội dung câu hỏi: Perceptron là gì?"
+      },
+      {
+        "id": "ch5-3",
+        "text": "Perceptron không thể học hàm nào sau đây?",
+        "options": [
+          {
+            "label": "A",
+            "text": "AND"
+          },
+          {
+            "label": "B",
+            "text": "OR"
+          },
+          {
+            "label": "C",
+            "text": "XOR"
+          },
+          {
+            "label": "D",
+            "text": "NAND"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì XOR là lựa chọn phù hợp nhất với nội dung câu hỏi: Perceptron không thể học hàm nào sau đây?"
+      },
+      {
+        "id": "ch5-4",
+        "text": "Một perceptron gồm những thành phần nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Activation, pooling, softmax"
+          },
+          {
+            "label": "B",
+            "text": "Trọng số, bias, hàm kích hoạt"
+          },
+          {
+            "label": "C",
+            "text": "Entropy, kernel, margin"
+          },
+          {
+            "label": "D",
+            "text": "Loss, learning rate, epoch"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Trọng số, bias, hàm kích hoạt là lựa chọn phù hợp nhất với nội dung câu hỏi: Một perceptron gồm những thành phần nào?"
+      },
+      {
+        "id": "ch5-5",
+        "text": "Activation function nào là dạng ngưỡng rời rạc?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Step function (sgn)"
+          },
+          {
+            "label": "B",
+            "text": "Sigmoid"
+          },
+          {
+            "label": "C",
+            "text": "Tanh"
+          },
+          {
+            "label": "D",
+            "text": "ReLU"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Step function (sgn) là lựa chọn phù hợp nhất với nội dung câu hỏi: Activation function nào là dạng ngưỡng rời rạc?"
+      },
+      {
+        "id": "ch5-6",
+        "text": "Hàm sigmoid biến đổi giá trị đầu vào thành?",
+        "options": [
+          {
+            "label": "A",
+            "text": "[-1, 1]"
+          },
+          {
+            "label": "B",
+            "text": "[0, ∞)"
+          },
+          {
+            "label": "C",
+            "text": "[0, 1]"
+          },
+          {
+            "label": "D",
+            "text": "[-∞, ∞]"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì [0, 1] là lựa chọn phù hợp nhất với nội dung câu hỏi: Hàm sigmoid biến đổi giá trị đầu vào thành?"
+      },
+      {
+        "id": "ch5-7",
+        "text": "Hàm sigmoid có đạo hàm là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "f(x)"
+          },
+          {
+            "label": "B",
+            "text": "f(x)(1 - f(x))"
+          },
+          {
+            "label": "C",
+            "text": "x^2"
+          },
+          {
+            "label": "D",
+            "text": "e^x"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì f(x)(1 - f(x)) là lựa chọn phù hợp nhất với nội dung câu hỏi: Hàm sigmoid có đạo hàm là?"
+      },
+      {
+        "id": "ch5-8",
+        "text": "Hàm tanh trả về giá trị trong khoảng?",
+        "options": [
+          {
+            "label": "A",
+            "text": "[0, 1]"
+          },
+          {
+            "label": "B",
+            "text": "[-1, 1]"
+          },
+          {
+            "label": "C",
+            "text": "[-∞, ∞]"
+          },
+          {
+            "label": "D",
+            "text": "[0, ∞)"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì [-1, 1] là lựa chọn phù hợp nhất với nội dung câu hỏi: Hàm tanh trả về giá trị trong khoảng?"
+      },
+      {
+        "id": "ch5-9",
+        "text": "Hàm ReLU có đặc điểm gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Trả về 0 nếu x <= 0, ngược lại trả về x"
+          },
+          {
+            "label": "B",
+            "text": "Luôn trả về 1"
+          },
+          {
+            "label": "C",
+            "text": "Tạo giá trị ngẫu nhiên"
+          },
+          {
+            "label": "D",
+            "text": "Không khả vi"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Trả về 0 nếu x <= 0, ngược lại trả về x là lựa chọn phù hợp nhất với nội dung câu hỏi: Hàm ReLU có đặc điểm gì?"
+      },
+      {
+        "id": "ch5-10",
+        "text": "Ưu điểm chính của ReLU là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Dễ tính đạo hàm và giảm vanishing gradient"
+          },
+          {
+            "label": "B",
+            "text": "Không phân biệt tuyến tính"
+          },
+          {
+            "label": "C",
+            "text": "Tối ưu margin"
+          },
+          {
+            "label": "D",
+            "text": "Cải thiện precision"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Dễ tính đạo hàm và giảm vanishing gradient là lựa chọn phù hợp nhất với nội dung câu hỏi: Ưu điểm chính của ReLU là?"
+      },
+      {
+        "id": "ch5-11",
+        "text": "MLP viết tắt của?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Multilayer Perceptron"
+          },
+          {
+            "label": "B",
+            "text": "Multi Loss Predictor"
+          },
+          {
+            "label": "C",
+            "text": "Machine Learned Predictor"
+          },
+          {
+            "label": "D",
+            "text": "Model Layer Phase"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Multilayer Perceptron là lựa chọn phù hợp nhất với nội dung câu hỏi: MLP viết tắt của?"
+      },
+      {
+        "id": "ch5-12",
+        "text": "Lớp ẩn trong MLP có chức năng?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Tạo input mới"
+          },
+          {
+            "label": "B",
+            "text": "Học đặc trưng phi tuyến"
+          },
+          {
+            "label": "C",
+            "text": "Chuẩn hóa output"
+          },
+          {
+            "label": "D",
+            "text": "Không cần thiết"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Học đặc trưng phi tuyến là lựa chọn phù hợp nhất với nội dung câu hỏi: Lớp ẩn trong MLP có chức năng?"
+      },
+      {
+        "id": "ch5-13",
+        "text": "Mỗi liên kết trong mạng neural có?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Trọng số riêng"
+          },
+          {
+            "label": "B",
+            "text": "Hàm sigmoid"
+          },
+          {
+            "label": "C",
+            "text": "Hàm mất mát"
+          },
+          {
+            "label": "D",
+            "text": "Bộ lọc"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Trọng số riêng là lựa chọn phù hợp nhất với nội dung câu hỏi: Mỗi liên kết trong mạng neural có?"
+      },
+      {
+        "id": "ch5-14",
+        "text": "Mạng neural có mấy loại lớp?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Input, processing"
+          },
+          {
+            "label": "B",
+            "text": "Input, hidden, output"
+          },
+          {
+            "label": "C",
+            "text": "Feature, weight, loss"
+          },
+          {
+            "label": "D",
+            "text": "Train, test"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Input, hidden, output là lựa chọn phù hợp nhất với nội dung câu hỏi: Mạng neural có mấy loại lớp?"
+      },
+      {
+        "id": "ch5-15",
+        "text": "Cấu trúc mạng gồm các phần nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Neurons, layers, weights, activation functions"
+          },
+          {
+            "label": "B",
+            "text": "Trees, branches, leaves"
+          },
+          {
+            "label": "C",
+            "text": "Gradient, epoch, MAE"
+          },
+          {
+            "label": "D",
+            "text": "Bias, entropy, cluster"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Neurons, layers, weights, activation functions là lựa chọn phù hợp nhất với nội dung câu hỏi: Cấu trúc mạng gồm các phần nào?"
+      },
+      {
+        "id": "ch5-16",
+        "text": "Lan truyền ngược là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Cách tính đạo hàm ngược từ output về input"
+          },
+          {
+            "label": "B",
+            "text": "Học ngẫu nhiên"
+          },
+          {
+            "label": "C",
+            "text": "Học không giám sát"
+          },
+          {
+            "label": "D",
+            "text": "Kết thúc huấn luyện"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Cách tính đạo hàm ngược từ output về input là lựa chọn phù hợp nhất với nội dung câu hỏi: Lan truyền ngược là?"
+      },
+      {
+        "id": "ch5-17",
+        "text": "Ý nghĩa chính của backpropagation?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Đánh giá mạng"
+          },
+          {
+            "label": "B",
+            "text": "Tối ưu trọng số qua đạo hàm của hàm lỗi"
+          },
+          {
+            "label": "C",
+            "text": "Giảm noise đầu vào"
+          },
+          {
+            "label": "D",
+            "text": "Sinh dữ liệu mới"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Tối ưu trọng số qua đạo hàm của hàm lỗi là lựa chọn phù hợp nhất với nội dung câu hỏi: Ý nghĩa chính của backpropagation?"
+      },
+      {
+        "id": "ch5-18",
+        "text": "Công cụ toán học cốt lõi của backpropagation?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Quy tắc chuỗi đạo hàm (chain rule)"
+          },
+          {
+            "label": "B",
+            "text": "Tích phân phân đoạn"
+          },
+          {
+            "label": "C",
+            "text": "Đại số tuyến tính"
+          },
+          {
+            "label": "D",
+            "text": "Giải tích tổ hợp"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Quy tắc chuỗi đạo hàm (chain rule) là lựa chọn phù hợp nhất với nội dung câu hỏi: Công cụ toán học cốt lõi của backpropagation?"
+      },
+      {
+        "id": "ch5-19",
+        "text": "Backpropagation cần thông tin nào để cập nhật trọng số?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Gradient của hàm lỗi theo từng trọng số"
+          },
+          {
+            "label": "B",
+            "text": "Giá trị output"
+          },
+          {
+            "label": "C",
+            "text": "Ma trận hiệp phương sai"
+          },
+          {
+            "label": "D",
+            "text": "Tỉ lệ dropout"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Gradient của hàm lỗi theo từng trọng số là lựa chọn phù hợp nhất với nội dung câu hỏi: Backpropagation cần thông tin nào để cập nhật trọng số?"
+      },
+      {
+        "id": "ch5-20",
+        "text": "Sau mỗi lần lan truyền ngược, trọng số được cập nhật bằng?",
+        "options": [
+          {
+            "label": "A",
+            "text": "w = w - learning_rate * gradient"
+          },
+          {
+            "label": "B",
+            "text": "w = w + output"
+          },
+          {
+            "label": "C",
+            "text": "w = w^2"
+          },
+          {
+            "label": "D",
+            "text": "w = bias * epoch"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì w = w - learning_rate * gradient là lựa chọn phù hợp nhất với nội dung câu hỏi: Sau mỗi lần lan truyền ngược, trọng số được cập nhật bằng?"
+      },
+      {
+        "id": "ch5-21",
+        "text": "Hàm softmax thường dùng trong?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Regression"
+          },
+          {
+            "label": "B",
+            "text": "Classification đa lớp"
+          },
+          {
+            "label": "C",
+            "text": "Clustering"
+          },
+          {
+            "label": "D",
+            "text": "Reinforcement"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Classification đa lớp là lựa chọn phù hợp nhất với nội dung câu hỏi: Hàm softmax thường dùng trong?"
+      },
+      {
+        "id": "ch5-22",
+        "text": "Softmax trả về?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Giá trị nhị phân"
+          },
+          {
+            "label": "B",
+            "text": "Xác suất các lớp cộng lại bằng 1"
+          },
+          {
+            "label": "C",
+            "text": "Hàm lỗi"
+          },
+          {
+            "label": "D",
+            "text": "Entropy"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Xác suất các lớp cộng lại bằng 1 là lựa chọn phù hợp nhất với nội dung câu hỏi: Softmax trả về?"
+      },
+      {
+        "id": "ch5-23",
+        "text": "Hàm mất mát (loss function) phổ biến cho classification là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "MSE"
+          },
+          {
+            "label": "B",
+            "text": "RMSE"
+          },
+          {
+            "label": "C",
+            "text": "Cross-entropy"
+          },
+          {
+            "label": "D",
+            "text": "Euclidean"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Cross-entropy là lựa chọn phù hợp nhất với nội dung câu hỏi: Hàm mất mát (loss function) phổ biến cho classification là?"
+      },
+      {
+        "id": "ch5-24",
+        "text": "Cross-entropy đo lường?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Độ lệch giữa phân phối dự đoán và thực tế"
+          },
+          {
+            "label": "B",
+            "text": "Khoảng cách Euclidean"
+          },
+          {
+            "label": "C",
+            "text": "Tổng số lỗi tuyệt đối"
+          },
+          {
+            "label": "D",
+            "text": "Tổng đạo hàm"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Độ lệch giữa phân phối dự đoán và thực tế là lựa chọn phù hợp nhất với nội dung câu hỏi: Cross-entropy đo lường?"
+      },
+      {
+        "id": "ch5-25",
+        "text": "Optimizer nào sau đây mở rộng từ SGD?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Adam"
+          },
+          {
+            "label": "B",
+            "text": "MSE"
+          },
+          {
+            "label": "C",
+            "text": "ReLU"
+          },
+          {
+            "label": "D",
+            "text": "Dropout"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Adam là lựa chọn phù hợp nhất với nội dung câu hỏi: Optimizer nào sau đây mở rộng từ SGD?"
+      },
+      {
+        "id": "ch5-26",
+        "text": "Adam kết hợp những kỹ thuật nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Dropout và tanh"
+          },
+          {
+            "label": "B",
+            "text": "Momentum và adaptive learning rate"
+          },
+          {
+            "label": "C",
+            "text": "SGD và Max pooling"
+          },
+          {
+            "label": "D",
+            "text": "Cross-validation và RMS"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Momentum và adaptive learning rate là lựa chọn phù hợp nhất với nội dung câu hỏi: Adam kết hợp những kỹ thuật nào?"
+      },
+      {
+        "id": "ch5-27",
+        "text": "Epoch là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Một lượt qua toàn bộ tập huấn luyện"
+          },
+          {
+            "label": "B",
+            "text": "Một batch"
+          },
+          {
+            "label": "C",
+            "text": "Một class"
+          },
+          {
+            "label": "D",
+            "text": "Một chiều mạng"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Một lượt qua toàn bộ tập huấn luyện là lựa chọn phù hợp nhất với nội dung câu hỏi: Epoch là gì?"
+      },
+      {
+        "id": "ch5-28",
+        "text": "Batch size ảnh hưởng tới?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Số class"
+          },
+          {
+            "label": "B",
+            "text": "Tốc độ và ổn định huấn luyện"
+          },
+          {
+            "label": "C",
+            "text": "Đầu ra"
+          },
+          {
+            "label": "D",
+            "text": "Hàm kích hoạt"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Tốc độ và ổn định huấn luyện là lựa chọn phù hợp nhất với nội dung câu hỏi: Batch size ảnh hưởng tới?"
+      },
+      {
+        "id": "ch5-29",
+        "text": "Nếu learning rate quá cao thì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Hội tụ nhanh"
+          },
+          {
+            "label": "B",
+            "text": "Không hội tụ hoặc dao động"
+          },
+          {
+            "label": "C",
+            "text": "Giảm lỗi nhanh"
+          },
+          {
+            "label": "D",
+            "text": "Tăng precision"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Không hội tụ hoặc dao động là lựa chọn phù hợp nhất với nội dung câu hỏi: Nếu learning rate quá cao thì?"
+      },
+      {
+        "id": "ch5-30",
+        "text": "Nếu learning rate quá thấp?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Không học được"
+          },
+          {
+            "label": "B",
+            "text": "Học rất chậm"
+          },
+          {
+            "label": "C",
+            "text": "Tăng lỗi"
+          },
+          {
+            "label": "D",
+            "text": "Không cập nhật trọng số"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Học rất chậm là lựa chọn phù hợp nhất với nội dung câu hỏi: Nếu learning rate quá thấp?"
+      },
+      {
+        "id": "ch5-31",
+        "text": "CNN viết tắt của?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Convolutional Neural Network"
+          },
+          {
+            "label": "B",
+            "text": "Core Neural Net"
+          },
+          {
+            "label": "C",
+            "text": "Classifier Network Node"
+          },
+          {
+            "label": "D",
+            "text": "Converged Normal Network"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Convolutional Neural Network là lựa chọn phù hợp nhất với nội dung câu hỏi: CNN viết tắt của?"
+      },
+      {
+        "id": "ch5-32",
+        "text": "CNN nổi bật trong xử lý?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Chuỗi thời gian"
+          },
+          {
+            "label": "B",
+            "text": "Hình ảnh và video"
+          },
+          {
+            "label": "C",
+            "text": "Văn bản"
+          },
+          {
+            "label": "D",
+            "text": "Câu hỏi trắc nghiệm"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Hình ảnh và video là lựa chọn phù hợp nhất với nội dung câu hỏi: CNN nổi bật trong xử lý?"
+      },
+      {
+        "id": "ch5-33",
+        "text": "Thành phần chính của CNN gồm?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Convolution layer, pooling layer, fully connected layer"
+          },
+          {
+            "label": "B",
+            "text": "Tree, node, margin"
+          },
+          {
+            "label": "C",
+            "text": "Perceptron, sigmoid, MAE"
+          },
+          {
+            "label": "D",
+            "text": "Layer, bias, MAE"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Convolution layer, pooling layer, fully connected layer là lựa chọn phù hợp nhất với nội dung câu hỏi: Thành phần chính của CNN gồm?"
+      },
+      {
+        "id": "ch5-34",
+        "text": "Convolution giúp?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Trích xuất đặc trưng cục bộ"
+          },
+          {
+            "label": "B",
+            "text": "Sinh noise"
+          },
+          {
+            "label": "C",
+            "text": "Tối ưu gradient"
+          },
+          {
+            "label": "D",
+            "text": "Làm sạch dữ liệu"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Trích xuất đặc trưng cục bộ là lựa chọn phù hợp nhất với nội dung câu hỏi: Convolution giúp?"
+      },
+      {
+        "id": "ch5-35",
+        "text": "Pooling layer dùng để?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Giảm chiều và giữ đặc trưng chính"
+          },
+          {
+            "label": "B",
+            "text": "Tăng batch size"
+          },
+          {
+            "label": "C",
+            "text": "Làm mịn output"
+          },
+          {
+            "label": "D",
+            "text": "Phân loại ảnh"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Giảm chiều và giữ đặc trưng chính là lựa chọn phù hợp nhất với nội dung câu hỏi: Pooling layer dùng để?"
+      },
+      {
+        "id": "ch5-36",
+        "text": "Max pooling chọn gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Trung bình"
+          },
+          {
+            "label": "B",
+            "text": "Tích"
+          },
+          {
+            "label": "C",
+            "text": "Giá trị lớn nhất trong vùng"
+          },
+          {
+            "label": "D",
+            "text": "Giá trị ngẫu nhiên"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Giá trị lớn nhất trong vùng là lựa chọn phù hợp nhất với nội dung câu hỏi: Max pooling chọn gì?"
+      },
+      {
+        "id": "ch5-37",
+        "text": "Dropout được dùng để?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Giảm overfitting"
+          },
+          {
+            "label": "B",
+            "text": "Tăng loss"
+          },
+          {
+            "label": "C",
+            "text": "Giảm số lớp"
+          },
+          {
+            "label": "D",
+            "text": "Xóa nhãn"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Giảm overfitting là lựa chọn phù hợp nhất với nội dung câu hỏi: Dropout được dùng để?"
+      },
+      {
+        "id": "ch5-38",
+        "text": "Một ứng dụng phổ biến của mạng neural là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Dịch mã DNA"
+          },
+          {
+            "label": "B",
+            "text": "Dự đoán GDP"
+          },
+          {
+            "label": "C",
+            "text": "Nhận diện khuôn mặt"
+          },
+          {
+            "label": "D",
+            "text": "Tính diện tích hình vuông"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Nhận diện khuôn mặt là lựa chọn phù hợp nhất với nội dung câu hỏi: Một ứng dụng phổ biến của mạng neural là?"
+      },
+      {
+        "id": "ch5-39",
+        "text": "Early stopping giúp?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Ngừng huấn luyện sớm nếu không cải thiện"
+          },
+          {
+            "label": "B",
+            "text": "Tăng số epoch"
+          },
+          {
+            "label": "C",
+            "text": "Giảm dropout"
+          },
+          {
+            "label": "D",
+            "text": "Làm sạch dữ liệu"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Ngừng huấn luyện sớm nếu không cải thiện là lựa chọn phù hợp nhất với nội dung câu hỏi: Early stopping giúp?"
+      },
+      {
+        "id": "ch5-40",
+        "text": "Transfer learning nghĩa là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Huấn luyện từ đầu"
+          },
+          {
+            "label": "B",
+            "text": "Tận dụng mô hình đã học cho bài toán mới"
+          },
+          {
+            "label": "C",
+            "text": "Dùng dữ liệu mới"
+          },
+          {
+            "label": "D",
+            "text": "Trích xuất lớp output"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Tận dụng mô hình đã học cho bài toán mới là lựa chọn phù hợp nhất với nội dung câu hỏi: Transfer learning nghĩa là?"
+      }
+    ],
+    [
+      {
+        "id": "ch6-1",
+        "text": "Clustering là phương pháp?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Học không giám sát (Unsupervised learning)"
+          },
+          {
+            "label": "B",
+            "text": "Học có giám sát"
+          },
+          {
+            "label": "C",
+            "text": "Học tăng cường"
+          },
+          {
+            "label": "D",
+            "text": "Học bán giám sát"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Học không giám sát (Unsupervised learning) là lựa chọn phù hợp nhất với nội dung câu hỏi: Clustering là phương pháp?"
+      },
+      {
+        "id": "ch6-2",
+        "text": "Mục tiêu chính của clustering là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Dự đoán nhãn"
+          },
+          {
+            "label": "B",
+            "text": "Nhóm các đối tượng tương đồng vào cùng cụm"
+          },
+          {
+            "label": "C",
+            "text": "Giảm số chiều"
+          },
+          {
+            "label": "D",
+            "text": "Sinh dữ liệu mới"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Nhóm các đối tượng tương đồng vào cùng cụm là lựa chọn phù hợp nhất với nội dung câu hỏi: Mục tiêu chính của clustering là?"
+      },
+      {
+        "id": "ch6-3",
+        "text": "Một cluster là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Một đối tượng đơn lẻ"
+          },
+          {
+            "label": "B",
+            "text": "Một nhóm các đối tượng tương đồng nhau"
+          },
+          {
+            "label": "C",
+            "text": "Một nhãn"
+          },
+          {
+            "label": "D",
+            "text": "Một hàm toán học"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Một nhóm các đối tượng tương đồng nhau là lựa chọn phù hợp nhất với nội dung câu hỏi: Một cluster là gì?"
+      },
+      {
+        "id": "ch6-4",
+        "text": "Clustering khác classification ở điểm nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Không biết trước nhãn"
+          },
+          {
+            "label": "B",
+            "text": "Chia tập train và test"
+          },
+          {
+            "label": "C",
+            "text": "Có mô hình giám sát"
+          },
+          {
+            "label": "D",
+            "text": "Tăng accuracy"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Không biết trước nhãn là lựa chọn phù hợp nhất với nội dung câu hỏi: Clustering khác classification ở điểm nào?"
+      },
+      {
+        "id": "ch6-5",
+        "text": "Ứng dụng nào sau đây phù hợp với clustering?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Dự đoán giá nhà"
+          },
+          {
+            "label": "B",
+            "text": "Phân loại email spam"
+          },
+          {
+            "label": "C",
+            "text": "Nhóm khách hàng theo hành vi mua sắm"
+          },
+          {
+            "label": "D",
+            "text": "Dịch ngôn ngữ"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Nhóm khách hàng theo hành vi mua sắm là lựa chọn phù hợp nhất với nội dung câu hỏi: Ứng dụng nào sau đây phù hợp với clustering?"
+      },
+      {
+        "id": "ch6-6",
+        "text": "Khoảng cách phổ biến dùng trong clustering là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Euclidean và Manhattan"
+          },
+          {
+            "label": "B",
+            "text": "Hamming"
+          },
+          {
+            "label": "C",
+            "text": "Cosine và Jaccard"
+          },
+          {
+            "label": "D",
+            "text": "Pearson"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Euclidean và Manhattan là lựa chọn phù hợp nhất với nội dung câu hỏi: Khoảng cách phổ biến dùng trong clustering là?"
+      },
+      {
+        "id": "ch6-7",
+        "text": "Khoảng cách Euclidean được dùng khi?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Dữ liệu dạng văn bản"
+          },
+          {
+            "label": "B",
+            "text": "Dữ liệu số liên tục"
+          },
+          {
+            "label": "C",
+            "text": "Dữ liệu rời rạc"
+          },
+          {
+            "label": "D",
+            "text": "Dữ liệu hình ảnh"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Dữ liệu số liên tục là lựa chọn phù hợp nhất với nội dung câu hỏi: Khoảng cách Euclidean được dùng khi?"
+      },
+      {
+        "id": "ch6-8",
+        "text": "Trong metric Minkowski, p = 1 cho ra?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Euclidean"
+          },
+          {
+            "label": "B",
+            "text": "Manhattan"
+          },
+          {
+            "label": "C",
+            "text": "Cosine"
+          },
+          {
+            "label": "D",
+            "text": "Mahalanobis"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Manhattan là lựa chọn phù hợp nhất với nội dung câu hỏi: Trong metric Minkowski, p = 1 cho ra?"
+      },
+      {
+        "id": "ch6-9",
+        "text": "Trong clustering, intra-cluster distance là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Khoảng cách giữa các điểm trong cùng một cụm"
+          },
+          {
+            "label": "B",
+            "text": "Khoảng cách giữa các cụm"
+          },
+          {
+            "label": "C",
+            "text": "Tổng lỗi"
+          },
+          {
+            "label": "D",
+            "text": "Trung bình đặc trưng"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Khoảng cách giữa các điểm trong cùng một cụm là lựa chọn phù hợp nhất với nội dung câu hỏi: Trong clustering, intra-cluster distance là?"
+      },
+      {
+        "id": "ch6-10",
+        "text": "Mục tiêu khi clustering là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Tăng số cụm"
+          },
+          {
+            "label": "B",
+            "text": "Giảm khoảng cách trong cụm, tăng khoảng cách giữa cụm"
+          },
+          {
+            "label": "C",
+            "text": "Tối đa accuracy"
+          },
+          {
+            "label": "D",
+            "text": "Tăng số chiều"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Giảm khoảng cách trong cụm, tăng khoảng cách giữa cụm là lựa chọn phù hợp nhất với nội dung câu hỏi: Mục tiêu khi clustering là?"
+      },
+      {
+        "id": "ch6-11",
+        "text": "K-means là phương pháp?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Phân hoạch dữ liệu thành K cụm dựa vào trung tâm cụm"
+          },
+          {
+            "label": "B",
+            "text": "Dựa trên mật độ"
+          },
+          {
+            "label": "C",
+            "text": "Phân loại tuyến tính"
+          },
+          {
+            "label": "D",
+            "text": "Tìm cây tối ưu"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Phân hoạch dữ liệu thành K cụm dựa vào trung tâm cụm là lựa chọn phù hợp nhất với nội dung câu hỏi: K-means là phương pháp?"
+      },
+      {
+        "id": "ch6-12",
+        "text": "K trong K-means biểu thị?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Số thuộc tính"
+          },
+          {
+            "label": "B",
+            "text": "Số cụm cần phân chia"
+          },
+          {
+            "label": "C",
+            "text": "Số chiều"
+          },
+          {
+            "label": "D",
+            "text": "Số lần lặp"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Số cụm cần phân chia là lựa chọn phù hợp nhất với nội dung câu hỏi: K trong K-means biểu thị?"
+      },
+      {
+        "id": "ch6-13",
+        "text": "Hàm lỗi trong K-means là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "MSE"
+          },
+          {
+            "label": "B",
+            "text": "Sum of Squared Errors (SSE)"
+          },
+          {
+            "label": "C",
+            "text": "Cross-entropy"
+          },
+          {
+            "label": "D",
+            "text": "MAE"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Sum of Squared Errors (SSE) là lựa chọn phù hợp nhất với nội dung câu hỏi: Hàm lỗi trong K-means là?"
+      },
+      {
+        "id": "ch6-14",
+        "text": "Trung tâm cụm trong K-means là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Mode"
+          },
+          {
+            "label": "B",
+            "text": "Mean của các điểm trong cụm"
+          },
+          {
+            "label": "C",
+            "text": "Giá trị đầu tiên"
+          },
+          {
+            "label": "D",
+            "text": "Random vector"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Mean của các điểm trong cụm là lựa chọn phù hợp nhất với nội dung câu hỏi: Trung tâm cụm trong K-means là?"
+      },
+      {
+        "id": "ch6-15",
+        "text": "Nhược điểm chính của K-means?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Không hội tụ"
+          },
+          {
+            "label": "B",
+            "text": "Nhạy với outliers và khởi tạo ngẫu nhiên"
+          },
+          {
+            "label": "C",
+            "text": "Không xử lý dữ liệu số"
+          },
+          {
+            "label": "D",
+            "text": "Không mở rộng được"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Nhạy với outliers và khởi tạo ngẫu nhiên là lựa chọn phù hợp nhất với nội dung câu hỏi: Nhược điểm chính của K-means?"
+      },
+      {
+        "id": "ch6-16",
+        "text": "K-medoids cải tiến gì so với K-means?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Giảm thời gian chạy"
+          },
+          {
+            "label": "B",
+            "text": "Ít nhạy với outlier do chọn điểm trung tâm là 1 điểm thực tế"
+          },
+          {
+            "label": "C",
+            "text": "Dễ code hơn"
+          },
+          {
+            "label": "D",
+            "text": "Xác suất cao hơn"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Ít nhạy với outlier do chọn điểm trung tâm là 1 điểm thực tế là lựa chọn phù hợp nhất với nội dung câu hỏi: K-medoids cải tiến gì so với K-means?"
+      },
+      {
+        "id": "ch6-17",
+        "text": "K-medians dùng giá trị gì để làm đại diện cụm?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Mode"
+          },
+          {
+            "label": "B",
+            "text": "Trung vị (median)"
+          },
+          {
+            "label": "C",
+            "text": "Max"
+          },
+          {
+            "label": "D",
+            "text": "Mean"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Trung vị (median) là lựa chọn phù hợp nhất với nội dung câu hỏi: K-medians dùng giá trị gì để làm đại diện cụm?"
+      },
+      {
+        "id": "ch6-18",
+        "text": "K-modes dùng khi dữ liệu?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Liên tục"
+          },
+          {
+            "label": "B",
+            "text": "Hình ảnh"
+          },
+          {
+            "label": "C",
+            "text": "Danh mục (categorical)"
+          },
+          {
+            "label": "D",
+            "text": "Text dài"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Danh mục (categorical) là lựa chọn phù hợp nhất với nội dung câu hỏi: K-modes dùng khi dữ liệu?"
+      },
+      {
+        "id": "ch6-19",
+        "text": "Phân cụm phân cấp (hierarchical) có đặc điểm gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Tạo cây phân cấp (dendrogram)"
+          },
+          {
+            "label": "B",
+            "text": "Dùng mạng nơ-ron"
+          },
+          {
+            "label": "C",
+            "text": "Chạy ngẫu nhiên"
+          },
+          {
+            "label": "D",
+            "text": "Không lặp"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Tạo cây phân cấp (dendrogram) là lựa chọn phù hợp nhất với nội dung câu hỏi: Phân cụm phân cấp (hierarchical) có đặc điểm gì?"
+      },
+      {
+        "id": "ch6-20",
+        "text": "Hai hướng tiếp cận của hierarchical clustering là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "K-means và DBSCAN"
+          },
+          {
+            "label": "B",
+            "text": "Agglomerative (bottom-up) và Divisive (top-down)"
+          },
+          {
+            "label": "C",
+            "text": "SGD và Adam"
+          },
+          {
+            "label": "D",
+            "text": "Mean và Mode"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Agglomerative (bottom-up) và Divisive (top-down) là lựa chọn phù hợp nhất với nội dung câu hỏi: Hai hướng tiếp cận của hierarchical clustering là?"
+      },
+      {
+        "id": "ch6-21",
+        "text": "DBSCAN viết tắt của?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Density-Based Spatial Clustering of Applications with Noise"
+          },
+          {
+            "label": "B",
+            "text": "Distance-Based Sample Classification"
+          },
+          {
+            "label": "C",
+            "text": "Deep Binary Scan"
+          },
+          {
+            "label": "D",
+            "text": "Data-Biased Scale Cluster Algorithm"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Density-Based Spatial Clustering of Applications with Noise là lựa chọn phù hợp nhất với nội dung câu hỏi: DBSCAN viết tắt của?"
+      },
+      {
+        "id": "ch6-22",
+        "text": "DBSCAN thuộc loại?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Phân hoạch"
+          },
+          {
+            "label": "B",
+            "text": "Phân cấp"
+          },
+          {
+            "label": "C",
+            "text": "Dựa trên mật độ (density-based)"
+          },
+          {
+            "label": "D",
+            "text": "Lưới (grid-based)"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Dựa trên mật độ (density-based) là lựa chọn phù hợp nhất với nội dung câu hỏi: DBSCAN thuộc loại?"
+      },
+      {
+        "id": "ch6-23",
+        "text": "Ưu điểm của DBSCAN?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Phát hiện cụm bất kỳ hình dạng và xử lý tốt outlier"
+          },
+          {
+            "label": "B",
+            "text": "Luôn chính xác"
+          },
+          {
+            "label": "C",
+            "text": "Nhanh hơn K-means"
+          },
+          {
+            "label": "D",
+            "text": "Không cần chọn tham số"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Phát hiện cụm bất kỳ hình dạng và xử lý tốt outlier là lựa chọn phù hợp nhất với nội dung câu hỏi: Ưu điểm của DBSCAN?"
+      },
+      {
+        "id": "ch6-24",
+        "text": "Trong DBSCAN, điểm core là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Có ít nhất MinPts điểm trong vùng bán kính ε (epsilon)"
+          },
+          {
+            "label": "B",
+            "text": "Có khoảng cách nhỏ nhất"
+          },
+          {
+            "label": "C",
+            "text": "Có xác suất cao"
+          },
+          {
+            "label": "D",
+            "text": "Không có ý nghĩa"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Có ít nhất MinPts điểm trong vùng bán kính ε (epsilon) là lựa chọn phù hợp nhất với nội dung câu hỏi: Trong DBSCAN, điểm core là gì?"
+      },
+      {
+        "id": "ch6-25",
+        "text": "Epsilon trong DBSCAN là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Số lần lặp"
+          },
+          {
+            "label": "B",
+            "text": "Bán kính tìm hàng xóm"
+          },
+          {
+            "label": "C",
+            "text": "Hệ số lỗi"
+          },
+          {
+            "label": "D",
+            "text": "Trọng số cụm"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Bán kính tìm hàng xóm là lựa chọn phù hợp nhất với nội dung câu hỏi: Epsilon trong DBSCAN là?"
+      },
+      {
+        "id": "ch6-26",
+        "text": "Grid-based clustering hoạt động bằng cách?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Chia không gian thành các ô lưới và nhóm các ô có mật độ cao"
+          },
+          {
+            "label": "B",
+            "text": "Phân cụm cây"
+          },
+          {
+            "label": "C",
+            "text": "Dùng mạng CNN"
+          },
+          {
+            "label": "D",
+            "text": "Random chọn điểm"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Chia không gian thành các ô lưới và nhóm các ô có mật độ cao là lựa chọn phù hợp nhất với nội dung câu hỏi: Grid-based clustering hoạt động bằng cách?"
+      },
+      {
+        "id": "ch6-27",
+        "text": "STING là ví dụ của?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Hierarchical clustering"
+          },
+          {
+            "label": "B",
+            "text": "Density-based clustering"
+          },
+          {
+            "label": "C",
+            "text": "Grid-based clustering"
+          },
+          {
+            "label": "D",
+            "text": "Partitioning"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Grid-based clustering là lựa chọn phù hợp nhất với nội dung câu hỏi: STING là ví dụ của?"
+      },
+      {
+        "id": "ch6-28",
+        "text": "Ưu điểm chính của phương pháp grid-based?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Tính toán nhanh, không phụ thuộc kích thước dữ liệu"
+          },
+          {
+            "label": "B",
+            "text": "Tính chính xác cao hơn DBSCAN"
+          },
+          {
+            "label": "C",
+            "text": "Dễ trực quan hóa"
+          },
+          {
+            "label": "D",
+            "text": "Không cần tham số"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Tính toán nhanh, không phụ thuộc kích thước dữ liệu là lựa chọn phù hợp nhất với nội dung câu hỏi: Ưu điểm chính của phương pháp grid-based?"
+      },
+      {
+        "id": "ch6-29",
+        "text": "Grid-based clustering phù hợp khi?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Dữ liệu lớn, không gian cao chiều"
+          },
+          {
+            "label": "B",
+            "text": "Dữ liệu rời rạc"
+          },
+          {
+            "label": "C",
+            "text": "Dữ liệu không có nhiễu"
+          },
+          {
+            "label": "D",
+            "text": "Dữ liệu có nhãn"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Dữ liệu lớn, không gian cao chiều là lựa chọn phù hợp nhất với nội dung câu hỏi: Grid-based clustering phù hợp khi?"
+      },
+      {
+        "id": "ch6-30",
+        "text": "Clustering có thể áp dụng cho bài toán nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Gán nhãn trước"
+          },
+          {
+            "label": "B",
+            "text": "Dự đoán lớp"
+          },
+          {
+            "label": "C",
+            "text": "Phát hiện dị thường, phân đoạn thị trường, nén dữ liệu"
+          },
+          {
+            "label": "D",
+            "text": "Dự đoán chuỗi thời gian"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Phát hiện dị thường, phân đoạn thị trường, nén dữ liệu là lựa chọn phù hợp nhất với nội dung câu hỏi: Clustering có thể áp dụng cho bài toán nào?"
+      }
+    ],
+    [
+      {
+        "id": "supp-1",
+        "text": "GAN gồm hai thành phần chính là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Generator và Discriminator"
+          },
+          {
+            "label": "B",
+            "text": "Decoder và Encoder"
+          },
+          {
+            "label": "C",
+            "text": "Convolution và Pooling"
+          },
+          {
+            "label": "D",
+            "text": "LSTM và CNN"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Generator và Discriminator là lựa chọn phù hợp nhất với nội dung câu hỏi: GAN gồm hai thành phần chính là gì?"
+      },
+      {
+        "id": "supp-2",
+        "text": "Vai trò của Generator trong GAN là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Phát hiện ảnh giả"
+          },
+          {
+            "label": "B",
+            "text": "Sinh dữ liệu giả giống thật"
+          },
+          {
+            "label": "C",
+            "text": "Phân loại ảnh"
+          },
+          {
+            "label": "D",
+            "text": "Tối ưu hóa loss"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Sinh dữ liệu giả giống thật là lựa chọn phù hợp nhất với nội dung câu hỏi: Vai trò của Generator trong GAN là?"
+      },
+      {
+        "id": "supp-3",
+        "text": "GAN được huấn luyện như thế nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Generator thắng thì dừng"
+          },
+          {
+            "label": "B",
+            "text": "Chỉ cập nhật Generator"
+          },
+          {
+            "label": "C",
+            "text": "Generator và Discriminator cùng học theo kiểu đối kháng"
+          },
+          {
+            "label": "D",
+            "text": "Dựa trên MAE"
+          }
+        ],
+        "correct": 2,
+        "explanation": "Đáp án C đúng vì Generator và Discriminator cùng học theo kiểu đối kháng là lựa chọn phù hợp nhất với nội dung câu hỏi: GAN được huấn luyện như thế nào?"
+      },
+      {
+        "id": "supp-4",
+        "text": "StackGAN dùng GAN để làm gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Phát hiện gian lận"
+          },
+          {
+            "label": "B",
+            "text": "Tạo ảnh từ mô tả văn bản"
+          },
+          {
+            "label": "C",
+            "text": "Dự đoán thời tiết"
+          },
+          {
+            "label": "D",
+            "text": "Nhận diện chữ viết tay"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Tạo ảnh từ mô tả văn bản là lựa chọn phù hợp nhất với nội dung câu hỏi: StackGAN dùng GAN để làm gì?"
+      },
+      {
+        "id": "supp-5",
+        "text": "Một vấn đề thường gặp trong GAN là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Mode collapse (Generator tạo dữ liệu giống nhau)"
+          },
+          {
+            "label": "B",
+            "text": "Accuracy thấp"
+          },
+          {
+            "label": "C",
+            "text": "Gradient biến mất"
+          },
+          {
+            "label": "D",
+            "text": "Dữ liệu thiếu nhãn"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Mode collapse (Generator tạo dữ liệu giống nhau) là lựa chọn phù hợp nhất với nội dung câu hỏi: Một vấn đề thường gặp trong GAN là gì?"
+      },
+      {
+        "id": "supp-6",
+        "text": "LLM là mô hình học kiểu gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Supervised"
+          },
+          {
+            "label": "B",
+            "text": "Self-supervised learning"
+          },
+          {
+            "label": "C",
+            "text": "Reinforcement"
+          },
+          {
+            "label": "D",
+            "text": "Transfer learning"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Self-supervised learning là lựa chọn phù hợp nhất với nội dung câu hỏi: LLM là mô hình học kiểu gì?"
+      },
+      {
+        "id": "supp-7",
+        "text": "Mô hình nào sau đây là LLM?",
+        "options": [
+          {
+            "label": "A",
+            "text": "ResNet"
+          },
+          {
+            "label": "B",
+            "text": "GPT-3"
+          },
+          {
+            "label": "C",
+            "text": "YOLO"
+          },
+          {
+            "label": "D",
+            "text": "LeNet"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì GPT-3 là lựa chọn phù hợp nhất với nội dung câu hỏi: Mô hình nào sau đây là LLM?"
+      },
+      {
+        "id": "supp-8",
+        "text": "PhoBERT được huấn luyện trên?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Dữ liệu tiếng Việt lớn (Wikipedia, VnExpress...)"
+          },
+          {
+            "label": "B",
+            "text": "Chỉ sách giáo khoa"
+          },
+          {
+            "label": "C",
+            "text": "Google Translate"
+          },
+          {
+            "label": "D",
+            "text": "Ảnh việt hóa"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Dữ liệu tiếng Việt lớn (Wikipedia, VnExpress...) là lựa chọn phù hợp nhất với nội dung câu hỏi: PhoBERT được huấn luyện trên?"
+      },
+      {
+        "id": "supp-9",
+        "text": "Kiến trúc chính của LLM là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "CNN"
           },
           {
             "label": "B",
@@ -582,163 +5020,543 @@
           },
           {
             "label": "C",
-            "text": "Linear Regression"
+            "text": "RNN"
           },
           {
             "label": "D",
-            "text": "Naive Bayes co ban"
+            "text": "PCA"
           }
         ],
         "correct": 1,
-        "explanation": "Transformer voi co che attention la kien truc nen tang cua nhieu LLM hien dai."
-      }
-    ],
-    [
-      {
-        "id": 9,
-        "text": "Hiện tượng một mô hình ngôn ngữ lớn (LLM) tự tin sinh ra thông tin sai lệch, không có trong dữ liệu huấn luyện hoặc thực tế được gọi là gì?",
-        "options": [
-          {
-            "label": "A",
-            "text": "Overfitting"
-          },
-          {
-            "label": "B",
-            "text": "Hallucination (Ảo giác)"
-          },
-          {
-            "label": "C",
-            "text": "Underfitting"
-          },
-          {
-            "label": "D",
-            "text": "Tokenization"
-          }
-        ],
-        "correct": 1,
-        "explanation": "Hallucination (Ảo giác) là hiện tượng mô hình sinh ra câu từ trôi chảy, tự tin nhưng thông tin hoàn toàn sai lệch hoặc không có thực."
+        "explanation": "Đáp án B đúng vì Transformer là lựa chọn phù hợp nhất với nội dung câu hỏi: Kiến trúc chính của LLM là gì?"
       },
       {
-        "id": "9b",
-        "text": "Khi chatbot tu tin dua ra mot link khoa hoc khong ton tai, day la vi du cua hien tuong nao?",
+        "id": "supp-10",
+        "text": "Một ứng dụng phổ biến của LLM là?",
         "options": [
           {
             "label": "A",
-            "text": "Hallucination"
+            "text": "Dịch ảnh"
           },
           {
             "label": "B",
-            "text": "Tokenization"
+            "text": "Trả lời câu hỏi tự nhiên"
           },
           {
             "label": "C",
-            "text": "Caching"
+            "text": "Đo khoảng cách"
           },
           {
             "label": "D",
-            "text": "Compression"
+            "text": "Nén dữ liệu"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Trả lời câu hỏi tự nhiên là lựa chọn phù hợp nhất với nội dung câu hỏi: Một ứng dụng phổ biến của LLM là?"
+      },
+      {
+        "id": "supp-11",
+        "text": "Metric Silhouette Coefficient đo lường gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Mức độ phân tách và gắn kết của cụm"
+          },
+          {
+            "label": "B",
+            "text": "Khoảng cách giữa trung tâm"
+          },
+          {
+            "label": "C",
+            "text": "Xác suất cụm"
+          },
+          {
+            "label": "D",
+            "text": "Độ chính xác"
           }
         ],
         "correct": 0,
-        "explanation": "Hallucination la khi model tao thong tin nghe co ve hop ly nhung sai hoac khong ton tai."
+        "explanation": "Đáp án A đúng vì Mức độ phân tách và gắn kết của cụm là lựa chọn phù hợp nhất với nội dung câu hỏi: Metric Silhouette Coefficient đo lường gì?"
       },
       {
-        "id": "9c",
-        "text": "Mot LLM tra loi rat mach lac nhung noi sai su that. Rui ro nay duoc goi la gi?",
+        "id": "supp-12",
+        "text": "Clustering intrinsic evaluation là gì?",
         "options": [
           {
             "label": "A",
-            "text": "Overfitting"
+            "text": "Đánh giá qua label"
           },
           {
             "label": "B",
-            "text": "Hallucination"
+            "text": "Đánh giá bằng chính cấu trúc cụm không cần nhãn"
           },
           {
             "label": "C",
-            "text": "Underflow"
+            "text": "So sánh với mô hình khác"
           },
           {
             "label": "D",
-            "text": "Dataframe"
+            "text": "Dùng mạng nơ-ron"
           }
         ],
         "correct": 1,
-        "explanation": "Day la hallucination: cau tra loi co ve tu tin va troi chay nhung noi sai su that."
-      }
-    ],
-    [
+        "explanation": "Đáp án B đúng vì Đánh giá bằng chính cấu trúc cụm không cần nhãn là lựa chọn phù hợp nhất với nội dung câu hỏi: Clustering intrinsic evaluation là gì?"
+      },
       {
-        "id": 10,
-        "text": "Kỹ thuật nào giúp điều chỉnh hoặc hướng dẫn hành vi của một mô hình ngôn ngữ lớn (LLM) mà không cần cập nhật lại trọng số (weights) của mô hình?",
+        "id": "supp-13",
+        "text": "BCubed precision dùng cho?",
         "options": [
           {
             "label": "A",
-            "text": "Fine-tuning"
+            "text": "Đánh giá clustering có giám sát"
           },
           {
             "label": "B",
-            "text": "Prompt Engineering (Kỹ thuật đặt câu lệnh)"
+            "text": "Dự đoán xác suất"
           },
           {
             "label": "C",
-            "text": "Pre-training"
+            "text": "Gradient boosting"
           },
           {
             "label": "D",
-            "text": "Backpropagation"
+            "text": "KNN"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Đánh giá clustering có giám sát là lựa chọn phù hợp nhất với nội dung câu hỏi: BCubed precision dùng cho?"
+      },
+      {
+        "id": "supp-14",
+        "text": "Subspace clustering (CLIQUE) xử lý gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Tìm cụm trong không gian con chiều cao"
+          },
+          {
+            "label": "B",
+            "text": "Clustering trên ảnh"
+          },
+          {
+            "label": "C",
+            "text": "Class imbalance"
+          },
+          {
+            "label": "D",
+            "text": "Feature ranking"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Tìm cụm trong không gian con chiều cao là lựa chọn phù hợp nhất với nội dung câu hỏi: Subspace clustering (CLIQUE) xử lý gì?"
+      },
+      {
+        "id": "supp-15",
+        "text": "OPTICS khác DBSCAN ở điểm nào?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Không dùng mật độ"
+          },
+          {
+            "label": "B",
+            "text": "Không cần chọn epsilon cố định, sinh biểu đồ thứ tự"
+          },
+          {
+            "label": "C",
+            "text": "Luôn phân hoạch"
+          },
+          {
+            "label": "D",
+            "text": "Tăng số chiều"
           }
         ],
         "correct": 1,
-        "explanation": "Prompt Engineering là việc thiết kế các chỉ dẫn đầu vào tối ưu để kiểm soát đầu ra của LLM mà không cần huấn luyện lại hay cập nhật tham số."
+        "explanation": "Đáp án B đúng vì Không cần chọn epsilon cố định, sinh biểu đồ thứ tự là lựa chọn phù hợp nhất với nội dung câu hỏi: OPTICS khác DBSCAN ở điểm nào?"
       },
       {
-        "id": "10b",
-        "text": "Cach nao sau day dieu huong dau ra cua LLM ma khong can huan luyen lai model?",
+        "id": "supp-16",
+        "text": "Hàm mất mát trong ví dụ f(x) = x² + 2x + 5 là?",
         "options": [
           {
             "label": "A",
-            "text": "Prompt Engineering"
+            "text": "f′(x) = 2x + 2"
           },
           {
             "label": "B",
-            "text": "Pre-training tu dau"
+            "text": "f′(x) = x² + 2"
           },
           {
             "label": "C",
-            "text": "Thay GPU"
+            "text": "f′(x) = x + 1"
           },
           {
             "label": "D",
-            "text": "Xoa dataset"
+            "text": "f′(x) = x² - 2"
           }
         ],
         "correct": 0,
-        "explanation": "Prompt Engineering thiet ke dau vao de dieu huong hanh vi model ma khong cap nhat trong so."
+        "explanation": "Đáp án A đúng vì f′(x) = 2x + 2 là lựa chọn phù hợp nhất với nội dung câu hỏi: Hàm mất mát trong ví dụ f(x) = x² + 2x + 5 là?"
       },
       {
-        "id": "10c",
-        "text": "Neu muon LLM tra ve JSON dung schema, ky thuat dau tien nen cai thien la gi?",
+        "id": "supp-17",
+        "text": "Cập nhật x trong Gradient Descent: x = ?",
         "options": [
           {
             "label": "A",
-            "text": "Viet prompt ro dinh dang dau ra"
+            "text": "x + λ f(x)"
           },
           {
             "label": "B",
-            "text": "Tang do sang man hinh"
+            "text": "x - λ f′(x)"
           },
           {
             "label": "C",
-            "text": "Doi ngon ngu CSS"
+            "text": "x / λ"
           },
           {
             "label": "D",
-            "text": "Tat validation"
+            "text": "x - λ²"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì x - λ f′(x) là lựa chọn phù hợp nhất với nội dung câu hỏi: Cập nhật x trong Gradient Descent: x = ?"
+      },
+      {
+        "id": "supp-18",
+        "text": "Nếu gradient gần 0 thì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Cập nhật mạnh"
+          },
+          {
+            "label": "B",
+            "text": "Đã gần điểm hội tụ"
+          },
+          {
+            "label": "C",
+            "text": "Luôn nhảy bước lớn"
+          },
+          {
+            "label": "D",
+            "text": "Mô hình bị overfitting"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Đã gần điểm hội tụ là lựa chọn phù hợp nhất với nội dung câu hỏi: Nếu gradient gần 0 thì?"
+      },
+      {
+        "id": "supp-19",
+        "text": "Nếu f(x) là hàm lồi thì Gradient Descent...?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Hội tụ về nghiệm duy nhất (global minimum)"
+          },
+          {
+            "label": "B",
+            "text": "Tăng mãi"
+          },
+          {
+            "label": "C",
+            "text": "Không dùng được"
+          },
+          {
+            "label": "D",
+            "text": "Phụ thuộc random"
           }
         ],
         "correct": 0,
-        "explanation": "Prompt can neu ro schema, rang buoc va vi du output de LLM tra ve dung dinh dang mong muon."
+        "explanation": "Đáp án A đúng vì Hội tụ về nghiệm duy nhất (global minimum) là lựa chọn phù hợp nhất với nội dung câu hỏi: Nếu f(x) là hàm lồi thì Gradient Descent...?"
+      },
+      {
+        "id": "supp-20",
+        "text": "Mini-batch Gradient Descent...?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Chia dữ liệu thành nhóm nhỏ để huấn luyện"
+          },
+          {
+            "label": "B",
+            "text": "Chạy một mẫu mỗi lần"
+          },
+          {
+            "label": "C",
+            "text": "Là SGD"
+          },
+          {
+            "label": "D",
+            "text": "Luôn hội tụ nhanh hơn"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Chia dữ liệu thành nhóm nhỏ để huấn luyện là lựa chọn phù hợp nhất với nội dung câu hỏi: Mini-batch Gradient Descent...?"
+      },
+      {
+        "id": "supp-21",
+        "text": "Validation set dùng để?",
+        "options": [
+          {
+            "label": "B",
+            "text": "Chọn mô hình, điều chỉnh hyperparameter"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án B đúng vì Chọn mô hình, điều chỉnh hyperparameter là lựa chọn phù hợp nhất với nội dung câu hỏi: Validation set dùng để?"
+      },
+      {
+        "id": "supp-22",
+        "text": "Leave-one-out CV dùng cho...?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Datasets nhỏ, cần đánh giá chính xác"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Datasets nhỏ, cần đánh giá chính xác là lựa chọn phù hợp nhất với nội dung câu hỏi: Leave-one-out CV dùng cho...?"
+      },
+      {
+        "id": "supp-26",
+        "text": "Bayesian Belief Network là gì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Mạng xác suất mô hình hóa quan hệ phụ thuộc giữa biến"
+          },
+          {
+            "label": "B",
+            "text": "Một loại mạng nơ-ron"
+          },
+          {
+            "label": "C",
+            "text": "Thuật toán phân cụm"
+          },
+          {
+            "label": "D",
+            "text": "Dạng đặc biệt của kNN"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Mạng xác suất mô hình hóa quan hệ phụ thuộc giữa biến là lựa chọn phù hợp nhất với nội dung câu hỏi: Bayesian Belief Network là gì?"
+      },
+      {
+        "id": "supp-27",
+        "text": "BBN khắc phục hạn chế nào của Naive Bayes?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Xử lý được phụ thuộc giữa các thuộc tính"
+          },
+          {
+            "label": "B",
+            "text": "Chạy nhanh hơn"
+          },
+          {
+            "label": "C",
+            "text": "Tự động gán nhãn"
+          },
+          {
+            "label": "D",
+            "text": "Giảm số chiều"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì Xử lý được phụ thuộc giữa các thuộc tính là lựa chọn phù hợp nhất với nội dung câu hỏi: BBN khắc phục hạn chế nào của Naive Bayes?"
+      },
+      {
+        "id": "supp-28",
+        "text": "BBN được biểu diễn qua?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Biểu đồ phân cụm"
+          },
+          {
+            "label": "B",
+            "text": "Đồ thị có hướng không chu trình (DAG)"
+          },
+          {
+            "label": "C",
+            "text": "Mạng nơ-ron sâu"
+          },
+          {
+            "label": "D",
+            "text": "Hàm mất mát tuyến tính"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Đồ thị có hướng không chu trình (DAG) là lựa chọn phù hợp nhất với nội dung câu hỏi: BBN được biểu diễn qua?"
+      },
+      {
+        "id": "supp-29",
+        "text": "Thuật toán phổ biến học cấu trúc BBN là?",
+        "options": [
+          {
+            "label": "A",
+            "text": "K2 Algorithm"
+          },
+          {
+            "label": "B",
+            "text": "Gradient Boosting"
+          },
+          {
+            "label": "C",
+            "text": "EM Clustering"
+          },
+          {
+            "label": "D",
+            "text": "SVM-Tree"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì K2 Algorithm là lựa chọn phù hợp nhất với nội dung câu hỏi: Thuật toán phổ biến học cấu trúc BBN là?"
+      },
+      {
+        "id": "supp-30",
+        "text": "Nhược điểm chính của BBN?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Không xử lý được dữ liệu rời rạc"
+          },
+          {
+            "label": "B",
+            "text": "Phức tạp tính toán khi số thuộc tính lớn"
+          },
+          {
+            "label": "C",
+            "text": "Thiếu độ chính xác"
+          },
+          {
+            "label": "D",
+            "text": "Không mở rộng được"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Phức tạp tính toán khi số thuộc tính lớn là lựa chọn phù hợp nhất với nội dung câu hỏi: Nhược điểm chính của BBN?"
+      },
+      {
+        "id": "supp-31",
+        "text": "ML cần nhiều feature engineering hơn DL vì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "DL có thể tự học đặc trưng qua các tầng"
+          },
+          {
+            "label": "B",
+            "text": "ML dùng mạng sâu hơn"
+          },
+          {
+            "label": "C",
+            "text": "ML luôn có dữ liệu nhiều hơn"
+          },
+          {
+            "label": "D",
+            "text": "DL không có activation function"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì DL có thể tự học đặc trưng qua các tầng là lựa chọn phù hợp nhất với nội dung câu hỏi: ML cần nhiều feature engineering hơn DL vì?"
+      },
+      {
+        "id": "supp-32",
+        "text": "DL yêu cầu phần cứng gì cao hơn ML?",
+        "options": [
+          {
+            "label": "A",
+            "text": "GPU/TPU"
+          },
+          {
+            "label": "B",
+            "text": "SSD"
+          },
+          {
+            "label": "C",
+            "text": "HDD"
+          },
+          {
+            "label": "D",
+            "text": "CPU đơn nhân"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì GPU/TPU là lựa chọn phù hợp nhất với nội dung câu hỏi: DL yêu cầu phần cứng gì cao hơn ML?"
+      },
+      {
+        "id": "supp-33",
+        "text": "Với dữ liệu nhỏ, nên dùng?",
+        "options": [
+          {
+            "label": "A",
+            "text": "ML truyền thống như SVM, Random Forest"
+          },
+          {
+            "label": "B",
+            "text": "LSTM"
+          },
+          {
+            "label": "C",
+            "text": "Transformer"
+          },
+          {
+            "label": "D",
+            "text": "GAN"
+          }
+        ],
+        "correct": 0,
+        "explanation": "Đáp án A đúng vì ML truyền thống như SVM, Random Forest là lựa chọn phù hợp nhất với nội dung câu hỏi: Với dữ liệu nhỏ, nên dùng?"
+      },
+      {
+        "id": "supp-34",
+        "text": "ML thường học nhanh hơn DL vì?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Dùng convolution"
+          },
+          {
+            "label": "B",
+            "text": "Có ít tham số hơn"
+          },
+          {
+            "label": "C",
+            "text": "Tối ưu tốt hơn"
+          },
+          {
+            "label": "D",
+            "text": "Không dùng loss function"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Có ít tham số hơn là lựa chọn phù hợp nhất với nội dung câu hỏi: ML thường học nhanh hơn DL vì?"
+      },
+      {
+        "id": "supp-35",
+        "text": "Khi nào nên dùng DL thay vì ML?",
+        "options": [
+          {
+            "label": "A",
+            "text": "Dữ liệu nhỏ và rời rạc"
+          },
+          {
+            "label": "B",
+            "text": "Dữ liệu lớn, nhiều chiều như ảnh/video"
+          },
+          {
+            "label": "C",
+            "text": "Mô hình tuyến tính"
+          },
+          {
+            "label": "D",
+            "text": "Dữ liệu không nhãn"
+          }
+        ],
+        "correct": 1,
+        "explanation": "Đáp án B đúng vì Dữ liệu lớn, nhiều chiều như ảnh/video là lựa chọn phù hợp nhất với nội dung câu hỏi: Khi nào nên dùng DL thay vì ML?"
       }
     ]
   ]

@@ -18,6 +18,7 @@ from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, HTTPException, Query, Header
 from pydantic import BaseModel, Field
 
+from core.settings import get_settings
 from models.database import (
     get_review_queue,
     resolve_review_item,
@@ -33,15 +34,12 @@ router = APIRouter()
 # Xác thực đơn giản bằng API Key / Simple API key auth
 # ──────────────────────────────────────────────────────────────────────────────
 
-ADMIN_API_KEY = os.getenv("ADMIN_API_KEY", "dev-admin-key-change-in-production")
-
-
 def verify_admin_key(x_admin_key: Optional[str] = Header(None)) -> None:
     """
     Xác minh API key admin / Verify admin API key.
     Nên thay bằng JWT trong production / Should be replaced with JWT in production.
     """
-    if not x_admin_key or x_admin_key != ADMIN_API_KEY:
+    if not x_admin_key or x_admin_key != get_settings().admin_api_key:
         raise HTTPException(
             status_code=401,
             detail="Unauthorized: Invalid or missing X-Admin-Key header",
