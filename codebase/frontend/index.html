@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="AI Learning Path Personalizer - Nền tảng học AI cá nhân hóa hàng đầu Việt Nam. Xây dựng lộ trình học AI phù hợp với mục tiêu và trình độ của bạn." />
+  <meta name="keywords" content="học AI, trí tuệ nhân tạo, lộ trình học AI, machine learning, deep learning, Việt Nam, VinUni" />
+  <meta name="author" content="VinUni AI Lab" />
+  <meta property="og:title" content="AI Learning Path Personalizer | VinUni" />
+  <meta property="og:description" content="Khám phá lộ trình học AI được cá nhân hóa dành riêng cho bạn." />
+  <meta property="og:type" content="website" />
+  <meta name="robots" content="index, follow" />
+  <title>AI Learning Path Personalizer | VinUni</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="src/styles.css" />
+</head>
+<body>
+  <!-- ========================================================
+       ANIMATED BACKGROUND PARTICLES
+       ======================================================== -->
+  <div class="bg-particles" aria-hidden="true">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+
+  <!-- ========================================================
+       TOAST NOTIFICATION CONTAINER
+       ======================================================== -->
+  <div id="toast-container" class="toast-container" role="alert" aria-live="polite"></div>
+
+  <!-- ========================================================
+       NAVIGATION / HEADER
+       ======================================================== -->
+  <header class="site-header">
+    <div class="header-inner container">
+      <!-- Logo -->
+      <div class="logo">
+        <div class="logo-icon" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="15" stroke="url(#logoGrad)" stroke-width="2"/>
+            <path d="M8 16 Q16 8 24 16 Q16 24 8 16Z" fill="url(#logoGrad)" opacity="0.8"/>
+            <circle cx="16" cy="16" r="4" fill="white"/>
+            <defs>
+              <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#7c3aed"/>
+                <stop offset="100%" stop-color="#2563eb"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="logo-title">AI Learning Path</span>
+          <span class="logo-sub">Personalizer</span>
+        </div>
+      </div>
+
+      <!-- Header Actions -->
+      <div class="header-actions">
+        <!-- Cost Display -->
+        <div class="cost-display" id="cost-display" title="Token usage &amp; estimated cost">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span id="cost-label">0 tokens · $0.000</span>
+        </div>
+        <!-- Support Button -->
+        <button class="btn-icon" id="btn-support" title="Hỗ trợ &amp; Đặt lại" aria-label="Mở hỗ trợ">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </button>
+        <!-- Feedback Button -->
+        <button class="btn-icon" id="btn-feedback" title="Đánh giá" aria-label="Mở đánh giá">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================
+       HERO SECTION
+       ======================================================== -->
+  <section class="hero" id="hero">
+    <div class="container hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot pulse-dot"></span>
+        <span>Powered by AI · VinUni Batch 02</span>
+      </div>
+      <h1 class="hero-title">
+        Lộ Trình Học AI
+        <span class="gradient-text">Cá Nhân Hóa</span>
+        Của Bạn
+      </h1>
+      <p class="hero-subtitle">
+        Trả lời 10 câu hỏi ngắn và nhận ngay lộ trình học AI được thiết kế
+        riêng cho mục tiêu, trình độ và lịch học của bạn.
+      </p>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-number">10</span>
+          <span class="stat-label">Câu hỏi</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-number">3'</span>
+          <span class="stat-label">Hoàn thành</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-number">100%</span>
+          <span class="stat-label">Cá nhân hóa</span>
+        </div>
+      </div>
+      <button class="btn-primary hero-cta" id="hero-start-btn">
+        <span>Bắt đầu ngay</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+    <!-- Decorative orbs -->
+    <div class="hero-orb orb-1" aria-hidden="true"></div>
+    <div class="hero-orb orb-2" aria-hidden="true"></div>
+    <div class="hero-orb orb-3" aria-hidden="true"></div>
+  </section>
+
+  <!-- ========================================================
+       MAIN APP CONTAINER
+       ======================================================== -->
+  <main class="app-container container" id="app-container">
+
+    <!-- ── MULTI-STEP FORM (Steps 1 & 2) ────────────────────── -->
+    <section class="form-section" id="form-section">
+
+      <!-- Step Indicator -->
+      <div class="step-indicator" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="2" aria-label="Bước hiện tại">
+        <div class="step-item active" id="step-ind-1">
+          <div class="step-circle">1</div>
+          <span class="step-label">Thông tin</span>
+        </div>
+        <div class="step-line" id="step-line-1"></div>
+        <div class="step-item" id="step-ind-2">
+          <div class="step-circle">2</div>
+          <span class="step-label">Bài kiểm tra</span>
+        </div>
+      </div>
+
+      <!-- ── STEP 1: Goal Form ─────────────────────────────── -->
+      <div class="form-card" id="step-1">
+        <div class="form-card-header">
+          <h2 class="form-title">
+            <span class="title-icon">🎯</span>
+            Mục tiêu học tập của bạn
+          </h2>
+          <p class="form-subtitle">Hãy cho chúng tôi biết thêm về bạn để cá nhân hóa lộ trình học.</p>
+        </div>
+
+        <form id="goal-form" novalidate>
+          <!-- Trường 1: Mục đích cốt lõi -->
+          <div class="form-group floating-label-group">
+            <select id="goal-why" name="goal_why" required>
+              <option value="" disabled selected></option>
+              <option value="Lập trình sản phẩm">Lập trình sản phẩm (Coding)</option>
+              <option value="Quản lý dự án AI">Quản lý dự án AI (Management)</option>
+              <option value="Ứng dụng AI vào marketing, văn phòng">Ứng dụng AI vào marketing, văn phòng (Application)</option>
+              <option value="Nghiên cứu học thuật">Nghiên cứu học thuật (Research)</option>
+            </select>
+            <label for="goal-why">Bạn học AI để phục vụ công việc gì? <span class="required">*</span></label>
+            <div class="field-error" id="err-why"></div>
+          </div>
+
+          <!-- Trường 2: Quỹ thời gian đầu tư -->
+          <div class="form-group floating-label-group">
+            <input type="number" id="goal-time" name="goal_time" min="1" max="40" placeholder=" " required />
+            <label for="goal-time">Bạn có thể dành bao nhiêu tiếng mỗi tuần cho lộ trình này? (1-40) <span class="required">*</span></label>
+            <div class="field-error" id="err-time"></div>
+          </div>
+
+          <!-- Trường 3: Hình thức học ưa thích -->
+          <div class="form-group floating-label-group">
+            <select id="goal-style" name="goal_style" required>
+              <option value="" disabled selected></option>
+              <option value="Học qua video trực quan">Học qua video trực quan</option>
+              <option value="Làm bài tập thực hành (Hands-on)">Làm bài tập thực hành (Hands-on)</option>
+              <option value="Đọc tài liệu lý thuyết">Đọc tài liệu lý thuyết</option>
+            </select>
+            <label for="goal-style">Hình thức học ưa thích của bạn là gì? <span class="required">*</span></label>
+            <div class="field-error" id="err-style"></div>
+          </div>
+
+          <!-- Công việc hiện tại (đảm bảo dữ liệu đầu vào cho AI tốt nhất) -->
+          <div class="form-group floating-label-group">
+            <input type="text" id="goal-job" name="goal_job" maxlength="100" placeholder=" " autocomplete="off" required />
+            <label for="goal-job">Công việc/Nghề nghiệp hiện tại của bạn <span class="required">*</span></label>
+            <div class="field-error" id="err-job"></div>
+          </div>
+
+          <button type="submit" class="btn-primary btn-full" id="btn-step1-next">
+            <span>Tiếp theo: Bài kiểm tra</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </form>
+      </div><!-- /step-1 -->
+
+      <!-- ── STEP 2: Quiz ──────────────────────────────────── -->
+      <div class="form-card hidden" id="step-2">
+        <div class="form-card-header">
+          <div class="quiz-header-row">
+            <h2 class="form-title">
+              <span class="title-icon">🧠</span>
+              Kiểm tra kiến thức AI
+            </h2>
+            <div class="quiz-timer-badge" id="quiz-timer-badge">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span id="quiz-time-display">0:00</span>
+            </div>
+          </div>
+          <p class="form-subtitle">10 câu hỏi về nền tảng AI. Đừng lo — điểm số chỉ để cá nhân hóa lộ trình của bạn!</p>
+
+          <!-- Quiz Progress Bar -->
+          <div class="quiz-progress-wrap">
+            <div class="quiz-progress-bar">
+              <div class="quiz-progress-fill" id="quiz-progress-fill" style="width:0%"></div>
+            </div>
+            <span class="quiz-progress-label" id="quiz-progress-label">Câu 0 / 10</span>
+          </div>
+        </div>
+
+        <!-- Question Card -->
+        <div class="question-card" id="question-card">
+          <div class="question-number" id="q-number">Câu 1</div>
+          <p class="question-text" id="q-text">Loading...</p>
+          <div class="options-grid" id="q-options">
+            <!-- dynamically rendered -->
+          </div>
+          <div class="question-feedback" id="q-feedback" aria-live="polite"></div>
+        </div>
+
+        <!-- Quiz Navigation -->
+        <div class="quiz-nav">
+          <button class="btn-ghost" id="btn-quiz-prev" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Câu trước
+          </button>
+          <div class="quiz-dots" id="quiz-dots">
+            <!-- dynamically rendered -->
+          </div>
+          <button class="btn-primary" id="btn-quiz-next" disabled>
+            Câu tiếp
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div><!-- /step-2 -->
+
+    </section><!-- /form-section -->
+
+    <!-- ── RESULTS / TABS SECTION ────────────────────────────── -->
+    <section class="results-section hidden" id="results-section">
+
+      <!-- Confidence Score Header -->
+      <div class="confidence-header">
+        <div class="confidence-card">
+          <div class="confidence-label">Điểm tự tin của AI</div>
+          <div class="confidence-meter-wrap">
+            <div class="confidence-meter" id="confidence-meter">
+              <div class="confidence-fill" id="confidence-fill" style="width: 0%"></div>
+            </div>
+            <span class="confidence-value" id="confidence-value">0%</span>
+          </div>
+          <div class="confidence-badge" id="confidence-badge">
+            <span class="badge-dot"></span>
+            <span id="confidence-badge-text">Đang phân tích...</span>
+          </div>
+        </div>
+        <div class="score-card">
+          <div class="score-label">Điểm quiz của bạn</div>
+          <div class="score-value" id="score-display">0 / 10</div>
+          <div class="score-level" id="score-level">--</div>
+        </div>
+      </div>
+
+      <!-- Fallback Mode Alert -->
+      <div class="alert alert-fallback hidden" id="fallback-alert" role="alert">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div>
+          <strong>Chế độ lộ trình cơ bản</strong>
+          <p>Độ tự tin AI &lt; 80%. Hiển thị lộ trình mặc định. Hãy trả lời thêm câu hỏi qua chatbot để nhận lộ trình cá nhân hóa!</p>
+        </div>
+      </div>
+
+      <!-- Failure Mode Alert -->
+      <div class="alert alert-failure hidden" id="failure-alert" role="alert">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        <div>
+          <strong>Không thể tải lộ trình</strong>
+          <p>Đã xảy ra lỗi khi phân tích dữ liệu. Đã khôi phục lộ trình mặc định.</p>
+        </div>
+        <button class="btn-ghost btn-sm" id="btn-retry">Thử lại</button>
+      </div>
+
+      <!-- ── TABS ──────────────────────────────────────────── -->
+      <div class="tabs-container">
+        <div class="tabs-nav" role="tablist" aria-label="Chức năng chính">
+          <button class="tab-btn active" id="tab-chat-btn" role="tab" aria-selected="true" aria-controls="tab-chat">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Trợ lý AI
+          </button>
+          <button class="tab-btn" id="tab-roadmap-btn" role="tab" aria-selected="false" aria-controls="tab-roadmap">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Lộ trình học
+          </button>
+          <div class="tab-underline" id="tab-underline"></div>
+        </div>
+
+        <!-- ── TAB 1: CHATBOT ───────────────────────────── -->
+        <div class="tab-panel active" id="tab-chat" role="tabpanel" aria-labelledby="tab-chat-btn">
+          <div class="chat-container">
+            <!-- Chat Messages -->
+            <div class="chat-messages" id="chat-messages" aria-live="polite" aria-label="Cuộc trò chuyện">
+              <!-- Welcome message injected by JS -->
+            </div>
+
+            <!-- Rate Limit Indicator -->
+            <div class="rate-limit-bar" id="rate-limit-bar">
+              <div class="rate-limit-info">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                <span id="rate-limit-label">5 tin nhắn còn lại</span>
+              </div>
+              <div class="rate-limit-track">
+                <div class="rate-limit-fill" id="rate-limit-fill" style="width:100%"></div>
+              </div>
+              <span class="rate-limit-timer hidden" id="rate-limit-timer">Làm mới sau <strong id="rl-countdown">60</strong>s</span>
+            </div>
+
+            <!-- Chat Input -->
+            <div class="chat-input-wrap">
+              <div class="chat-input-inner">
+                <textarea
+                  id="chat-input"
+                  class="chat-input"
+                  placeholder="Hỏi AI về lộ trình học của bạn..."
+                  rows="1"
+                  maxlength="500"
+                  aria-label="Nhập câu hỏi"
+                ></textarea>
+                <div class="chat-input-actions">
+                  <span class="char-count" id="char-count">0/500</span>
+                  <button class="btn-send" id="btn-send" aria-label="Gửi tin nhắn" title="Gửi (Enter)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                  </button>
+                </div>
+              </div>
+              <p class="chat-hint">Nhấn <kbd>Enter</kbd> để gửi, <kbd>Shift+Enter</kbd> để xuống dòng</p>
+            </div>
+          </div>
+        </div><!-- /tab-chat -->
+
+        <!-- ── TAB 2: ROADMAP ───────────────────────────── -->
+        <div class="tab-panel" id="tab-roadmap" role="tabpanel" aria-labelledby="tab-roadmap-btn">
+          <!-- Roadmap Header -->
+          <div class="roadmap-header">
+            <div class="roadmap-meta">
+              <h3 class="roadmap-title" id="roadmap-title">Lộ trình học AI của bạn</h3>
+              <p class="roadmap-subtitle" id="roadmap-subtitle">Được cá nhân hóa dựa trên kết quả bài kiểm tra và mục tiêu của bạn.</p>
+            </div>
+            <div class="roadmap-actions">
+              <button class="btn-ghost btn-sm" id="btn-export-roadmap">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Xuất lộ trình
+              </button>
+            </div>
+          </div>
+
+          <!-- Roadmap Tree -->
+          <div class="roadmap-tree" id="roadmap-tree">
+            <!-- Skeleton loading state -->
+            <div class="roadmap-skeleton" id="roadmap-skeleton">
+              <div class="skel-phase">
+                <div class="skel-phase-title skeleton-shimmer"></div>
+                <div class="skel-milestone skeleton-shimmer"></div>
+                <div class="skel-milestone skeleton-shimmer"></div>
+                <div class="skel-milestone skeleton-shimmer"></div>
+              </div>
+              <div class="skel-phase">
+                <div class="skel-phase-title skeleton-shimmer"></div>
+                <div class="skel-milestone skeleton-shimmer"></div>
+                <div class="skel-milestone skeleton-shimmer"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Roadmap Legend -->
+          <div class="roadmap-legend">
+            <div class="legend-item">
+              <div class="legend-dot dot-completed"></div>
+              <span>Đã hoàn thành</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot dot-active"></div>
+              <span>Đang học</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot dot-locked"></div>
+              <span>Chưa mở khóa</span>
+            </div>
+          </div>
+        </div><!-- /tab-roadmap -->
+
+      </div><!-- /tabs-container -->
+    </section><!-- /results-section -->
+  </main>
+
+  <!-- ========================================================
+       FOOTER
+       ======================================================== -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="footer-logo-text">AI Learning Path Personalizer</span>
+        <span class="footer-tagline">Bởi VinUni AI Lab · Batch 02 · Day 05</span>
+      </div>
+      <div class="footer-links">
+        <a href="#" class="footer-link">Điều khoản</a>
+        <a href="#" class="footer-link">Quyền riêng tư</a>
+        <a href="#" class="footer-link">Liên hệ</a>
+      </div>
+      <div class="footer-copy">
+        &copy; 2026 VinUni. Mọi quyền được bảo lưu.
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================================
+       MODAL: FEEDBACK (Star Rating)
+       ======================================================== -->
+  <div class="modal-overlay hidden" id="modal-feedback" role="dialog" aria-modal="true" aria-labelledby="modal-feedback-title">
+    <div class="modal-card">
+      <button class="modal-close" id="modal-feedback-close" aria-label="Đóng">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="modal-icon">⭐</div>
+      <h3 class="modal-title" id="modal-feedback-title">Đánh giá lộ trình</h3>
+      <p class="modal-subtitle">Lộ trình này có phù hợp với bạn không? Phản hồi của bạn giúp AI học tốt hơn!</p>
+
+      <!-- Star Rating -->
+      <div class="star-rating" id="star-rating" role="radiogroup" aria-label="Đánh giá sao">
+        <button class="star-btn" data-rating="1" aria-label="1 sao" title="Rất tệ">★</button>
+        <button class="star-btn" data-rating="2" aria-label="2 sao" title="Tệ">★</button>
+        <button class="star-btn" data-rating="3" aria-label="3 sao" title="Trung bình">★</button>
+        <button class="star-btn" data-rating="4" aria-label="4 sao" title="Tốt">★</button>
+        <button class="star-btn" data-rating="5" aria-label="5 sao" title="Xuất sắc">★</button>
+      </div>
+      <p class="star-label-text" id="star-label-text">Chọn số sao...</p>
+
+      <!-- Comment -->
+      <div class="form-group">
+        <textarea id="feedback-comment" class="form-textarea" placeholder="Nhận xét của bạn (tuỳ chọn)..." rows="3" maxlength="300"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-ghost" id="btn-feedback-cancel">Huỷ</button>
+        <button class="btn-primary" id="btn-feedback-submit" disabled>
+          Gửi đánh giá
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL: RESET & SUPPORT
+       ======================================================== -->
+  <div class="modal-overlay hidden" id="modal-support" role="dialog" aria-modal="true" aria-labelledby="modal-support-title">
+    <div class="modal-card">
+      <button class="modal-close" id="modal-support-close" aria-label="Đóng">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="modal-icon">🛠️</div>
+      <h3 class="modal-title" id="modal-support-title">Hỗ trợ &amp; Đặt lại</h3>
+      <p class="modal-subtitle">Gặp vấn đề? Bạn có thể đặt lại toàn bộ phiên làm việc hoặc liên hệ hỗ trợ.</p>
+
+      <div class="support-options">
+        <div class="support-option">
+          <div class="support-option-icon">🔄</div>
+          <div class="support-option-content">
+            <strong>Đặt lại phiên</strong>
+            <p>Xoá toàn bộ dữ liệu và bắt đầu lại từ đầu.</p>
+          </div>
+          <button class="btn-danger btn-sm" id="btn-reset-session">Đặt lại</button>
+        </div>
+        <div class="support-option">
+          <div class="support-option-icon">📋</div>
+          <div class="support-option-content">
+            <strong>Lộ trình mặc định</strong>
+            <p>Khôi phục về lộ trình học AI cơ bản.</p>
+          </div>
+          <button class="btn-ghost btn-sm" id="btn-rollback">Khôi phục</button>
+        </div>
+        <div class="support-option">
+          <div class="support-option-icon">✉️</div>
+          <div class="support-option-content">
+            <strong>Liên hệ hỗ trợ</strong>
+            <p>ai-support@vinuni.edu.vn</p>
+          </div>
+          <a href="mailto:ai-support@vinuni.edu.vn" class="btn-ghost btn-sm">Email</a>
+        </div>
+      </div>
+
+      <button class="btn-ghost btn-full" id="btn-support-close-main" style="margin-top:1rem;">Đóng</button>
+    </div>
+  </div>
+
+  <!-- Main JS -->
+  <script src="src/app.js"></script>
+</body>
+</html>

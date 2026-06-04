@@ -1,0 +1,302 @@
+{
+  "_metadata": {
+    "dataset_version": "1.0.0",
+    "created_date": "2026-06-03",
+    "description": "Bộ dữ liệu kiểm thử gồm 10 hồ sơ người dùng đa dạng để đánh giá hệ thống AI Learning Path Personalization",
+    "total_profiles": 10,
+    "quiz_structure": "10 câu hỏi: (1) Nền tảng lập trình, (2) Toán học/Thống kê, (3) Kinh nghiệm AI hiện tại, (4) Hướng ứng dụng mong muốn, (5) Mục tiêu nghề nghiệp cụ thể, (6) Phong cách học tập, (7) Nguồn lực sẵn có, (8) Dự án mong muốn, (9) Thách thức chính, (10) Timeline kỳ vọng"
+  },
+  "test_profiles": [
+    {
+      "user_id": "TEST_001",
+      "persona_name": "Nguyễn Thị Hoa – Business PM muốn AI cho Product Management",
+      "goal_description": "Tôi là Product Manager tại một startup fintech. Tôi muốn học AI để ứng dụng vào phân tích hành vi người dùng, cải thiện product recommendations, và hiểu đủ về AI để làm việc hiệu quả với team Data Science. Mục tiêu là trở thành AI Product Manager trong 12 tháng.",
+      "quiz_answers": [
+        "Không biết lập trình, chỉ dùng Excel và SQL cơ bản",
+        "Học xác suất thống kê cơ bản ở đại học nhưng đã quên nhiều",
+        "Dùng ChatGPT hàng ngày cho công việc, chưa tự build AI gì",
+        "Muốn ứng dụng AI vào product analytics và user behavior",
+        "Mục tiêu: AI Product Manager tại công ty product trong 12 tháng",
+        "Học tốt nhất qua case study và ví dụ thực tế",
+        "Có laptop tốt, sẵn sàng đầu tư khóa học 2-3 triệu/tháng",
+        "Muốn build một dashboard analytics với AI insights",
+        "Thách thức lớn nhất: không biết code và sợ toán",
+        "Kỳ vọng có kết quả rõ ràng sau 6 tháng đầu tiên"
+      ],
+      "time_per_week": "8 giờ/tuần",
+      "current_job": "Product Manager – Công ty Fintech (startup Series A)",
+      "expected_path_type": "business",
+      "expected_confidence_range": [0.80, 0.95],
+      "test_assertions": {
+        "min_milestones": 4,
+        "max_milestones": 6,
+        "must_include_keywords": ["product", "analytics", "no-code", "strategy"],
+        "must_not_include": ["CUDA", "neural network từ đầu", "nghiên cứu học thuật"],
+        "difficulty_distribution": "Cơ bản đến Trung cấp là chủ yếu"
+      }
+    },
+    {
+      "user_id": "TEST_002",
+      "persona_name": "Trần Văn Minh – Fresh Graduate muốn trở thành ML Engineer",
+      "goal_description": "Tôi vừa tốt nghiệp đại học ngành Công nghệ Thông tin. Tôi muốn trở thành Machine Learning Engineer chuyên sâu về Computer Vision. Tôi có nền tảng lập trình tốt và muốn xây dựng career trong AI industry.",
+      "quiz_answers": [
+        "Biết Python, C++, Java ở mức khá – đã làm nhiều project trường",
+        "Học Linear Algebra, Calculus, Probability & Statistics tại trường, điểm trung bình khá",
+        "Đã học một khóa ML cơ bản online, biết sklearn và từng train model nhỏ",
+        "Muốn chuyên sâu Computer Vision: object detection, image segmentation",
+        "Mục tiêu: ML Engineer tại công ty AI product (VinAI, FPT AI, Zalo AI) trong 18 tháng",
+        "Học tốt nhất qua practice – thích làm project hơn đọc sách",
+        "Không có GPU riêng, dùng Google Colab Free và Kaggle Notebooks",
+        "Muốn build portfolio ít nhất 3 projects CV có thể demo được",
+        "Thách thức: chưa có kinh nghiệm production, chỉ biết research code",
+        "Muốn apply job ML Engineer sau 18 tháng học tập"
+      ],
+      "time_per_week": "25 giờ/tuần",
+      "current_job": "Sinh viên mới tốt nghiệp – Đại học Bách Khoa Hà Nội",
+      "expected_path_type": "technical",
+      "expected_confidence_range": [0.85, 0.97],
+      "test_assertions": {
+        "min_milestones": 5,
+        "max_milestones": 7,
+        "must_include_keywords": ["PyTorch", "Computer Vision", "portfolio", "MLOps"],
+        "must_not_include": ["no-code", "Excel", "business strategy"],
+        "difficulty_distribution": "Trung cấp đến Nâng cao là chủ yếu"
+      }
+    },
+    {
+      "user_id": "TEST_003",
+      "persona_name": "Lê Thị Bích – Nhân viên Y tế muốn ứng dụng AI trong Y học",
+      "goal_description": "Tôi là bác sĩ nội trú tại bệnh viện đa khoa. Tôi muốn tìm hiểu cách AI đang được ứng dụng trong chẩn đoán y tế, đặc biệt là phân tích hình ảnh X-quang và CT scan. Tôi không cần trở thành AI engineer nhưng muốn hiểu đủ để ứng dụng và collaborate với team kỹ thuật.",
+      "quiz_answers": [
+        "Không biết lập trình, chỉ biết dùng SPSS cho nghiên cứu",
+        "Có kiến thức thống kê y tế tốt: RCT, cohort study, biostatistics",
+        "Đọc vài papers về AI in Medicine nhưng chưa thực hành",
+        "Muốn hiểu AI imaging: radiograph analysis, pathology image AI",
+        "Mục tiêu: researcher/clinician biết ứng dụng AI trong nghiên cứu lâm sàng",
+        "Học tốt nhất qua reading papers và practical workshops",
+        "Thời gian rất hạn chế do lịch trực bệnh viện dày đặc",
+        "Muốn đóng góp vào một nghiên cứu AI+Y học tại Việt Nam",
+        "Thách thức: không có background kỹ thuật và rất ít thời gian",
+        "Không có deadline cụ thể, muốn học từ từ nhưng chắc chắn"
+      ],
+      "time_per_week": "4 giờ/tuần",
+      "current_job": "Bác sĩ Nội trú – Bệnh viện Bạch Mai",
+      "expected_path_type": "hybrid",
+      "expected_confidence_range": [0.70, 0.88],
+      "test_assertions": {
+        "min_milestones": 3,
+        "max_milestones": 5,
+        "must_include_keywords": ["AI in Medicine", "medical imaging", "clinical AI", "research"],
+        "must_not_include": ["deep learning từ đầu", "production deployment", "GPU"],
+        "difficulty_distribution": "Cơ bản đến Trung cấp, nhẹ nhàng và phù hợp với thời gian ít"
+      }
+    },
+    {
+      "user_id": "TEST_004",
+      "persona_name": "Phạm Đức Anh – Marketing Professional muốn dùng AI Tools",
+      "goal_description": "Tôi làm Marketing Manager tại một tập đoàn bán lẻ lớn. Tôi muốn học cách sử dụng các công cụ AI để tăng hiệu quả công việc marketing: viết content, tạo hình ảnh, phân tích campaign, và automation. Mục tiêu thực dụng và nhanh chóng.",
+      "quiz_answers": [
+        "Không biết lập trình gì cả",
+        "Toán kém, chỉ biết phép tính cơ bản",
+        "Dùng ChatGPT, Midjourney, Canva AI thường xuyên cho công việc",
+        "Muốn master các AI tools cho marketing: content, image, data analysis",
+        "Mục tiêu: trở thành AI-savvy Marketer, không cần hiểu kỹ thuật sâu",
+        "Học qua hands-on workshops và YouTube tutorials",
+        "Công ty sẵn sàng trả tiền license cho AI tools",
+        "Muốn tự động hóa báo cáo và tạo content marketing bằng AI",
+        "Thách thức: quá nhiều tools, không biết bắt đầu từ đâu",
+        "Muốn thấy kết quả ngay trong 1-2 tháng đầu"
+      ],
+      "time_per_week": "6 giờ/tuần",
+      "current_job": "Marketing Manager – Tập đoàn bán lẻ",
+      "expected_path_type": "business",
+      "expected_confidence_range": [0.82, 0.95],
+      "test_assertions": {
+        "min_milestones": 3,
+        "max_milestones": 5,
+        "must_include_keywords": ["AI tools", "ChatGPT", "content", "Midjourney", "automation"],
+        "must_not_include": ["machine learning", "Python", "neural network"],
+        "difficulty_distribution": "Cơ bản là chủ yếu, tập trung vào practical tools"
+      }
+    },
+    {
+      "user_id": "TEST_005",
+      "persona_name": "Ngô Thị Thanh – Giáo viên muốn ứng dụng AI trong Giảng dạy",
+      "goal_description": "Tôi là giáo viên THPT môn Vật lý đã dạy 8 năm. Tôi muốn học cách ứng dụng AI vào thiết kế bài giảng, tạo bài tập cá nhân hóa cho học sinh, và hiểu cách AI đang thay đổi giáo dục để chuẩn bị cho tương lai.",
+      "quiz_answers": [
+        "Không biết lập trình, dùng Word/PowerPoint/Google Slides",
+        "Có kiến thức toán tốt (dạy Vật lý)",
+        "Mới bắt đầu dùng ChatGPT để soạn đề và câu hỏi, còn mới",
+        "Muốn dùng AI để tạo nội dung giảng dạy và đánh giá học sinh",
+        "Mục tiêu: trở thành giáo viên tiên phong dùng AI trong trường",
+        "Học qua ví dụ cụ thể và thực hành ngay với bài dạy của mình",
+        "Trường chưa có ngân sách AI, chủ yếu dùng free tools",
+        "Muốn tạo một hệ thống quiz adaptive cho học sinh lớp mình",
+        "Thách thức: e ngại công nghệ, không biết đâu là nguồn uy tín",
+        "Muốn áp dụng được trong học kỳ tới (3 tháng nữa)"
+      ],
+      "time_per_week": "5 giờ/tuần",
+      "current_job": "Giáo viên Vật lý THPT – Trường THPT Gia Định TP.HCM",
+      "expected_path_type": "business",
+      "expected_confidence_range": [0.78, 0.92],
+      "test_assertions": {
+        "min_milestones": 3,
+        "max_milestones": 5,
+        "must_include_keywords": ["AI in Education", "EdTech", "free tools", "personalized learning"],
+        "must_not_include": ["deep learning", "Python", "deployment"],
+        "difficulty_distribution": "Cơ bản hoàn toàn, friendly và encouraging"
+      }
+    },
+    {
+      "user_id": "TEST_006",
+      "persona_name": "Võ Thanh Tùng – Developer muốn chuyên sâu Deep Learning",
+      "goal_description": "Tôi là senior Python developer 5 năm kinh nghiệm, chuyên backend và data pipeline. Tôi muốn chuyển sâu vào Deep Learning, đặc biệt là Large Language Models và fine-tuning. Tôi muốn có thể tự research và implement các paper mới nhất.",
+      "quiz_answers": [
+        "Python expert, biết cả C++, biết CUDA basics",
+        "Toán tốt: linear algebra, calculus, probability – đã ôn lại gần đây",
+        "Đã dùng sklearn, PyTorch cơ bản, fine-tuned một BERT model nhỏ",
+        "Muốn chuyên sâu LLMs: pre-training, fine-tuning, RLHF, RAG",
+        "Mục tiêu: AI Research Engineer hoặc LLM Engineer tại công ty AI",
+        "Học qua papers, implementation từ đầu, và cộng đồng ML",
+        "Có RTX 4090, cloud budget 200$/tháng, thành thạo Docker/K8s",
+        "Muốn fine-tune một LLM cho tiếng Việt và publish lên HuggingFace",
+        "Thách thức: nhảy từ applied ML lên research-grade understanding",
+        "Timeline: 12 tháng để đủ năng lực apply vào team AI research"
+      ],
+      "time_per_week": "20 giờ/tuần",
+      "current_job": "Senior Backend Developer – Công ty công nghệ (remote)",
+      "expected_path_type": "technical",
+      "expected_confidence_range": [0.88, 0.98],
+      "test_assertions": {
+        "min_milestones": 5,
+        "max_milestones": 7,
+        "must_include_keywords": ["LLM", "fine-tuning", "Transformer", "RLHF", "HuggingFace", "research"],
+        "must_not_include": ["no-code", "Excel", "business basics"],
+        "difficulty_distribution": "Trung cấp đến Nâng cao, tập trung vào research"
+      }
+    },
+    {
+      "user_id": "TEST_007",
+      "persona_name": "Đinh Quốc Huy – Doanh nhân muốn xây dựng AI Startup",
+      "goal_description": "Tôi đã có 2 startup trước (1 thành công, 1 thất bại). Tôi muốn xây dựng AI startup trong lĩnh vực HR Tech. Tôi cần hiểu đủ về AI để make product decisions, hire đúng người, và pitch cho investors. Không cần tự code AI.",
+      "quiz_answers": [
+        "Biết một ít JavaScript từ hồi sinh viên, không code nhiều năm rồi",
+        "Toán trung bình, tư duy kinh doanh mạnh hơn kỹ thuật",
+        "Đã dùng nhiều AI SaaS tools, biết cách đánh giá AI product",
+        "Muốn hiểu AI landscape để build AI product cho HR: screening, matching",
+        "Mục tiêu: launch MVP AI HR Product và raise seed round trong 12 tháng",
+        "Học nhanh, thực dụng – chỉ học những gì cần cho business decision",
+        "Có network investor, sẵn sàng thuê AI consultant nếu cần",
+        "Muốn hiểu đủ để viết technical spec cho team AI mình sẽ hire",
+        "Thách thức: phân biệt AI hype với thực tế, chọn đúng approach",
+        "Cần move fast – 6 tháng để có đủ kiến thức để raise money"
+      ],
+      "time_per_week": "10 giờ/tuần",
+      "current_job": "Serial Entrepreneur – đang tìm kiếm ý tưởng startup mới",
+      "expected_path_type": "business",
+      "expected_confidence_range": [0.82, 0.94],
+      "test_assertions": {
+        "min_milestones": 4,
+        "max_milestones": 6,
+        "must_include_keywords": ["AI product", "startup", "investor", "MVP", "HR Tech"],
+        "must_not_include": ["research paper", "CUDA", "từ đầu implement"],
+        "difficulty_distribution": "Cơ bản đến Trung cấp, tập trung business & strategy"
+      }
+    },
+    {
+      "user_id": "TEST_008",
+      "persona_name": "Hoàng Minh Quân – Finance Analyst muốn học AI cho Quantitative Finance",
+      "goal_description": "Tôi là financial analyst tại ngân hàng, chuyên mảng risk management. Tôi muốn học AI/ML để áp dụng vào predictive modeling cho credit risk, market forecasting, và fraud detection. Muốn chuyển sang vị trí Quantitative Analyst.",
+      "quiz_answers": [
+        "Biết Python cơ bản (dùng cho data analysis), biết R",
+        "Toán rất tốt: statistics, econometrics, financial mathematics",
+        "Đã dùng scikit-learn cho một vài internal projects nhỏ",
+        "Muốn chuyên sâu: time series, credit scoring models, fraud detection ML",
+        "Mục tiêu: Quantitative Analyst / Model Risk Validator trong 18 tháng",
+        "Học qua academic papers và rigorous courses",
+        "Có access Bloomberg terminal, Python Pro license qua công ty",
+        "Muốn build một credit risk model end-to-end cho thesis nội bộ",
+        "Thách thức: chuyển từ statistical mindset sang ML mindset",
+        "Apply vị trí Quant Analyst ở nước ngoài sau 2 năm"
+      ],
+      "time_per_week": "12 giờ/tuần",
+      "current_job": "Financial Analyst – Ngân hàng thương mại cổ phần lớn",
+      "expected_path_type": "technical",
+      "expected_confidence_range": [0.83, 0.95],
+      "test_assertions": {
+        "min_milestones": 4,
+        "max_milestones": 6,
+        "must_include_keywords": ["time series", "credit risk", "quantitative", "financial ML"],
+        "must_not_include": ["no-code tools", "marketing AI", "creative AI"],
+        "difficulty_distribution": "Trung cấp đến Nâng cao, toán học nặng"
+      }
+    },
+    {
+      "user_id": "TEST_009",
+      "persona_name": "Trần Thị Mỹ Linh – Designer/Artist muốn khám phá AI Sáng tạo",
+      "goal_description": "Tôi là graphic designer và illustrator tự do. Tôi muốn tích hợp AI vào quy trình sáng tác của mình: dùng AI để generate concepts, enhance artwork, và tạo các sản phẩm digital mới. Tôi cũng muốn hiểu cách bảo vệ tác phẩm của mình khỏi AI.",
+      "quiz_answers": [
+        "Không biết lập trình gì cả – chỉ dùng Adobe Suite và Procreate",
+        "Toán yếu, nhưng có tư duy sáng tạo và visual rất mạnh",
+        "Đã thử Midjourney, DALL-E, Stable Diffusion – bị mê ngay",
+        "Muốn master generative AI cho visual art và animation",
+        "Mục tiêu: AI Artist/Creative Director, bán artwork và nhận project AI art",
+        "Học tốt nhất qua visual examples và hands-on experimentation",
+        "Sẵn sàng đăng ký Midjourney Pro, ComfyUI cloud",
+        "Muốn build personal style với AI, tạo NFT collection và print-on-demand",
+        "Thách thức: lo ngại đạo đức AI art và copyright issues",
+        "Muốn có income từ AI art trong 6 tháng"
+      ],
+      "time_per_week": "15 giờ/tuần",
+      "current_job": "Freelance Graphic Designer & Illustrator",
+      "expected_path_type": "creative",
+      "expected_confidence_range": [0.80, 0.93],
+      "test_assertions": {
+        "min_milestones": 4,
+        "max_milestones": 6,
+        "must_include_keywords": ["generative AI", "Midjourney", "Stable Diffusion", "creative", "AI art"],
+        "must_not_include": ["machine learning theory", "Python code", "research paper"],
+        "difficulty_distribution": "Cơ bản đến Trung cấp, visual và creative focused"
+      }
+    },
+    {
+      "user_id": "TEST_010",
+      "persona_name": "Nguyễn Hữu Đức – Sinh viên chưa xác định hướng AI",
+      "goal_description": "Tôi là sinh viên năm 3 ngành Kinh tế. Tôi nghe AI đang là xu hướng và muốn học nhưng thực sự chưa biết mình muốn làm gì với AI. Có người nói học coding, có người nói học business AI. Tôi bị overwhelmed và không biết bắt đầu từ đâu.",
+      "quiz_answers": [
+        "Đang học Python cơ bản được 1 tháng, chưa thành thạo",
+        "Toán ở mức trung bình trong chương trình đại học kinh tế",
+        "Chưa học gì về AI/ML, chỉ đọc tin tức và xem YouTube về AI",
+        "Chưa biết – có thể business AI hoặc có thể data analysis",
+        "Mục tiêu còn mơ hồ: muốn có việc làm liên quan đến AI sau khi ra trường",
+        "Chưa biết phong cách học tập của mình khi học AI",
+        "Không có GPU, dùng laptop trường khá cũ",
+        "Chưa có ý tưởng project cụ thể",
+        "Thách thức lớn nhất: không biết AI có phù hợp với mình không",
+        "Ra trường trong 1.5 năm nữa, muốn có direction rõ ràng trước khi ra trường"
+      ],
+      "time_per_week": "8 giờ/tuần",
+      "current_job": "Sinh viên năm 3 – Đại học Kinh tế TP.HCM",
+      "expected_path_type": "exploratory",
+      "expected_confidence_range": [0.50, 0.72],
+      "test_assertions": {
+        "min_milestones": 3,
+        "max_milestones": 4,
+        "must_include_keywords": ["khám phá", "định hướng", "cơ bản", "exploratory"],
+        "must_include_in_notes": ["câu hỏi làm rõ", "quiz", "advisor"],
+        "difficulty_distribution": "Cơ bản hoàn toàn, nhẹ nhàng và encouraging"
+      }
+    }
+  ],
+  "evaluation_notes": {
+    "happy_path_profiles": ["TEST_001", "TEST_002", "TEST_004", "TEST_005", "TEST_006", "TEST_007", "TEST_008", "TEST_009"],
+    "low_confidence_profiles": ["TEST_003", "TEST_010"],
+    "failure_case_profiles": [],
+    "edge_cases": {
+      "TEST_003": "Ít thời gian nhất (4h/tuần) + ngành rất đặc thù",
+      "TEST_006": "Technical level cao nhất trong dataset",
+      "TEST_010": "Profile mơ hồ nhất, trigger low-confidence path",
+      "TEST_009": "Creative path – ít phổ biến nhất trong AI education"
+    }
+  }
+}

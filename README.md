@@ -1,103 +1,137 @@
-# Batch 02 · Day 06 — AI Product Hackathon
+# Day06 — AI Product Hackathon 🧠✨
+## AI Learning Path Personalizer
 
 > SPEC → Prototype → Demo. Hôm nay không có bài giảng mới — hôm nay chứng minh: SPEC là giả thuyết, prototype là bằng chứng, demo là thuyết phục.
 
 ---
 
-## Cách nộp bài
+## 👥 Thành viên nhóm
 
-**Đại diện nhóm tạo MỘT repo nhóm**, đặt tên:
+| Tên tài khoản | Họ và tên | Vai trò |
+|---|---|---|
+| **VanSangNguyen21** (sangthon2003@gmail.com) | Nguyễn Văn Sang | Product Manager / Lead |
+| **phammaianh11102005@gmail.com** | Phạm Mai Anh | Prompt / AI Engineer |
+| **Shiner-2** | Phan Nhật Huy | Backend Core Developer |
+| **letho1608** | Lê Quang Thọ | Backend Data & Ops |
+| **DoTrungDuc1908** | Đỗ Trung Đức | Frontend UI/UX Developer |
+| **nguyetbinh** | Nguyễn Nguyệt Bình | QA / Test & Pitching |
 
+---
+
+## 🎯 Mô tả sản phẩm
+
+**AI Learning Path Personalizer** — Hệ thống cá nhân hóa lộ trình học AI dành cho người mới bắt đầu.
+
+**Track:** Learning OS (Vin AI Thực Chiến)
+
+**User:** Người mới bắt đầu học AI (sinh viên, người chuyển ngành, người làm kinh doanh/quản lý) đang bị ngợp giữa ma trận tài liệu học tập.
+
+**Build slice:**
+> Cho người mới bắt đầu học AI đang khai báo mục tiêu học tập, prototype dùng AI để phân tích mục tiêu & điểm số quiz đầu vào (10 câu) nhằm đề xuất lộ trình học dạng cây trực quan, tạo ra lộ trình học cá nhân hóa với Confidence Score tương ứng, và xử lý Low-confidence bằng cách kích hoạt Fallback hiển thị lộ trình cơ bản kèm khóa các nhánh nâng cao.
+
+---
+
+## 🚀 Tính năng chính
+
+1. **Quiz & Goal Selection** — Form đăng ký mục tiêu + bài test 10 câu đánh giá trình độ
+2. **Interactive Visual Tree Roadmap** — Lộ trình học dạng sơ đồ cây, có milestone, thời lượng và link tài liệu
+3. **Conversational AI Companion** — Chatbot tích hợp giải thích milestone và tư vấn học tập
+4. **4 Paths Protection** — Happy (>80%), Low-conf (50-80%), Failure, Correction/Feedback Loop
+5. **AI Guardrails** — Chặn Prompt Injection, Rate Limit 5 tin/phút, khóa chat nếu chưa làm quiz
+6. **Cost & Token Monitoring** — Theo dõi chi phí API theo từng phiên
+
+---
+
+## 📁 Cấu trúc repo
+
+```text
+Day06-AI-Product-Hackathon/
+├── README.md                   ← File này (thành viên + mô tả sản phẩm)
+├── spec/                       ← SPEC sản phẩm
+│   ├── README.md               ← Hướng dẫn viết SPEC
+│   ├── spec.md                 ← SPEC chính (thin-spec từ Day 5)
+│   ├── evidence-pack.md        ← Bằng chứng / evidence
+│   ├── thin-spec-template.md   ← Template thin SPEC
+│   └── synthesis-decide-toolkit.md
+└── codebase/                   ← Mã nguồn prototype
+    ├── README.md               ← Hướng dẫn cài đặt & chạy
+    ├── backend/                ← FastAPI backend
+    │   ├── app/api/            ← API endpoints (analyze, chat, feedback, admin)
+    │   ├── middleware/         ← Guardrails, Cost Logger, Data Masking
+    │   ├── models/             ← SQLite Database & CRUD
+    │   └── requirements.txt
+    ├── frontend/               ← Giao diện web
+    │   ├── index.html
+    │   └── src/ (app.js, styles.css)
+    ├── prompts/                ← System prompt & guardrail rules
+    ├── evals/                  ← Test dataset & evaluation report
+    ├── docs/                   ← Architecture & demo script
+    └── cloudflare-demo/        ← Phiên bản deploy trên Cloudflare Workers
 ```
-Day06-Lop-NhomXX
+
+---
+
+## ⚙️ Cách chạy prototype
+
+### 1. Cài đặt dependencies
+
+```bash
+cd codebase/backend
+pip install -r requirements.txt
 ```
 
-Ví dụ: `Day06-C401-Nhom03`
+### 2. Cấu hình môi trường
 
-- **README của repo nhóm phải liệt kê đủ thành viên** — mỗi người gồm **mã học viên + họ và tên**.
-- Đại diện nhóm nộp **link repo** lên LMS. **Hạn nộp: 23:59 ngày 04/06/2026.**
-- Mỗi thành viên cần **ít nhất một commit thực chất** trong repo (không commit = mất điểm cá nhân).
-
-### Cấu trúc repo nhóm
-
-```
-Day06-Lop-NhomXX/
-├── README.md        ← Danh sách thành viên (mã HV + họ tên) + mô tả ngắn sản phẩm
-├── spec/            ← SPEC sản phẩm (xem hướng dẫn trong spec/)
-└── codebase/        ← Toàn bộ code prototype (xem hướng dẫn trong codebase/)
+```bash
+copy .env.example .env
 ```
 
----
+Mở `.env` và điền:
+```env
+OPENAI_API_KEY=your_api_key_here
+OPENAI_API_BASE=https://integrate.api.nvidia.com/v1   # hoặc https://api.openai.com/v1
+MODEL_NAME=deepseek-ai/deepseek-v4-flash              # hoặc gpt-4o-mini
+MAX_DAILY_COST_USD=1.0
+RATE_LIMIT_PER_MINUTE=5
+```
 
-## Lịch ngày 06 — 04/06/2026
+### 3. Chạy backend server
 
-| Giờ | Mốc | Cần đạt |
-|-----|-----|---------|
-| Sáng | Build | Bắt đầu từ SPEC nhẹ đã làm ở Day 5 |
-| **11:00** | Checkpoint 1 | **Show được ít nhất mockup/prototype chạy được** |
-| **13:00** | Checkpoint 2 | **Lắp được AI vào ít nhất 1 flow** |
-| **15:30** | Checkpoint 3 | **Chuẩn bị xong tài liệu demo + slide** |
-| **16:00** | Demo round | Trình bày trong zone, 10 phút/nhóm |
+```bash
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+```
 
----
+API docs: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
-## Tracks
+### 4. Chạy frontend
 
-Mỗi nhóm chọn một lĩnh vực, lấy một app thật trong đó để soi và cải tiến:
-
-| Track | App thật gợi ý |
-|-------|----------------|
-| **Learning OS** (Vin AI Thực Chiến) | LMS khóa học, Discord lớp |
-| **Travel & Hospitality** | Vinpearl, Sun World / SunGroup |
-| **Food & Local Delivery** | ShopeeFood, GrabFood, BeFood, Xanh SM Ngon |
-| **Personal Finance** | MoMo, ZaloPay, app ngân hàng |
-| **Healthcare** | Vinmec, Long Châu, Pharmacity |
-
-> Các nhóm **cùng track** ngồi **cùng một zone** khi demo.
+Mở file `codebase/frontend/index.html` trực tiếp bằng trình duyệt hoặc dùng **Live Server** trong VS Code.
 
 ---
 
-## Kỳ vọng mỗi demo
+## 🛠️ Tech Stack
 
-1. **Product Canvas** — giới thiệu ý tưởng và nỗi đau (painpoint) của người dùng.
-2. **Demo full luồng end-to-end** — show cả happy case lẫn error case.
-3. **AI chạy thật trong ít nhất 1 flow** — không chỉ mockup tĩnh.
-
----
-
-## Demo round (16:00)
-
-- Mỗi nhóm **10 phút** (≈ 5 phút trình bày + 5 phút Q&A).
-- Các nhóm khác **phản biện, đặt câu hỏi**.
-- **Đánh giá chéo qua form**: thành viên các nhóm khác chấm điểm.
-- **Tổng kết**: nhóm điểm cao nhất mỗi zone được **bonus**; còn thời gian thì các nhóm điểm cao **present trước cả lớp**; giảng viên đánh giá.
-
-Chi tiết luật chơi + cách chấm: [`hackathon-rules.md`](hackathon-rules.md)
+| Layer | Công nghệ |
+|-------|-----------|
+| Frontend | HTML5, Vanilla CSS3 (Glassmorphism, Dark theme), Vanilla JavaScript |
+| Backend | FastAPI (Python), Uvicorn, Pydantic, SQLite3 |
+| AI Model | NVIDIA API / OpenAI API — `deepseek-ai/deepseek-v4-flash` |
+| Guardrails | Custom regex + keyword filter (guardrail_rules.json) |
+| Cost tracking | SQLite cost_logs table + in-memory rate limiter |
 
 ---
 
-## Chấm điểm (Day 5 + Day 6 = 100 điểm)
+## 👤 Phân công chi tiết
 
-| Hạng mục | Điểm |
-|----------|------|
-| SPEC | 25 |
-| Prototype | 15 |
-| Demo Day | 25 |
-| Bài tập UX (Day 5) | 10 |
-| Phản ánh cá nhân (reflection) | 25 |
-
-**Điều kiện chặn:** prototype không có lời gọi AI thật → giới hạn 4/10 · không có commit → mất điểm cá nhân · không giải thích được phần mình khi bị hỏi → 0 điểm demo cá nhân.
-
----
-
-## Tài liệu trong repo này
-
-| Folder / file | Nội dung |
-|---------------|----------|
-| [`hackathon-rules.md`](hackathon-rules.md) | Luật chơi, lịch, demo round, cách chấm |
-| [`spec/`](spec/) | Hướng dẫn viết SPEC sản phẩm (nối tiếp SPEC nhẹ Day 5) |
-| [`codebase/`](codebase/) | Yêu cầu nộp code prototype |
+| Thành viên | Phần đã làm | File chứng minh |
+|---|---|---|
+| **VanSangNguyen21** | Product Lead — Quản lý Spec, định nghĩa Pain & Opportunity, tổng hợp tài liệu nhóm, tích hợp guardrails & evals pipeline | `spec/spec.md`, `spec/evidence-pack.md`, `codebase/evals/run_evals.py`, `codebase/backend/middleware/guardrails.py` |
+| **phammaianh11102005** | Prompt Engineer — Thiết kế System Prompt, JSON Schema, Guardrail rules chống Injection | `codebase/prompts/system_prompt.txt`, `codebase/prompts/guardrail_rules.json` |
+| **Shiner-2** | Backend Core — API `/api/analyze`, `/api/chat`, routing chính | `codebase/backend/app/api/analyze.py`, `codebase/backend/app/api/chat.py`, `codebase/backend/app/main.py` |
+| **letho1608** | Backend Data & Ops — SQLite database, Cost Logger, Rate limits, Feedback log | `codebase/backend/models/database.py`, `codebase/backend/middleware/cost_logger.py`, `codebase/backend/app/api/feedback.py` |
+| **DoTrungDuc1908** | Frontend UI/UX — Giao diện Web HTML/CSS/JS, Form khảo sát, Quiz 10 câu, Visual Tree Roadmap | `codebase/frontend/index.html`, `codebase/frontend/src/app.js`, `codebase/frontend/src/styles.css` |
+| **nguyetbinh** | QA / Test & Pitching — Dataset 10 user profiles, evaluation report, demo script, architecture docs | `codebase/evals/test_dataset.json`, `codebase/evals/evaluation_report.md`, `codebase/docs/demo_script.md` |
 
 ---
 
-*Batch 02 · Ngày 06 — VinUni A20 · AI Thực Chiến · 2026*
+*Batch 02 · Ngày 06 — VinUni AI20k · AI Thực Chiến · 2026*

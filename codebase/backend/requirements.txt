@@ -1,0 +1,41 @@
+# ============================================================
+# requirements.txt - Danh sách gói phụ thuộc
+# AI Learning Path Personalization Backend
+# ============================================================
+
+# ── Web Framework ──────────────────────────────────────────
+fastapi==0.111.0          # Framework API hiệu suất cao / High-performance API framework
+uvicorn[standard]==0.29.0 # ASGI server với WebSocket / ASGI server with WebSocket support
+
+# ── Validation & Settings ──────────────────────────────────
+pydantic==2.7.1           # Data validation và settings / Data validation and settings
+pydantic-settings==2.2.1  # Pydantic v2 settings management
+python-dotenv==1.0.1      # Tải biến môi trường từ .env / Load env vars from .env file
+
+# ── LLM Clients ────────────────────────────────────────────
+openai==1.30.1            # OpenAI GPT-4o, GPT-4o-mini, GPT-3.5 client
+google-generativeai==0.7.2  # Google Gemini Flash / Pro client
+
+# ── HTTP Client ────────────────────────────────────────────
+httpx==0.27.0             # Async HTTP client (dùng bởi OpenAI SDK / used by OpenAI SDK)
+
+# ── Database ───────────────────────────────────────────────
+# sqlite3 là thư viện tích hợp Python / sqlite3 is a Python built-in, no install needed
+aiosqlite==0.20.0         # Async SQLite support (tuỳ chọn / optional async wrapper)
+
+# ── Security ───────────────────────────────────────────────
+python-multipart==0.0.9   # Form data parsing (cần cho FastAPI uploads / needed for uploads)
+
+# ── Development Tools ──────────────────────────────────────
+pytest==8.2.2             # Unit testing framework
+pytest-asyncio==0.23.7    # Async test support
+httpx==0.27.0             # Test client cho FastAPI / FastAPI test client
+
+# ── Logging & Monitoring ───────────────────────────────────
+# Logging sử dụng stdlib / Logging uses stdlib (no extra package needed)
+
+# ── Type Hints ─────────────────────────────────────────────
+typing-extensions==4.11.0  # Hỗ trợ type hints nâng cao / Advanced type hint support
+
+# ── Production ─────────────────────────────────────────────
+gunicorn==22.0.0           # Production WSGI server (tuỳ chọn / optional)

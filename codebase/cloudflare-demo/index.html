@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloudflare Shield & AI Worker Hub</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Load Cloudflare Turnstile API -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header>
+      <div class="logo-section">
+        <div class="logo-icon">CF</div>
+        <div class="logo-text">
+          <h1>Cloudflare Developer Shield</h1>
+          <p>Security & Serverless AI Integration</p>
+        </div>
+      </div>
+      <div class="cf-status-badge">
+        <div class="status-dot"></div>
+        <span>Cloudflare Edge Connected</span>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-tab="turnstile">
+        🛡️ Turnstile Security Gate
+      </button>
+      <button class="tab-btn" data-tab="workers-ai">
+        🧠 Workers AI Playground
+      </button>
+      <button class="tab-btn" data-tab="pages-config">
+        🚀 Pages Config Builder
+      </button>
+    </nav>
+
+    <!-- Tab 1: Turnstile Gate -->
+    <div id="tab-turnstile" class="tab-content active">
+      <div class="grid-2col">
+        <!-- Input & Form Area -->
+        <div class="glass-card accent-orange">
+          <div class="card-title">🛡️ Turnstile Challenge Gate</div>
+          <div class="card-subtitle">Cấu hình và thử nghiệm cơ chế xác thực không CAPTCHA của Cloudflare</div>
+
+          <form id="gate-form" onsubmit="event.preventDefault();">
+            <div class="form-group">
+              <label class="form-label">Chọn Loại Khóa Turnstile Thử Nghiệm (Site Key)</label>
+              <div class="key-selector-grid">
+                <label class="key-option">
+                  <input type="radio" name="sitekey-selector" value="1x00000000000000000000AA" checked>
+                  <div class="key-card">
+                    <span class="key-title">Always Pass</span>
+                    <span class="key-desc">Luôn tự động vượt qua thử thách</span>
+                  </div>
+                </label>
+                <label class="key-option">
+                  <input type="radio" name="sitekey-selector" value="3x00000000000000000000FF">
+                  <div class="key-card">
+                    <span class="key-title">Interactive</span>
+                    <span class="key-desc">Bắt buộc xác thực trực quan</span>
+                  </div>
+                </label>
+                <label class="key-option">
+                  <input type="radio" name="sitekey-selector" value="2x00000000000000000000AB">
+                  <div class="key-card">
+                    <span class="key-title">Always Fail</span>
+                    <span class="key-desc">Luôn báo lỗi thất bại</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="username-input">Tên Người Dùng / Client ID</label>
+              <input type="text" id="username-input" class="form-input" placeholder="Nhập tên đăng nhập demo..." value="VinUni_Student_Batch02">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="action-select">Mục Đích Yêu Cầu</label>
+              <select id="action-select" class="form-select">
+                <option value="login">Đăng Nhập Hệ Thống Secure-Console</option>
+                <option value="access_ai">Mở Khóa Cloudflare Workers AI Playground</option>
+                <option value="sensitive_op">Thực Hiện Giao Dịch Nhạy Cảm</option>
+              </select>
+            </div>
+
+            <!-- Turnstile Anchor Container -->
+            <div class="form-group">
+              <label class="form-label">Thử thách Cloudflare Turnstile</label>
+              <div class="turnstile-box">
+                <div id="turnstile-container"></div>
+                <!-- Hidden input to store token -->
+                <input type="hidden" id="turnstile-token" name="cf-turnstile-response">
+              </div>
+            </div>
+
+            <button type="button" id="btn-verify-gate" class="btn-primary" disabled>
+              🔒 Xác Thực & Truy Cập
+            </button>
+          </form>
+        </div>
+
+        <!-- Terminal Console Logs -->
+        <div class="glass-card terminal-card">
+          <div class="terminal-header">
+            <div class="terminal-dots">
+              <div class="dot red"></div>
+              <div class="dot yellow"></div>
+              <div class="dot green"></div>
+            </div>
+            <span class="terminal-title">cloudflare_edge_monitor.log</span>
+            <button class="btn-copy" id="btn-clear-logs">Clear Logs</button>
+          </div>
+          <div class="terminal-body" id="log-console">
+            <!-- Dynamic logs will appear here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: Workers AI Playground -->
+    <div id="tab-workers-ai" class="tab-content">
+      <div class="glass-card accent-blue" style="position: relative;">
+        <!-- Shield Overlay if not verified -->
+        <div id="ai-gate-overlay" class="guarded-overlay">
+          <div class="shield-icon-container">
+            🛡️
+          </div>
+          <h2 style="font-family: var(--font-display); margin-bottom: 0.5rem;">Cổng Đã Bị Khóa Bởi Cloudflare Shield</h2>
+          <p style="color: var(--text-secondary); max-width: 500px; margin-bottom: 1.5rem;">
+            Để bảo vệ chống lại Bot, spam và Prompt Injection, bạn cần hoàn tất xác thực Cloudflare Turnstile tại Tab "Turnstile Security Gate" trước.
+          </p>
+          <button class="btn-primary" style="width: auto;" onclick="switchTab('turnstile')">
+            Đi Đến Cổng Xác Thực
+          </button>
+        </div>
+
+        <div class="tab-panel-grid">
+          <!-- Sidebar Model Selection -->
+          <div class="panel-sidebar">
+            <h3 style="font-family: var(--font-display); margin-bottom: 0.5rem; font-size: 1rem; color: var(--text-secondary); text-transform: uppercase;">
+              Chọn Workers AI Model
+            </h3>
+            <button class="sidebar-btn active" data-model="llama-3" onclick="selectAIModel('llama-3')">
+              <span>Text Generation</span>
+              <span class="sidebar-btn-tag">Llama 3.1</span>
+            </button>
+            <button class="sidebar-btn" data-model="flux" onclick="selectAIModel('flux')">
+              <span>Image Generation</span>
+              <span class="sidebar-btn-tag">Flux-1 Schnell</span>
+            </button>
+            <button class="sidebar-btn" data-model="whisper" onclick="selectAIModel('whisper')">
+              <span>Speech-to-Text</span>
+              <span class="sidebar-btn-tag">Whisper v3</span>
+            </button>
+          </div>
+
+          <!-- Model Runner Area -->
+          <div>
+            <div id="model-text-generator" class="model-view">
+              <div class="card-title">🧠 Workers AI Text Generation</div>
+              <div class="card-subtitle">Chạy mô hình Meta Llama 3.1 trên biên mạng Cloudflare Edge</div>
+
+              <div class="form-group">
+                <label class="form-label" for="prompt-input">Nhập Prompt Trò Chuyện</label>
+                <textarea id="prompt-input" class="form-textarea" placeholder="Hỏi Llama điều gì đó về Cloudflare...">Hãy giải thích ngắn gọn Cloudflare Workers là gì?</textarea>
+              </div>
+
+              <button type="button" id="btn-run-ai" class="btn-primary" onclick="runTextGeneration()">
+                ✨ Gửi Yêu Cầu Đến Edge Worker
+              </button>
+            </div>
+
+            <div id="model-image-generator" class="model-view" style="display: none;">
+              <div class="card-title">🖼️ Workers AI Image Generation</div>
+              <div class="card-subtitle">Tạo hình ảnh chất lượng cao sử dụng mô hình FLUX.1-schnell</div>
+
+              <div class="form-group">
+                <label class="form-label" for="image-prompt-input">Mô tả hình ảnh bằng tiếng Anh</label>
+                <textarea id="image-prompt-input" class="form-textarea" placeholder="Mô tả hình ảnh mong muốn...">A futuristic cybernetic city with Cloudflare orange glowing symbols, 4k resolution, cinematic lighting</textarea>
+              </div>
+
+              <button type="button" id="btn-run-image-ai" class="btn-primary" onclick="runImageGeneration()">
+                🎨 Tạo Ảnh Bằng AI Worker
+              </button>
+            </div>
+
+            <div id="model-speech-generator" class="model-view" style="display: none;">
+              <div class="card-title">🎙️ Workers AI Speech-to-Text</div>
+              <div class="card-subtitle">Chuyển đổi âm thanh thành văn bản qua mô hình Whisper v3</div>
+
+              <div class="form-group">
+                <label class="form-label">Chọn File Âm Thanh Mẫu</label>
+                <select id="audio-sample-select" class="form-select">
+                  <option value="vinuni_intro.mp3">Giới thiệu về VinUni AI Club (Tiếng Việt)</option>
+                  <option value="cloudflare_pages.mp3">Deploying Static Apps on Cloudflare Pages (English)</option>
+                </select>
+              </div>
+
+              <button type="button" id="btn-run-speech-ai" class="btn-primary" onclick="runSpeechToText()">
+                🎙️ Phóng Tác File Âm Thanh
+              </button>
+            </div>
+
+            <!-- Execution Results / Logs -->
+            <div style="margin-top: 2rem;">
+              <div class="code-header">
+                <span class="code-lang-label" id="editor-lang">Worker Deployment Code (wrangler.js)</span>
+                <button class="btn-copy" id="btn-copy-code">Copy Code</button>
+              </div>
+              <div class="code-editor">
+                <pre><code id="code-snippet"></code></pre>
+              </div>
+
+              <div class="code-header">
+                <span class="code-lang-label">Response Data From Edge Server</span>
+              </div>
+              <div class="code-editor">
+                <pre><code id="response-snippet">Click "Gửi Yêu Cầu Đến Edge Worker" để xem phản hồi thực tế từ Cloudflare Workers...</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 3: Pages Config Builder -->
+    <div id="tab-pages-config" class="tab-content">
+      <div class="grid-2col">
+        <!-- Configuration options -->
+        <div class="glass-card accent-orange">
+          <div class="card-title">🚀 Pages Config Generator</div>
+          <div class="card-subtitle">Tạo các file cấu hình bảo mật chuẩn cho Cloudflare Pages</div>
+
+          <div class="config-options">
+            <label class="checkbox-label">
+              <input type="checkbox" id="opt-hsts" checked>
+              <div>
+                <strong>HSTS (HTTP Strict Transport Security)</strong>
+                <div style="font-size: 0.8rem; color: var(--text-secondary);">Bắt buộc trình duyệt luôn truy cập qua HTTPS để chống tấn công Man-in-the-middle</div>
+              </div>
+            </label>
+
+            <label class="checkbox-label">
+              <input type="checkbox" id="opt-csp" checked>
+              <div>
+                <strong>Strict CSP (Content Security Policy)</strong>
+                <div style="font-size: 0.8rem; color: var(--text-secondary);">Ngăn chặn XSS bằng cách chỉ định rõ các nguồn script được phép load (bao gồm cả Turnstile)</div>
+              </div>
+            </label>
+
+            <label class="checkbox-label">
+              <input type="checkbox" id="opt-cors">
+              <div>
+                <strong>CORS Security Headers</strong>
+                <div style="font-size: 0.8rem; color: var(--text-secondary);">Cấu hình các header Access-Control-Allow-Origin giới hạn quyền gọi API từ bên ngoài</div>
+              </div>
+            </label>
+
+            <label class="checkbox-label">
+              <input type="checkbox" id="opt-clickjack" checked>
+              <div>
+                <strong>X-Frame-Options (Chống Clickjacking)</strong>
+                <div style="font-size: 0.8rem; color: var(--text-secondary);">Ngăn chặn kẻ xấu nhúng trang web của bạn vào một iframe trên trang khác</div>
+              </div>
+            </label>
+          </div>
+
+          <button type="button" class="btn-primary" onclick="generateConfig()">
+            ⚙️ Tạo File Cấu Hình _headers
+          </button>
+        </div>
+
+        <!-- Generated Output Code -->
+        <div class="glass-card">
+          <div class="card-title">📄 Cloudflare Pages _headers Output</div>
+          <div class="card-subtitle">Đặt tệp này vào thư mục build của bạn (dist/ hoặc public/) khi deploy lên Pages</div>
+
+          <div class="code-header">
+            <span class="code-lang-label">_headers</span>
+            <button class="btn-copy" id="btn-copy-headers">Copy Content</button>
+          </div>
+          <div class="code-editor">
+            <pre><code id="headers-output">/*
+  # Click "Tạo File Cấu Hình _headers" để tạo cấu hình...</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- App Main Script -->
+  <script src="app.js"></script>
+</body>
+</html>

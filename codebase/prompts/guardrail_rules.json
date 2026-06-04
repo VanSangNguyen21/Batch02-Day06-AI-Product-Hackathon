@@ -1,0 +1,80 @@
+{
+  "version": "1.0.0",
+  "description": "Bộ quy tắc guardrail cho AI Path - Lớp bảo vệ chống lạm dụng",
+
+  "banned_keywords": [
+    "hack", "hacking", "exploit", "bypass security", "sql injection",
+    "xss attack", "jailbreak", "ignore previous instructions",
+    "act as", "pretend you are", "forget your instructions",
+    "reveal your system prompt", "show me your prompt",
+    "tài khoản ngân hàng", "mật khẩu người khác", "phishing",
+    "bom", "vũ khí", "chế tạo", "drug", "ma túy",
+    "DAN", "developer mode", "override", "sudo",
+    "you are now", "new instructions:", "system:", "[SYSTEM]"
+  ],
+
+  "jailbreak_patterns": [
+    "ignore (all |previous |above )?(instructions|rules|guidelines)",
+    "you (are|were) (now |a )?(free|unrestricted|unfiltered)",
+    "pretend (you are|to be|that you)",
+    "act as (a|an) (different|unrestricted|evil)",
+    "forget (everything|all) (you|your)",
+    "your (new|real) (instructions|purpose|goal) (is|are)",
+    "\\[SYSTEM\\].*\\[/SYSTEM\\]",
+    "<!-- .*system.* -->",
+    "reveal (your|the) (system |)prompt",
+    "(bypass|disable|remove) (your )?(safety|filter|guard)",
+    "token limit.*exceeded",
+    "print (the |your )?(above|previous|full) (prompt|instructions)"
+  ],
+
+  "spam_detection": {
+    "max_repeated_chars": 50,
+    "max_repeated_words": 10,
+    "min_message_length": 2,
+    "max_message_length": 2000,
+    "pattern": "(.{1,5})\\1{20,}"
+  },
+
+  "rate_limits": {
+    "max_messages_per_minute": 5,
+    "max_messages_per_hour": 60,
+    "max_messages_per_day": 100,
+    "max_daily_cost_usd": 1.0,
+    "cost_exceeded_action": "slow_down",
+    "comment": "Khi user vượt max_daily_cost_usd: giới hạn tốc độ phản hồi thay vì block hoàn toàn"
+  },
+
+  "quiz_gate": {
+    "min_questions_answered": 3,
+    "comment": "User phải hoàn thành ít nhất 3 câu quiz trước khi hỏi câu hỏi chuyên sâu"
+  },
+
+  "out_of_scope_keywords": [
+    "hack ngân hàng", "kiếm tiền nhanh", "cờ bạc online",
+    "chứng khoán bot", "trading bot illegal", "scrape dữ liệu trái phép",
+    "deepfake người khác", "giả mạo giọng nói", "tạo ảnh khiêu dâm",
+    "bypass captcha", "spam email", "phần mềm độc hại",
+    "crypto scam", "rug pull", "pump and dump",
+    "nấu ăn", "canh chua", "món ăn", "công thức nấu", "du lịch", "thời tiết"
+  ],
+
+  "response_templates": {
+    "blocked_harmful": "🛡️ [Yêu cầu vi phạm ranh giới bảo mật của hệ thống]. Hệ thống AI Path chỉ hỗ trợ các câu hỏi liên quan đến học tập và phát triển kỹ năng AI.",
+    "blocked_spam": "🚫 Phát hiện hành vi spam. Vui lòng nhập câu hỏi thực sự của bạn. Hệ thống đã ghi nhận sự kiện này.",
+    "blocked_jailbreak": "🛡️ [Yêu cầu vi phạm ranh giới bảo mật của hệ thống]",
+    "out_of_scope": "📚 Câu hỏi của bạn nằm ngoài phạm vi của AI Path. Tôi chỉ có thể hỗ trợ các chủ đề liên quan đến lộ trình học AI và phát triển kỹ năng. Bạn muốn hỏi gì về lộ trình học của bạn?",
+    "rate_limited": "⏳ Bạn đã gửi quá nhiều tin nhắn. Hệ thống giới hạn 5 tin nhắn/phút để đảm bảo chất lượng phục vụ. Vui lòng đợi {seconds} giây.",
+    "cost_limited": "💰 Bạn đã sử dụng hết ngân sách AI cho hôm nay ($1 USD). Hệ thống sẽ tự động reset vào 00:00 ngày mai. Lộ trình học của bạn vẫn có thể truy cập trong Tab Lộ trình.",
+    "quiz_required": "📋 Vui lòng hoàn thành bài test năng lực ngắn (ít nhất 3 câu) trước khi hỏi chuyên sâu để mình hỗ trợ tốt nhất nhé! Bấm vào bước 'Kiểm tra năng lực' để bắt đầu.",
+    "too_short": "Vui lòng nhập câu hỏi rõ ràng hơn (ít nhất 2 ký tự).",
+    "too_long": "Câu hỏi quá dài (tối đa 2000 ký tự). Vui lòng rút gọn câu hỏi của bạn."
+  },
+
+  "logging": {
+    "log_blocked_requests": true,
+    "log_fields": ["user_id", "timestamp", "reason", "message_preview_50_chars"],
+    "alert_admin_on_repeated_violations": 3,
+    "comment": "Ghi log tất cả request bị block để phân tích và cải thiện hệ thống"
+  }
+}
