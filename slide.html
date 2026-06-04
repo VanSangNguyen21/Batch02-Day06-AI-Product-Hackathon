@@ -1,0 +1,1403 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Learning Path Personalizer — Presentation</title>
+    <style>
+      :root {
+        --bg: #070b14;
+        --bg-2: #0b1220;
+        --panel: rgba(15, 23, 42, 0.78);
+        --panel-strong: rgba(15, 23, 42, 0.95);
+        --line: rgba(148, 163, 184, 0.18);
+        --line-strong: rgba(148, 163, 184, 0.34);
+        --text: #f8fafc;
+        --muted: #94a3b8;
+        --soft: #cbd5e1;
+        --brand: #38bdf8;
+        --brand-2: #818cf8;
+        --ok: #22c55e;
+        --warn: #f59e0b;
+        --bad: #ef4444;
+        --shadow: 0 30px 90px rgba(0, 0, 0, 0.45);
+        --radius: 28px;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background:
+          radial-gradient(
+            circle at 12% 8%,
+            rgba(56, 189, 248, 0.16),
+            transparent 32%
+          ),
+          radial-gradient(
+            circle at 80% 18%,
+            rgba(129, 140, 248, 0.14),
+            transparent 30%
+          ),
+          linear-gradient(135deg, var(--bg), var(--bg-2));
+        color: var(--text);
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+          linear-gradient(rgba(148, 163, 184, 0.055) 1px, transparent 1px),
+          linear-gradient(
+            90deg,
+            rgba(148, 163, 184, 0.055) 1px,
+            transparent 1px
+          );
+        background-size: 42px 42px;
+        mask-image: radial-gradient(
+          circle at center,
+          black 0%,
+          transparent 78%
+        );
+      }
+
+      .deck {
+        height: 100vh;
+        display: grid;
+        grid-template-rows: 70px 1fr 72px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 38px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(7, 11, 20, 0.64);
+        backdrop-filter: blur(18px);
+      }
+
+      .brand {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        letter-spacing: 0.02em;
+      }
+
+      .brand-mark {
+        width: 12px;
+        height: 34px;
+        border-radius: 999px;
+        background: linear-gradient(180deg, var(--brand), var(--brand-2));
+        box-shadow: 0 0 28px rgba(56, 189, 248, 0.45);
+      }
+
+      .brand-title {
+        font-size: 0.88rem;
+        color: var(--soft);
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+      }
+
+      .counter {
+        color: var(--muted);
+        font-size: 0.95rem;
+        font-weight: 600;
+      }
+
+      .counter strong {
+        color: var(--text);
+        font-size: 1.05rem;
+      }
+
+      .progress {
+        position: absolute;
+        top: 69px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: rgba(148, 163, 184, 0.14);
+        z-index: 10;
+      }
+
+      .progress-fill {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, var(--brand), var(--brand-2));
+        box-shadow: 0 0 24px rgba(56, 189, 248, 0.5);
+        transition: width 0.45s ease;
+      }
+
+      .stage {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .slide {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding: 54px 70px 70px;
+        transition:
+          opacity 0.55s ease,
+          transform 0.55s ease,
+          visibility 0.55s ease;
+        transform: translateX(22px) scale(0.992);
+      }
+
+      .slide::-webkit-scrollbar,
+      .slide *::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+        display: none;
+      }
+
+      .slide.active {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transform: translateX(0) scale(1);
+      }
+
+      .slide-inner {
+        width: min(1180px, 100%);
+        min-height: 100%;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 30px;
+      }
+
+      .slide.long .slide-inner {
+        justify-content: flex-start;
+        padding-bottom: 40px;
+      }
+
+      .eyebrow {
+        color: var(--brand);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 800;
+        font-size: 0.82rem;
+      }
+
+      h1 {
+        font-size: clamp(3.4rem, 7vw, 6.6rem);
+        line-height: 0.95;
+        letter-spacing: -0.07em;
+        max-width: 980px;
+      }
+
+      h2 {
+        font-size: clamp(2.35rem, 4.4vw, 4.5rem);
+        line-height: 0.98;
+        letter-spacing: -0.055em;
+        max-width: 900px;
+      }
+
+      h3 {
+        font-size: 1.1rem;
+        letter-spacing: -0.015em;
+        color: var(--text);
+        margin-bottom: 10px;
+      }
+
+      p {
+        color: var(--soft);
+        line-height: 1.65;
+        font-size: 1rem;
+      }
+
+      .lead {
+        max-width: 840px;
+        font-size: clamp(1.1rem, 1.7vw, 1.42rem);
+        color: #dbeafe;
+        line-height: 1.55;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .accent {
+        color: var(--brand);
+      }
+
+      .hero {
+        padding: 54px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background:
+          linear-gradient(
+            135deg,
+            rgba(15, 23, 42, 0.72),
+            rgba(15, 23, 42, 0.36)
+          ),
+          radial-gradient(
+            circle at 82% 18%,
+            rgba(56, 189, 248, 0.16),
+            transparent 38%
+          );
+        box-shadow: var(--shadow);
+      }
+
+      .hero-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 30px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid var(--line);
+        background: rgba(15, 23, 42, 0.72);
+        color: var(--soft);
+        border-radius: 999px;
+        padding: 10px 14px;
+        font-weight: 700;
+        font-size: 0.9rem;
+      }
+
+      .grid {
+        display: grid;
+        gap: 18px;
+      }
+
+      .grid-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .grid-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .card {
+        position: relative;
+        overflow: hidden;
+        min-height: 150px;
+        padding: 24px;
+        border-radius: 22px;
+        border: 1px solid var(--line);
+        background: linear-gradient(
+          180deg,
+          rgba(15, 23, 42, 0.76),
+          rgba(15, 23, 42, 0.54)
+        );
+        box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+      }
+
+      .card::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--brand), transparent);
+        opacity: 0.8;
+      }
+
+      .card .label {
+        color: var(--brand);
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 0.72rem;
+        margin-bottom: 14px;
+      }
+
+      .card p {
+        color: var(--muted);
+        font-size: 0.98rem;
+      }
+
+      .numbered {
+        counter-reset: step;
+      }
+
+      .step-card {
+        min-height: 168px;
+      }
+
+      .step-card::after {
+        counter-increment: step;
+        content: "0" counter(step);
+        position: absolute;
+        right: 22px;
+        bottom: 12px;
+        color: rgba(148, 163, 184, 0.12);
+        font-size: 3.8rem;
+        font-weight: 900;
+        line-height: 1;
+        letter-spacing: -0.08em;
+      }
+
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .flow-box {
+        border: 1px solid var(--line);
+        background: rgba(15, 23, 42, 0.72);
+        border-radius: 20px;
+        padding: 20px;
+        min-height: 122px;
+        position: relative;
+      }
+
+      .flow-box::after {
+        content: "";
+        position: absolute;
+        width: 36px;
+        height: 1px;
+        right: -25px;
+        top: 50%;
+        background: var(--line-strong);
+      }
+
+      .flow-box:last-child::after {
+        display: none;
+      }
+
+      .flow-index {
+        color: var(--brand);
+        font-weight: 900;
+        margin-bottom: 12px;
+        display: block;
+      }
+
+      .architecture {
+        display: grid;
+        grid-template-columns: 1fr 1.4fr 1fr;
+        gap: 18px;
+        align-items: stretch;
+      }
+
+      .arch-column {
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: rgba(15, 23, 42, 0.58);
+        padding: 22px;
+      }
+
+      .arch-node {
+        padding: 15px 16px;
+        border-radius: 16px;
+        border: 1px solid var(--line);
+        background: rgba(2, 6, 23, 0.36);
+        margin-top: 12px;
+        color: var(--soft);
+        font-weight: 650;
+      }
+
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .metric {
+        padding: 26px;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: rgba(15, 23, 42, 0.68);
+      }
+
+      .metric-value {
+        font-size: 2.4rem;
+        line-height: 1;
+        font-weight: 900;
+        letter-spacing: -0.06em;
+        color: var(--brand);
+        margin-bottom: 12px;
+      }
+
+      .metric.good .metric-value {
+        color: var(--ok);
+      }
+      .metric.warn .metric-value {
+        color: var(--warn);
+      }
+      .metric.bad .metric-value {
+        color: var(--bad);
+      }
+
+      .quote {
+        max-width: 860px;
+        padding-left: 28px;
+        border-left: 4px solid var(--brand);
+        color: #e0f2fe;
+        font-size: clamp(1.25rem, 2vw, 1.75rem);
+        line-height: 1.45;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+      }
+
+      .code-schema {
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 24px;
+        background: rgba(2, 6, 23, 0.58);
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        color: #bae6fd;
+        line-height: 1.65;
+        white-space: pre-wrap;
+        text-align: left;
+        font-size: 0.92rem;
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: 1.08fr 0.92fr;
+        gap: 26px;
+        align-items: center;
+      }
+
+      .note-panel {
+        position: fixed;
+        left: 34px;
+        bottom: 92px;
+        width: min(540px, calc(100vw - 68px));
+        max-height: 210px;
+        overflow-y: auto;
+        scrollbar-width: none;
+        border-radius: 20px;
+        border: 1px solid var(--line);
+        background: var(--panel-strong);
+        backdrop-filter: blur(18px);
+        padding: 20px;
+        color: var(--muted);
+        box-shadow: var(--shadow);
+        display: none;
+        z-index: 30;
+      }
+
+      .note-panel::-webkit-scrollbar {
+        display: none;
+      }
+
+      .note-panel.show {
+        display: block;
+      }
+
+      .controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 0 38px;
+        border-top: 1px solid var(--line);
+        background: rgba(7, 11, 20, 0.72);
+        backdrop-filter: blur(18px);
+      }
+
+      .control-group {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+
+      button {
+        border: 1px solid var(--line);
+        background: rgba(15, 23, 42, 0.84);
+        color: var(--text);
+        padding: 12px 18px;
+        border-radius: 999px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: 0.2s ease;
+      }
+
+      button:hover {
+        border-color: rgba(56, 189, 248, 0.5);
+        transform: translateY(-1px);
+      }
+
+      button:disabled {
+        opacity: 0.36;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .hint {
+        color: var(--muted);
+        font-size: 0.9rem;
+        font-weight: 650;
+      }
+
+      .dots {
+        display: flex;
+        gap: 7px;
+        align-items: center;
+      }
+
+      .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.32);
+      }
+
+      .dot.active {
+        width: 24px;
+        background: linear-gradient(90deg, var(--brand), var(--brand-2));
+      }
+
+      @media (max-width: 1040px) {
+        .deck {
+          grid-template-rows: 64px 1fr 68px;
+        }
+        .slide {
+          padding: 42px 28px 58px;
+        }
+        .grid-3,
+        .grid-4,
+        .metric-grid,
+        .flow,
+        .architecture,
+        .split {
+          grid-template-columns: 1fr;
+        }
+        .flow-box::after {
+          display: none;
+        }
+        .topbar,
+        .controls {
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+        .hint {
+          display: none;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .hero {
+          padding: 30px;
+        }
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+        .brand-title {
+          font-size: 0.72rem;
+        }
+        .slide {
+          padding: 30px 18px 46px;
+        }
+        .control-group button {
+          padding: 10px 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="deck">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark"></span>
+          <span class="brand-title">AI Learning Path Personalizer</span>
+        </div>
+        <div class="counter">
+          <strong id="current">1</strong> / <span id="total">15</span>
+        </div>
+      </header>
+
+      <div class="progress">
+        <div class="progress-fill" id="progress"></div>
+      </div>
+
+      <section class="stage" id="stage">
+        <article class="slide active">
+          <div class="slide-inner">
+            <div class="hero">
+              <div class="eyebrow">VinUni AI Product Hackathon</div>
+              <h1>AI Learning Path Personalizer</h1>
+              <p class="lead">
+                Cá nhân hóa lộ trình học AI/ML dựa trên mục tiêu, nền tảng và
+                bài kiểm tra đầu vào.
+              </p>
+              <div class="hero-meta">
+                <span class="pill">Learning OS Track</span>
+                <span class="pill">FastAPI Backend</span>
+                <span class="pill">RAG Quiz Selection</span>
+                <span class="pill">Visual Roadmap</span>
+              </div>
+        </article>
+
+        <article class="slide">
+          <div class="slide-inner">
+            <div class="eyebrow">Problem</div>
+            <h2>
+              Người mới học AI thường không thiếu tài liệu, họ thiếu một lộ
+              trình đúng.
+            </h2>
+            <div class="grid grid-3">
+              <div class="card">
+                <div class="label">Pain point 01</div>
+                <h3>Quá nhiều tài nguyên</h3>
+                <p>
+                  Khóa học, video, roadmap và blog xuất hiện quá nhiều khiến
+                  người học khó chọn điểm bắt đầu.
+                </p>
+              </div>
+              <div class="card">
+                <div class="label">Pain point 02</div>
+                <h3>Không biết mức hiện tại</h3>
+                <p>
+                  Người học không chắc mình đang thiếu toán, lập trình, ML
+                  fundamentals hay kỹ năng ứng dụng.
+                </p>
+              </div>
+              <div class="card">
+                <div class="label">Pain point 03</div>
+                <h3>Lộ trình dễ quá hoặc quá khó</h3>
+                <p>
+                  Mục tiêu học thường không khớp với thời gian, background và
+                  năng lực hiện tại.
+                </p>
+              </div>
+            </div>
+            <p class="quote">
+              Advisor con người khó scale. Sản phẩm cần đóng vai trò như một AI
+              advisor có thể tư vấn nhanh, nhất quán và cá nhân hóa.
+            </p>
+          </div>
+        </article>
+
+        <article class="slide">
+          <div class="slide-inner">
+            <div class="eyebrow">Target users</div>
+            <h2>Bốn nhóm người dùng chính cần những lộ trình khác nhau.</h2>
+            <div class="grid grid-4">
+              <div class="card">
+                <div class="label">Persona</div>
+                <h3>Sinh viên mới học AI</h3>
+                <p>Cần nền tảng, thuật ngữ cơ bản và cách học có thứ tự.</p>
+              </div>
+              <div class="card">
+                <div class="label">Persona</div>
+                <h3>Career switcher</h3>
+                <p>
+                  Cần biết học gì trước để chuyển ngành sang AI/ML hiệu quả.
+                </p>
+              </div>
+              <div class="card">
+                <div class="label">Persona</div>
+                <h3>Developer</h3>
+                <p>
+                  Đã biết lập trình nhưng cần nối sang ML, data và model
+                  evaluation.
+                </p>
+              </div>
+              <div class="card">
+                <div class="label">Persona</div>
+                <h3>Business/Product user</h3>
+                <p>
+                  Cần hiểu AI để ra quyết định, quản lý sản phẩm và giao tiếp
+                  với team kỹ thuật.
+                </p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="slide">
+          <div class="slide-inner">
+            <div class="eyebrow">Solution</div>
+            <h2>
+              Goal, profile và quiz được kết hợp để tạo một roadmap học tập cá
+              nhân hóa.
+            </h2>
+            <div class="flow">
+              <div class="flow-box">
+                <span class="flow-index">01</span>
+                <h3>Profile</h3>
+                <p>Mục tiêu, background, level, vai trò muốn đạt.</p>
+              </div>
+              <div class="flow-box">
+                <span class="flow-index">02</span>
+                <h3>Entry quiz</h3>
+                <p>Đánh giá nền tảng bằng bộ câu hỏi phù hợp.</p>
+              </div>
+              <div class="flow-box">
+                <span class="flow-index">03</span>
+                <h3>AI analysis</h3>
+                <p>LLM phân tích hồ sơ, điểm quiz và ràng buộc thời gian.</p>
+              </div>
+              <div class="flow-box">
+                <span class="flow-index">04</span>
+                <h3>Roadmap</h3>
+                <p>Milestones, resources, deliverables, estimated weeks.</p>
+              </div>
+              <div class="flow-box">
+                <span class="flow-index">05</span>
+                <h3>Companion</h3>
+                <p>Chatbot giải thích từng milestone và nhận feedback.</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="slide long">
+          <div class="slide-inner">
+            <div class="eyebrow">Product workflow</div>
+            <h2>Luồng trải nghiệm từ input đến feedback loop.</h2>
+            <div class="grid grid-2 numbered">
+              <div class="card step-card">
+                <h3>Nhập mục tiêu và background</h3>
+                <p>
+                  Người dùng khai báo mục tiêu học tập, trình độ hiện tại, kinh
+                  nghiệm và vai trò mong muốn.
+                </p>
+              </div>
+              <div class="card step-card">
+                <h3>RAG chọn quiz phù hợp</h3>
+                <p>
+                  Hệ thống match profile với metadata của các quiz set bằng
+                  lightweight text similarity.
+                </p>
+              </div>
+              <div class="card step-card">
+                <h3>Làm bài kiểm tra đầu vào</h3>
+                <p>
+                  Quiz giúp xác định mức nền tảng và giảm rủi ro AI đưa lộ trình
+                  quá khó.
+                </p>
+              </div>
+              <div class="card step-card">
+                <h3>LLM sinh roadmap có schema</h3>
+                <p>
+                  Backend yêu cầu LLM trả JSON với confidence score, path type
+                  và milestones.
+                </p>
+              </div>
+              <div class="card step-card">
+                <h3>Frontend render visual roadmap</h3>
+                <p>
+                  Lộ trình được hiển thị thành cây trực quan để người học dễ
+                  theo dõi.
+                </p>
+              </div>
+              <div class="card step-card">
+                <h3>Chatbot và feedback</h3>
+                <p>
+                  Người dùng hỏi thêm về từng milestone, sau đó đánh giá để hệ
+                  thống cải thiện.
+                </p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="slide">
+          <div class="slide-inner">
+            <div class="eyebrow">Architecture</div>
+            <h2>
+              Kiến trúc chia lớp rõ ràng: UI, backend orchestration, AI layer và
+              logging.
+            </h2>
+            <div class="architecture">
+              <div class="arch-column">
+                <h3>Frontend</h3>
+                <div class="arch-node">Goal & Profile Form</div>
+                <div class="arch-node">Entry Quiz UI</div>
+                <div class="arch-node">Visual Tree Roadmap</div>
+                <div class="arch-node">Chat Companion</div>
+              </div>
+              <div class="arch-column">
+                <h3>FastAPI Backend</h3>
+                <div class="arch-node">Guardrail Layer</div>
+                <div class="arch-node">RAG Quiz Retriever</div>
+                <div class="arch-node">Prompt Engine</div>
+                <div class="arch-node">LLM Provider Adapter</div>
+                <div class="arch-node">JSON Roadmap Validator</div>
+              </div>
+              <div class="arch-column">
+                <h3>Data & Monitoring</h3>
+                <div class="arch-node">SQLite Cost Logs</div>
+                <div class="arch-node">Feedback Database</div>
+                <div class="arch-node">Admin APIs</div>
+                <div class="arch-node">Evaluation Report</div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="slide long">
+          <div class="slide-inner">
+            <div class="eyebrow">RAG Quiz Selection</div>
+            <h2>
+              Quiz không được chọn ngẫu nhiên, mà được match theo profile người
+              học.
+            </h2>
+            <div class="grid grid-2">
+              <div class="card">
+                <div class="label">fund-001</div>
+                <h3>AI & ML Fundamentals</h3>
+                <p>
+                  Easy. Phù hợp cho beginner cần nắm các khái niệm nền tảng.
+                </p>
+              </div>
+              <div class="card">
+                <div class="label">inter-001</div>
+                <h3>Supervised Learning Deep Dive</h3>
+                <p>
+                  Medium. Phù hợp với developer hoặc người đã biết căn bản về
+                  ML.
+                </p>
+              </div>
+              <div class="card">
+                <div class="label">biz-001</div>
+                <h3>AI for Business Leaders</h3>
+                <p>
+                  Easy. Phù hợp với business/product users muốn hiểu AI ở mức ra
+                  quyết định.
+                </p>
+              </div>
+              <div class="card">
+                <div class="label">nlp-001</div>
+                <h3>NLP Basics</h3>
+                <p>
+                  Hard. Phù hợp với người muốn đi sâu vào NLP hoặc ML
+                  engineering.
+                </p>
+              </div>
+            </div>
+            <p class="quote">
+              RAG hiện dùng Jaccard similarity kết hợp frequency boost. Cách này
+              nhẹ, dễ debug và phù hợp prototype hackathon.
+            </p>
+          </div>
+        </article>
+
+        <article class="slide">
+          <div class="slide-inner">
+            <div class="eyebrow">Roadmap generation</div>
+            <h2>
+              LLM không trả văn bản tự do, mà phải trả JSON roadmap theo schema.
+            </h2>
+            <div class="split">
+              <div class="code-schema">
+                { "confidence_score": 0.82, "path_type": "happy", "summary":
+                "...", "estimated_weeks": 20, "milestones": [ { "week": 1,
+                "title": "...", "description": "...", "resources": ["..."],
+                "deliverable": "..." } ] }
+              </div>
+              <div class="grid">
+                <div class="card">
+                  <h3>Confidence score</h3>
+                  <p>
+                    Độ tin cậy của lộ trình, dùng để quyết định mở hoặc khóa
+                    nhánh nâng cao.
+                  </p>
+                </div>
+                <div class="card">
+                  <h3>Path type</h3>
+                  <p>
+                    Gồm happy, low_conf hoặc failure, giúp frontend chọn đúng
+                    cách hiển thị.
+                  </p>
+                </div>
+                <div class="card">
+                  <h3>Milestones</h3>
+                  <p>
+                    Mỗi milestone có tuần học, mục tiêu, tài nguyên và
+                    deliverable cụ thể.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="slide">
+          <div class="slide-inner">
+            <div class="eyebrow">Risk control</div>
+            <h2>
+              4 Paths Protection giúp hệ thống không đưa người học vào lộ trình
+              sai.
+            </h2>
+            <div class="grid grid-2">
+              <div class="card">
+                <div class="label">Happy path</div>
+                <h3>Confidence cao</h3>
+                <p>
+                  Hiển thị roadmap cá nhân hóa đầy đủ, bao gồm các nhánh nâng
+                  cao phù hợp.
+                </p>
+              </div>
+              <div class="card">
+                <div class="label">Low-confidence path</div>
+                <h3>Confidence trung bình</h3>
+                <p>
+                  Khóa nhánh nâng cao, ưu tiên foundational roadmap an toàn hơn.
+                </p>
+              </div>
+              <div class="card">
+                <div class="label">Failure path</div>
+                <h3>Dữ liệu lỗi hoặc rỗng</h3>
+                <p>
+                  Rollback về default roadmap thay vì trả kết quả rỗng hoặc khó
+                  hiểu.
+                </p>
+              </div>
+              <div class="card">
+                <div class="label">Correction loop</div>
+                <h3>Feedback thấp</h3>
+                <p>
+                  Lưu feedback để phân tích các case sai và cải thiện prompt,
+                  rule hoặc retriever.
+                </p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="slide">
+          <div class="slide-inner">
+            <div class="eyebrow">Guardrails</div>
+            <h2>
+              Hệ thống được thiết kế với guardrails, rate limit và cost
+              monitoring.
+            </h2>
+            <div class="grid grid-4">
+              <div class="card">
+                <h3>Prompt injection</h3>
+                <p>
+                  Chặn yêu cầu tiết lộ system prompt hoặc bypass luật hệ thống.
+                </p>
+              </div>
+              <div class="card">
+                <h3>Scope control</h3>
+                <p>
+                  Từ chối nội dung ngoài phạm vi học AI và định hướng học tập.
+                </p>
+              </div>
+              <div class="card">
+                <h3>Rate limit</h3>
+                <p>
+                  Giới hạn 5 tin/phút và khóa chat nếu người dùng chưa làm quiz.
+                </p>
+              </div>
+              <div class="card">
+                <h3>Cost logs</h3>
+                <p>
+                  Ghi log token/cost vào SQLite, hỗ trợ ngưỡng chi phí theo
+                  ngày.
+                </p>
+              </div>
+            </div>
+            <p class="quote">
+              Guardrails biến demo AI thành một sản phẩm có tư duy vận hành,
+              không chỉ là một prompt gọi LLM.
+            </p>
+          </div>
+        </article>
+
+        <article class="slide long">
+          <div class="slide-inner">
+            <div class="eyebrow">Demo scenario</div>
+            <h2>Một người dùng muốn trở thành ML Engineer trong 6 tháng.</h2>
+            <div class="grid grid-2 numbered">
+              <div class="card step-card">
+                <h3>Profile input</h3>
+                <p>
+                  Goal: Become an ML Engineer in 6 months. Background: software
+                  engineer, Python strong, intermediate level.
+                </p>
+              </div>
+              <div class="card step-card">
+                <h3>Quiz selection</h3>
+                <p>
+                  RAG chọn inter-001: Supervised Learning Deep Dive vì profile
+                  đã có nền tảng lập trình.
+                </p>
+              </div>
+              <div class="card step-card">
+                <h3>Quiz result</h3>
+                <p>
+                  Điểm 8/10 cho thấy nền tảng tốt, hệ thống có thể sinh roadmap
+                  tham vọng hơn.
+                </p>
+              </div>
+              <div class="card step-card">
+                <h3>Roadmap output</h3>
+                <p>
+                  Confidence 0.82, path_type happy, estimated 20 weeks với 5
+                  milestones.
+                </p>
+              </div>
+              <div class="card step-card">
+                <h3>Visual roadmap</h3>
+                <p>
+                  Frontend render milestones thành cây trực quan kèm resources
+                  và deliverables.
+                </p>
+              </div>
+              <div class="card step-card">
+                <h3>Chatbot support</h3>
+                <p>
+                  User hỏi milestone đầu tiên nên học như thế nào, chatbot trả
+                  lời dựa trên roadmap context.
+                </p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="slide">
+          <div class="slide-inner">
+            <div class="eyebrow">Evaluation</div>
+            <h2>
+              Kết quả hiện tại cho thấy hệ thống ổn về cấu trúc và guardrails,
+              nhưng cần cải thiện calibration.
+            </h2>
+            <div class="metric-grid">
+              <div class="metric good">
+                <div class="metric-value">100%</div>
+                <h3>JSON Schema Validity</h3>
+                <p>LLM output được validate đúng cấu trúc.</p>
+              </div>
+              <div class="metric good">
+                <div class="metric-value">100%</div>
+                <h3>Guardrail Block Rate</h3>
+                <p>Chặn được các test case prompt injection.</p>
+              </div>
+              <div class="metric warn">
+                <div class="metric-value">2.35s</div>
+                <h3>Latency P95</h3>
+                <p>Đủ tốt cho prototype tương tác.</p>
+              </div>
+              <div class="metric bad">
+                <div class="metric-value">3.0/5</div>
+                <h3>Roadmap Relevance</h3>
+                <p>Còn dư địa cải thiện chất lượng lộ trình.</p>
+              </div>
+            </div>
+            <p class="muted">
+              Confidence Score Accuracy và Path Type Accuracy hiện còn thấp do
+              confidence calibration chưa ổn định.
+            </p>
+          </div>
+        </article>
+
+        <article class="slide long">
+          <div class="slide-inner">
+            <div class="eyebrow">Limitations</div>
+            <h2>
+              Các hạn chế được trình bày trung thực để định hướng cải tiến.
+            </h2>
+            <div class="grid grid-2">
+              <div class="card">
+                <h3>Confidence calibration chưa tốt</h3>
+                <p>
+                  Model có xu hướng trả score 0.55 lặp lại, cần rule layer hoặc
+                  evaluator model.
+                </p>
+              </div>
+              <div class="card">
+                <h3>Path type chưa ổn định</h3>
+                <p>
+                  Cần cải thiện mapping từ score và quiz result sang happy,
+                  low_conf hoặc failure.
+                </p>
+              </div>
+              <div class="card">
+                <h3>RAG còn đơn giản</h3>
+                <p>
+                  Hiện mới dùng text similarity, chưa dùng semantic embedding
+                  hoặc vector database.
+                </p>
+              </div>
+              <div class="card">
+                <h3>Evaluation dataset nhỏ</h3>
+                <p>
+                  Mới khoảng 10 profiles, chưa đủ để benchmark hoặc calibrate
+                  đáng tin cậy.
+                </p>
+              </div>
+              <div class="card">
+                <h3>Quiz coverage hạn chế</h3>
+                <p>
+                  Mới có 4 quiz set, chưa bao phủ Computer Vision, MLOps, Data
+                  Science và AI Product.
+                </p>
+              </div>
+              <div class="card">
+                <h3>Prototype stage</h3>
+                <p>Phù hợp demo hackathon, chưa phải production full-scale.</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="slide long">
+          <div class="slide-inner">
+            <div class="eyebrow">Future work</div>
+            <h2>
+              Hướng phát triển tiếp theo tập trung vào chất lượng, scale và trải
+              nghiệm học tập.
+            </h2>
+            <div class="grid grid-4">
+              <div class="card">
+                <h3>Semantic RAG</h3>
+                <p>
+                  Nâng từ keyword similarity lên sentence-transformers hoặc
+                  vector database.
+                </p>
+              </div>
+              <div class="card">
+                <h3>More quiz sets</h3>
+                <p>
+                  Bổ sung Computer Vision, NLP nâng cao, Data Science, MLOps và
+                  AI Product.
+                </p>
+              </div>
+              <div class="card">
+                <h3>Better calibration</h3>
+                <p>
+                  Thêm rule layer hoặc evaluator model để score phản ánh đúng
+                  rủi ro.
+                </p>
+              </div>
+              <div class="card">
+                <h3>Progress tracking</h3>
+                <p>
+                  Theo dõi tiến độ học theo tuần và nhắc milestone tiếp theo.
+                </p>
+              </div>
+              <div class="card">
+                <h3>Admin dashboard</h3>
+                <p>
+                  Phân tích feedback, confidence errors và correction queue.
+                </p>
+              </div>
+              <div class="card">
+                <h3>Export roadmap</h3>
+                <p>Xuất PDF, Calendar, Notion hoặc learning plan template.</p>
+              </div>
+              <div class="card">
+                <h3>Localization</h3>
+                <p>
+                  Cá nhân hóa tài nguyên tiếng Việt/tiếng Anh và miễn phí/trả
+                  phí.
+                </p>
+              </div>
+              <div class="card">
+                <h3>Larger benchmark</h3>
+                <p>
+                  Tăng dataset evaluation lên 100+ profiles để đo chất lượng tốt
+                  hơn.
+                </p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="slide">
+          <div class="slide-inner">
+            <div class="eyebrow">Team</div>
+            <h2>
+              Team xây dựng sản phẩm từ problem discovery đến prototype AI.
+            </h2>
+            <div class="grid grid-3">
+              <div class="card">
+                <div class="label">Product</div>
+                <h3>Nguyễn Văn Sáng</h3>
+                <p>Product Manager / Lead</p>
+              </div>
+              <div class="card">
+                <div class="label">AI</div>
+                <h3>Phạm Mai Anh</h3>
+                <p>Prompt / AI Engineer</p>
+              </div>
+              <div class="card">
+                <div class="label">Backend</div>
+                <h3>Phạm Ngọc Hải Dương</h3>
+                <p>Backend Core Developer</p>
+              </div>
+              <div class="card">
+                <div class="label">Data & Ops</div>
+                <h3>Lê Quang Thọ</h3>
+                <p>Backend Data & Ops</p>
+              </div>
+              <div class="card">
+                <div class="label">Frontend</div>
+                <h3>Đỗ Trung Đức</h3>
+                <p>Frontend UI/UX Developer</p>
+              </div>
+              <div class="card">
+                <div class="label">QA</div>
+                <h3>Vương Nguyệt Bình</h3>
+                <p>QA / Test & Pitching</p>
+              </div>
+            </div>
+            <p class="quote">Helping every learner find the right AI path.</p>
+          </div>
+        </article>
+      </section>
+
+      <footer class="controls">
+        <div class="control-group">
+          <button id="prevBtn" type="button">Previous</button>
+          <button id="nextBtn" type="button">Next</button>
+          <button id="notesBtn" type="button">Notes</button>
+        </div>
+        <div class="dots" id="dots"></div>
+      </footer>
+    </main>
+
+    <aside class="note-panel" id="notePanel">
+      <h3>Presenter Notes</h3>
+      <p id="noteText"></p>
+    </aside>
+
+    <script>
+      const slides = [...document.querySelectorAll(".slide")];
+      const total = slides.length;
+      const notes = [
+        "Mở đầu bằng tuyên bố giá trị: hệ thống biến nhu cầu học AI mơ hồ thành roadmap cá nhân hóa trong vài phút.",
+        "Nhấn mạnh vấn đề là thiếu định hướng, không phải thiếu tài liệu. Đây là pain point dễ hiểu với người mới học AI.",
+        "Giải thích bốn persona để cho thấy sản phẩm không dùng một lộ trình chung cho tất cả người học.",
+        "Tóm tắt logic sản phẩm: goal và quiz là tín hiệu đầu vào, AI analysis sinh roadmap có confidence.",
+        "Slide này trình bày luồng end-to-end. Nên nói theo trình tự từ user input đến feedback loop.",
+        "Giải thích architecture ở mức product/engineering: frontend, backend, AI layer, validation và logging.",
+        "RAG Quiz Selection là điểm khác biệt quan trọng: hệ thống chọn quiz phù hợp trước khi sinh roadmap.",
+        "Nhấn mạnh LLM output được ép theo schema để frontend render ổn định và dễ đánh giá.",
+        "4 Paths Protection giúp giảm rủi ro roadmap sai, đặc biệt khi confidence thấp hoặc input lỗi.",
+        "Guardrails và cost monitoring cho thấy tư duy sản phẩm thực tế, không chỉ là demo gọi model.",
+        "Demo scenario giúp audience hình dung trải nghiệm người dùng cụ thể từ profile đến roadmap và chatbot.",
+        "Trình bày metric một cách trung thực: điểm mạnh là schema và guardrail; điểm cần cải thiện là relevance và calibration.",
+        "Không né hạn chế. Nói rõ đây là prototype hackathon và có hướng cải thiện kỹ thuật cụ thể.",
+        "Future work nên được nói như roadmap sản phẩm: semantic RAG, progress tracking, admin dashboard và benchmark lớn hơn.",
+        "Kết thúc bằng team contribution và câu tagline. Giữ tone chuyên nghiệp, ngắn gọn.",
+      ];
+
+      let current = 0;
+      const currentEl = document.getElementById("current");
+      const totalEl = document.getElementById("total");
+      const progressEl = document.getElementById("progress");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const notesBtn = document.getElementById("notesBtn");
+      const notePanel = document.getElementById("notePanel");
+      const noteText = document.getElementById("noteText");
+      const dotsEl = document.getElementById("dots");
+
+      totalEl.textContent = total;
+
+      for (let i = 0; i < total; i++) {
+        const dot = document.createElement("span");
+        dot.className = "dot";
+        dot.addEventListener("click", () => goTo(i));
+        dotsEl.appendChild(dot);
+      }
+
+      function update() {
+        slides.forEach((slide, index) => {
+          slide.classList.toggle("active", index === current);
+          if (index !== current) slide.scrollTop = 0;
+        });
+
+        currentEl.textContent = current + 1;
+        progressEl.style.width = ((current + 1) / total) * 100 + "%";
+        prevBtn.disabled = current === 0;
+        nextBtn.disabled = current === total - 1;
+        noteText.textContent = notes[current] || "";
+        [...dotsEl.children].forEach((dot, index) =>
+          dot.classList.toggle("active", index === current),
+        );
+      }
+
+      function goTo(index) {
+        current = Math.max(0, Math.min(total - 1, index));
+        update();
+      }
+
+      function next() {
+        goTo(current + 1);
+      }
+      function previous() {
+        goTo(current - 1);
+      }
+
+      prevBtn.addEventListener("click", previous);
+      nextBtn.addEventListener("click", next);
+      notesBtn.addEventListener("click", () =>
+        notePanel.classList.toggle("show"),
+      );
+
+      document.addEventListener("keydown", (event) => {
+        if (
+          event.key === "ArrowRight" ||
+          event.key === "PageDown" ||
+          event.key === " "
+        )
+          next();
+        if (event.key === "ArrowLeft" || event.key === "PageUp") previous();
+        if (event.key.toLowerCase() === "n") notePanel.classList.toggle("show");
+        if (event.key === "Home") goTo(0);
+        if (event.key === "End") goTo(total - 1);
+      });
+
+      let wheelLock = false;
+      document.getElementById("stage").addEventListener(
+        "wheel",
+        (event) => {
+          const activeSlide = slides[current];
+          const atTop = activeSlide.scrollTop <= 0;
+          const atBottom =
+            Math.ceil(activeSlide.scrollTop + activeSlide.clientHeight) >=
+            activeSlide.scrollHeight;
+
+          if ((event.deltaY < 0 && atTop) || (event.deltaY > 0 && atBottom)) {
+            if (!wheelLock && Math.abs(event.deltaY) > 60) {
+              wheelLock = true;
+              if (event.deltaY > 0) next();
+              else previous();
+              setTimeout(() => (wheelLock = false), 650);
+            }
+          }
+        },
+        { passive: true },
+      );
+
+      update();
+    </script>
+  </body>
+</html>
