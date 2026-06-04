@@ -1394,22 +1394,17 @@ const Roadmap = {
       </button>
     `;
 
-    // Toggle completion (not for locked milestones)
-    if (status !== 'locked') {
-      const checkBtn = el.querySelector('.milestone-check');
-      checkBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this._toggleMilestone(ms.id, el, checkBtn);
-      });
+    const checkBtn = el.querySelector('.milestone-check');
+    checkBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this._toggleMilestone(ms.id, el, checkBtn);
+    });
 
-      // Click on card to expand / mark active
-      el.addEventListener('click', (e) => {
-        if (e.target.closest('a')) return;
-        if (!el.classList.contains('locked')) {
-          el.classList.toggle('active');
-        }
-      });
-    }
+    // Click on card to expand / mark active
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('a, button')) return;
+      el.classList.toggle('active');
+    });
 
     return el;
   },
@@ -2403,4 +2398,3 @@ if (typeof window !== 'undefined') {
   // Also try after a short delay (in case DOMContentLoaded already fired)
   setTimeout(() => Admin.init(), 200);
 }
-
