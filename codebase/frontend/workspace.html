@@ -86,6 +86,8 @@
         <button class="btn-icon" id="btn-feedback" title="Đánh giá" aria-label="Mở đánh giá">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         </button>
+        <!-- Auth Badge (Đăng nhập / User pill) -->
+        <div class="auth-badge" id="user-badge"></div>
         <div class="account-menu hidden" id="account-menu">
           <div class="account-avatar" id="account-avatar" aria-hidden="true">U</div>
           <div class="account-copy">
@@ -353,6 +355,37 @@
       </div>
 
       <button class="btn-ghost btn-full" id="btn-support-close-main" style="margin-top:1rem;">Đóng</button>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL: LOGIN / REGISTER
+       ======================================================== -->
+  <div class="modal-overlay hidden" id="modal-login" role="dialog" aria-modal="true" aria-labelledby="modal-login-title">
+    <div class="modal-card">
+      <button class="modal-close" id="modal-login-close" aria-label="Đóng" onclick="document.getElementById('modal-login').classList.add('hidden')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="modal-icon">🔑</div>
+      <h3 class="modal-title" id="modal-login-title">Đăng nhập</h3>
+      <p class="modal-subtitle" id="login-error" style="color:var(--color-error,#ef4444);min-height:1.2em;font-size:0.85rem;"></p>
+
+      <form id="login-form-modal" onsubmit="handleLoginSubmit(event)" style="width:100%;display:flex;flex-direction:column;gap:0.75rem;">
+        <div class="form-group">
+          <label class="form-label" for="login-username">Tên đăng nhập</label>
+          <input class="form-input" id="login-username" type="text" placeholder="Nhập tên đăng nhập" autocomplete="username" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-password">Mật khẩu</label>
+          <input class="form-input" id="login-password" type="password" placeholder="Nhập mật khẩu" autocomplete="current-password" required />
+        </div>
+        <button class="btn-primary" id="btn-login-submit" type="submit" style="width:100%;margin-top:0.25rem;">Đăng nhập</button>
+      </form>
+
+      <p style="margin-top:0.75rem;font-size:0.82rem;color:var(--text-secondary);text-align:center;">
+        <span id="auth-toggle-text">Chưa có tài khoản?</span>
+        <a href="#" id="auth-toggle-btn" style="color:var(--accent-violet);font-weight:600;margin-left:4px;">Đăng ký ngay</a>
+      </p>
     </div>
   </div>
 

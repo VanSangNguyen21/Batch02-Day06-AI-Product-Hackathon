@@ -301,6 +301,10 @@ async function handleLoginSubmit(e) {
     await refreshMe();
     showToast(`Chào mừng ${AuthState.user_id} (${AuthState.role})`, 'success');
     document.getElementById('login-password').value = '';
+    // Redirect to workspace if on landing page
+    if (document.body.classList.contains('page-landing') || window.location.pathname.endsWith('index.html') || window.location.pathname === '/') {
+      setTimeout(() => { window.location.href = 'main.html'; }, 800);
+    }
   } catch (err) {
     errEl.textContent = err.message;
   } finally {

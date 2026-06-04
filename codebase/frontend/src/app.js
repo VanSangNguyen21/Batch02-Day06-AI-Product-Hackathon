@@ -1319,14 +1319,14 @@ const ResultsUI = {
     } catch (err) {
       console.warn('[Analyze API] Error / Failure Path triggered:', err.message);
 
-      // Failure mode — use default roadmap
-      AppState.results.isFailure = true;
-      AppState.results.roadmap   = DEFAULT_ROADMAP;
-      AppState.results.isFallback = true;
+      // Failure mode — use default roadmap (isFallback stays false here)
+      AppState.results.isFailure  = true;
+      AppState.results.isFallback = false;
+      AppState.results.roadmap    = DEFAULT_ROADMAP;
 
-      // Show friendly warning alerts
+      // Only show the failure alert, not both
       if ($('failure-alert')) $('failure-alert').classList.remove('hidden');
-      if ($('fallback-alert')) $('fallback-alert').classList.remove('hidden');
+      if ($('fallback-alert')) $('fallback-alert').classList.add('hidden');
 
       Roadmap.render(DEFAULT_ROADMAP);
       ProgressStore.save();
@@ -1449,15 +1449,27 @@ const Roadmap = {
           ${ms.time ? `<span class="milestone-time">⏱ ${ms.time}</span>` : ''}
         </div>
       </div>
-      <button class="milestone-check" title="${isCompleted ? 'Đã hoàn thành' : 'Đánh dấu hoàn thành'}" aria-label="Toggle hoàn thành">
-        ${isCompleted ? '✓' : ''}
-      </button>
+      <div class="milestone-actions">
+        <button class="milestone-edit-btn" title="Chỉnh sửa milestone" aria-label="Chỉnh sửa">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Thay đổi
+        </button>
+        <button class="milestone-check" title="${isCompleted ? 'Đã hoàn thành' : 'Đánh dấu hoàn thành'}" aria-label="Toggle hoàn thành">
+          ${isCompleted ? '✓' : ''}
+        </button>
+      </div>
     `;
 
     const checkBtn = el.querySelector('.milestone-check');
     checkBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       this._toggleMilestone(ms.id, el, checkBtn);
+    });
+
+    const editBtn = el.querySelector('.milestone-edit-btn');
+    editBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this._openEdit(ms, el);
     });
 
     // Click on card to expand / mark active
@@ -1467,6 +1479,165 @@ const Roadmap = {
     });
 
     return el;
+  },
+
+  _openEdit(ms, cardEl) {
+    const escVal = v => (v || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    // Reuse or create a single shared edit modal
+    let modal = document.getElementById('modal-milestone-edit');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'modal-milestone-edit';
+      modal.className = 'modal-overlay hidden medit-overlay';
+      modal.setAttribute('role', 'dialog');
+      modal.setAttribute('aria-modal', 'true');
+      modal.innerHTML = `
+        <div class="medit-card">
+          <div class="medit-header">
+            <div class="medit-header-left">
+              <div class="medit-permission-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </div>
+              <div>
+                <div class="medit-title">Cho phép thay đổi milestone?</div>
+                <div class="medit-subtitle">Lộ trình học của bạn sẽ được cập nhật</div>
+              </div>
+            </div>
+            <button class="medit-close" aria-label="Đóng">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+
+          <div class="medit-context">
+            <div class="medit-context-label">Milestone hiện tại</div>
+            <div class="medit-context-preview">
+              <span class="medit-context-icon" id="medit-ctx-icon"></span>
+              <div>
+                <div class="medit-context-title" id="medit-ctx-title"></div>
+                <div class="medit-context-desc" id="medit-ctx-desc"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="medit-divider">
+            <span>Chỉnh sửa thành</span>
+          </div>
+
+          <div class="medit-fields">
+            <label class="edit-label">Tên milestone
+              <input class="edit-input" id="medit-title" placeholder="Tên milestone" />
+            </label>
+            <label class="edit-label">Mô tả
+              <textarea class="edit-input edit-textarea" id="medit-desc" rows="2" placeholder="Mô tả ngắn"></textarea>
+            </label>
+            <div class="edit-row">
+              <label class="edit-label" style="flex:1">Thời gian
+                <input class="edit-input" id="medit-time" placeholder="VD: 2–3 tuần" />
+              </label>
+              <label class="edit-label" style="flex:2">Tags (phân cách bằng dấu phẩy)
+                <input class="edit-input" id="medit-tags" placeholder="Python, ML, ..." />
+              </label>
+            </div>
+          </div>
+
+          <div class="medit-actions">
+            <button class="medit-btn-deny" id="medit-deny">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Hủy
+            </button>
+            <button class="medit-btn-allow" id="medit-allow">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Áp dụng thay đổi
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    // Populate context preview
+    document.getElementById('medit-ctx-icon').textContent  = ms.icon || '📌';
+    document.getElementById('medit-ctx-title').textContent = ms.title || '';
+    document.getElementById('medit-ctx-desc').textContent  = ms.desc || '';
+
+    // Pre-fill fields
+    document.getElementById('medit-title').value = ms.title || '';
+    document.getElementById('medit-desc').value  = ms.desc  || '';
+    document.getElementById('medit-time').value  = ms.time  || '';
+    document.getElementById('medit-tags').value  = (ms.tags || []).join(', ');
+
+    // Show modal
+    modal.classList.remove('hidden');
+    requestAnimationFrame(() => modal.classList.add('medit-visible'));
+    setTimeout(() => document.getElementById('medit-title').focus(), 80);
+
+    const close = () => {
+      modal.classList.remove('medit-visible');
+      setTimeout(() => modal.classList.add('hidden'), 200);
+    };
+
+    const _buildBody = () => {
+      const linksHtml = (ms.links && ms.links.length > 0) ? `
+        <div class="milestone-links">
+          ${ms.links.map(link => {
+            let label = 'Tài liệu học';
+            if (link.includes('coursera.org')) label = 'Coursera';
+            else if (link.includes('kaggle.com')) label = 'Kaggle';
+            else if (link.includes('elementsofai.com')) label = 'Elements of AI';
+            else if (link.includes('promptingguide.ai')) label = 'Prompting Guide';
+            else if (link.includes('deeplearning.ai')) label = 'DeepLearning.AI';
+            else if (link.includes('youtube.com') || link.includes('youtu.be')) label = 'Video';
+            return `<a href="${link}" target="_blank" rel="noopener noreferrer" class="milestone-link-btn" title="${link}">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              ${label}
+            </a>`;
+          }).join('')}
+        </div>
+      ` : '';
+      const body = cardEl.querySelector('.milestone-body');
+      body.innerHTML = `
+        <div class="milestone-title">${ms.title}</div>
+        <div class="milestone-desc">${ms.desc}</div>
+        ${linksHtml}
+        <div class="milestone-meta">
+          ${ms.tags.map(tag => `<span class="milestone-tag">${tag}</span>`).join('')}
+          ${ms.time ? `<span class="milestone-time">⏱ ${ms.time}</span>` : ''}
+        </div>
+      `;
+    };
+
+    // Replace listeners each time by cloning buttons
+    const allowBtn = document.getElementById('medit-allow');
+    const denyBtn  = document.getElementById('medit-deny');
+    const closeBtn = modal.querySelector('.medit-close');
+
+    const newAllow = allowBtn.cloneNode(true);
+    const newDeny  = denyBtn.cloneNode(true);
+    const newClose = closeBtn.cloneNode(true);
+    allowBtn.replaceWith(newAllow);
+    denyBtn.replaceWith(newDeny);
+    closeBtn.replaceWith(newClose);
+
+    newAllow.addEventListener('click', () => {
+      ms.title = document.getElementById('medit-title').value.trim() || ms.title;
+      ms.desc  = document.getElementById('medit-desc').value.trim();
+      ms.time  = document.getElementById('medit-time').value.trim();
+      ms.tags  = document.getElementById('medit-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+      _buildBody();
+      close();
+      Toast.success('Đã cập nhật!', `Milestone "${ms.title}" đã được chỉnh sửa.`);
+    });
+
+    newDeny.addEventListener('click', close);
+    newClose.addEventListener('click', close);
+
+    // Close on backdrop click
+    modal.onclick = (e) => { if (e.target === modal) close(); };
+
+    // Close on Escape
+    const onKey = (e) => { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', onKey); } };
+    document.addEventListener('keydown', onKey);
   },
 
   _toggleMilestone(id, cardEl, checkBtn) {
@@ -1857,11 +2028,15 @@ Lộ trình học của bạn đã được tạo ở khung **Lộ trình học*
     this.sendBtn.disabled   = true;
     const typingEl = this._showTyping();
 
+    const chatAbort = new AbortController();
+    const chatTimeout = setTimeout(() => chatAbort.abort(), 60000); // 60 s timeout
+
     try {
       const response = await fetchWithAuth(ENDPOINTS.chat, {
         method:  'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
+        signal:  chatAbort.signal,
         body:    JSON.stringify({
           user_id:            AppState.ui.userId || 'guest_user',
           message:            content,
@@ -1875,6 +2050,7 @@ Lộ trình học của bạn đã được tạo ở khung **Lộ trình học*
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
 
+      clearTimeout(chatTimeout);
       this._removeTyping();
       this._appendMessage(
         'ai',
@@ -1893,6 +2069,7 @@ Lộ trình học của bạn đã được tạo ở khung **Lộ trình học*
       this._applyRoadmapUpdate(data.roadmap_update);
 
     } catch (err) {
+      clearTimeout(chatTimeout);
       console.warn('[Chat API] Error:', err.message);
       this._removeTyping();
 
@@ -1900,6 +2077,12 @@ Lộ trình học của bạn đã được tạo ở khung **Lộ trình học*
         AuthUI.showUnauthenticated(true);
         this._appendMessage('ai', 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục dùng Trợ lý AI.');
         Toast.warning('Cần đăng nhập', 'Phiên đăng nhập đã hết hạn hoặc chưa hợp lệ.');
+        return;
+      }
+
+      if (err.name === 'AbortError') {
+        this._appendMessage('ai', 'Yêu cầu mất quá nhiều thời gian (> 60 giây). Vui lòng thử lại.');
+        Toast.warning('Hết thời gian chờ', 'Model AI phản hồi quá chậm. Hãy thử lại.');
         return;
       }
 
