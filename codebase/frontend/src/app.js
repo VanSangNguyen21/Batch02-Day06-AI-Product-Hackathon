@@ -38,6 +38,18 @@ const ENDPOINTS = {
   progress: `${API_BASE}/api/progress`,
 };
 
+const LOCAL_AUTH_KEY = 'AI_PATH_LOCAL_AUTH_USER';
+
+function getLocalAuthUser() {
+  try {
+    const raw = localStorage.getItem(LOCAL_AUTH_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    localStorage.removeItem(LOCAL_AUTH_KEY);
+    return null;
+  }
+}
+
 /* ─── INPUT SANITIZATION GUARDRAIL ──────────────────────────── */
 /**
  * Basic frontend XSS / injection guardrail.
@@ -260,15 +272,31 @@ const ProgressStore = {
 
   restoreView() {
     const hasResults = Boolean(AppState.results.roadmap);
-    if (hasResults) {
-      $('form-section').classList.add('hidden');
-      $('results-section').classList.remove('hidden');
+    const hasQuizResult = Boolean(AppState.quiz.endTime || AppState.results.level || AppState.results.score);
+    const formSection = $('form-section');
+    const resultsSection = $('results-section');
+
+    if (hasResults && !resultsSection) {
+      goToWorkspace(false);
+      return;
+    }
+
+    if (!hasResults && isWorkspacePage() && !hasQuizResult) {
+      window.location.href = 'main.html';
+      return;
+    }
+
+    if ((hasResults || (isWorkspacePage() && hasQuizResult)) && resultsSection) {
+      if (formSection) formSection.classList.add('hidden');
+      resultsSection.classList.remove('hidden');
       ResultsUI.renderExisting();
       return;
     }
 
-    $('form-section').classList.remove('hidden');
-    $('results-section').classList.add('hidden');
+    if (!formSection || !resultsSection) return;
+
+    formSection.classList.remove('hidden');
+    resultsSection.classList.add('hidden');
     StepForm.goToStep(AppState.ui.currentStep || 1, { restartQuiz: false });
   },
 };
@@ -386,6 +414,14 @@ function buildRandomQuizQuestions() {
 const $ = (id) => document.getElementById(id);
 const $$ = (sel) => document.querySelectorAll(sel);
 
+function isWorkspacePage() {
+  return document.body.classList.contains('page-workspace');
+}
+
+function goToWorkspace(shouldAnalyze = false) {
+  window.location.href = shouldAnalyze ? 'workspace.html?analyze=1' : 'workspace.html';
+}
+
 /* ─── TOAST SYSTEM ───────────────────────────────────────────── */
 const Toast = {
   container: null,
@@ -496,14 +532,24 @@ const AuthUI = {
     this.loginForm = $('login-form');
     this.registerForm = $('register-form');
 
-    this.loginTab.addEventListener('click', () => this.switchMode('login'));
-    this.registerTab.addEventListener('click', () => this.switchMode('register'));
-    this.loginForm.addEventListener('submit', (e) => this.handleLogin(e));
-    this.registerForm.addEventListener('submit', (e) => this.handleRegister(e));
-    $('btn-logout').addEventListener('click', () => this.logout());
+    if (this.loginTab && this.registerTab && this.loginForm && this.registerForm) {
+      this.loginTab.addEventListener('click', () => this.switchMode('login'));
+      this.registerTab.addEventListener('click', () => this.switchMode('register'));
+      this.loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+      this.registerForm.addEventListener('submit', (e) => this.handleRegister(e));
+    }
+
+    const logoutBtn = $('btn-logout');
+    if (logoutBtn) logoutBtn.addEventListener('click', () => this.logout());
   },
 
   async checkSession() {
+    const localUser = getLocalAuthUser();
+    if (localUser) {
+      this.showAuthenticated(localUser, false);
+      return;
+    }
+
     try {
       const response = await fetch(ENDPOINTS.authMe, { credentials: 'include' });
       if (!response.ok) throw new Error('not_authenticated');
@@ -569,28 +615,34 @@ const AuthUI = {
     AppState.ui.user = user;
     AppState.ui.userId = user.user_id;
 
-    this.authSection.classList.add('hidden');
-    this.appContainer.classList.remove('hidden');
-    this.accountMenu.classList.remove('hidden');
+    if (this.authSection) this.authSection.classList.add('hidden');
+    if (this.appContainer) this.appContainer.classList.remove('hidden');
+    if (this.accountMenu) this.accountMenu.classList.remove('hidden');
 
-    $('account-name').textContent = user.name;
-    $('account-email').textContent = user.email;
-    $('account-avatar').textContent = (user.name || user.email || 'U').trim().charAt(0).toUpperCase();
+    if ($('account-name')) $('account-name').textContent = user.name;
+    if ($('account-email')) $('account-email').textContent = user.email;
+    if ($('account-avatar')) $('account-avatar').textContent = (user.name || user.email || 'U').trim().charAt(0).toUpperCase();
 
     const restored = ProgressStore.restore(user.user_id);
 
     if (shouldScroll) {
-      (restored && AppState.results.roadmap ? $('results-section') : $('form-section'))
-        .scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const target = restored && AppState.results.roadmap ? $('results-section') : $('form-section');
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   },
 
   showUnauthenticated(shouldScroll = true) {
     AppState.ui.user = null;
     AppState.ui.userId = null;
+
+    if (!this.authSection) {
+      window.location.href = 'auth.html?mode=login';
+      return;
+    }
+
     this.authSection.classList.remove('hidden');
-    this.appContainer.classList.add('hidden');
-    this.accountMenu.classList.add('hidden');
+    if (this.appContainer) this.appContainer.classList.add('hidden');
+    if (this.accountMenu) this.accountMenu.classList.add('hidden');
     if (shouldScroll) {
       this.authSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -600,6 +652,7 @@ const AuthUI = {
     try {
       await fetch(ENDPOINTS.logout, { method: 'POST', credentials: 'include' });
     } finally {
+      localStorage.removeItem(LOCAL_AUTH_KEY);
       SupportModal._resetSession({ keepAuth: false, silent: true, clearProgress: false });
       this.showUnauthenticated(true);
       Toast.info('Đã đăng xuất', 'Hẹn gặp lại bạn ở phiên học tiếp theo.');
@@ -621,6 +674,7 @@ const StepForm = {
     this.ind1    = $('step-ind-1');
     this.ind2    = $('step-ind-2');
     this.line1   = $('step-line-1');
+    if (!$('goal-form') || !this.step1El || !this.step2El) return;
 
     // Form submission (Step 1 → Step 2)
     $('goal-form').addEventListener('submit', (e) => {
@@ -728,6 +782,7 @@ const Quiz = {
     this._dotsEl       = $('quiz-dots');
     this._prevBtn      = $('btn-quiz-prev');
     this._nextBtn      = $('btn-quiz-next');
+    if (!this._cardEl || !this._qOptions || !this._prevBtn || !this._nextBtn) return;
 
     this._prevBtn.addEventListener('click', () => this._navigate(-1));
   },
@@ -941,23 +996,28 @@ const Quiz = {
 const ResultsUI = {
   show() {
     // Hide form section
-    $('form-section').classList.add('hidden');
+    if ($('form-section')) $('form-section').classList.add('hidden');
 
     // Show results
     const resultsEl = $('results-section');
+    if (!resultsEl) {
+      ProgressStore.save();
+      goToWorkspace(true);
+      return;
+    }
     resultsEl.classList.remove('hidden');
 
     // Update confidence meter
     this._animateConfidence();
 
     // Update score
-    $('score-display').textContent = `${AppState.results.score} / 10`;
+    if ($('score-display')) $('score-display').textContent = `${AppState.results.score} / 10`;
     const levelInfo = SCORE_LEVELS.find(l => AppState.results.score >= l.min && AppState.results.score <= l.max);
-    $('score-level').textContent = levelInfo ? levelInfo.label : '—';
+    if ($('score-level')) $('score-level').textContent = levelInfo ? levelInfo.label : '—';
 
     // Show fallback alert if needed
-    if (AppState.results.isFallback) {
-      $('fallback-alert').classList.remove('hidden');
+    if (AppState.results.isFallback && $('fallback-alert')) {
+      if ($('fallback-alert')) $('fallback-alert').classList.remove('hidden');
     }
 
     // Load roadmap (with loading state)
@@ -976,12 +1036,12 @@ const ResultsUI = {
 
   renderExisting() {
     this._animateConfidence();
-    $('score-display').textContent = `${AppState.results.score} / 10`;
+    if ($('score-display')) $('score-display').textContent = `${AppState.results.score} / 10`;
     const levelInfo = SCORE_LEVELS.find(l => AppState.results.score >= l.min && AppState.results.score <= l.max);
-    $('score-level').textContent = levelInfo ? levelInfo.label : (AppState.results.level || '--');
+    if ($('score-level')) $('score-level').textContent = levelInfo ? levelInfo.label : (AppState.results.level || '--');
 
-    $('fallback-alert').classList.toggle('hidden', !AppState.results.isFallback);
-    $('failure-alert').classList.toggle('hidden', !AppState.results.isFailure);
+    if ($('fallback-alert')) $('fallback-alert').classList.toggle('hidden', !AppState.results.isFallback);
+    if ($('failure-alert')) $('failure-alert').classList.toggle('hidden', !AppState.results.isFailure);
 
     if (AppState.results.roadmap) {
       Roadmap.render(AppState.results.roadmap);
@@ -1001,6 +1061,7 @@ const ResultsUI = {
     const val  = $('confidence-value');
     const badge    = $('confidence-badge');
     const badgeText= $('confidence-badge-text');
+    if (!badge) return;
     const badgeDot = badge.querySelector('.badge-dot');
 
     // Animate fill with delay
@@ -1147,8 +1208,8 @@ const ResultsUI = {
         AppState.results.isFallback = false;
         AppState.results.isFailure = false;
         
-        $('fallback-alert').classList.add('hidden');
-        $('failure-alert').classList.add('hidden');
+        if ($('fallback-alert')) $('fallback-alert').classList.add('hidden');
+        if ($('failure-alert')) $('failure-alert').classList.add('hidden');
         
         // Render
         Roadmap.render(AppState.results.roadmap);
@@ -1161,8 +1222,8 @@ const ResultsUI = {
         AppState.results.isFailure = false;
         AppState.results.roadmap = DEFAULT_ROADMAP;
         
-        $('fallback-alert').classList.remove('hidden');
-        $('failure-alert').classList.add('hidden');
+        if ($('fallback-alert')) $('fallback-alert').classList.remove('hidden');
+        if ($('failure-alert')) $('failure-alert').classList.add('hidden');
         
         // Render baseline VinUni roadmap
         Roadmap.render(DEFAULT_ROADMAP);
@@ -1189,8 +1250,8 @@ const ResultsUI = {
       AppState.results.isFallback = true;
 
       // Show friendly warning alerts
-      $('failure-alert').classList.remove('hidden');
-      $('fallback-alert').classList.remove('hidden');
+      if ($('failure-alert')) $('failure-alert').classList.remove('hidden');
+      if ($('fallback-alert')) $('fallback-alert').classList.remove('hidden');
 
       Roadmap.render(DEFAULT_ROADMAP);
       ProgressStore.save();
@@ -1209,9 +1270,9 @@ const Roadmap = {
     this.treeEl    = $('roadmap-tree');
     this.skeletonEl = $('roadmap-skeleton');
 
-    $('btn-export-roadmap').addEventListener('click', () => this.exportAsText());
-    $('btn-retry').addEventListener('click', () => {
-      $('failure-alert').classList.add('hidden');
+    if ($('btn-export-roadmap')) $('btn-export-roadmap').addEventListener('click', () => this.exportAsText());
+    if ($('btn-retry')) $('btn-retry').addEventListener('click', () => {
+      if ($('failure-alert')) $('failure-alert').classList.add('hidden');
       ResultsUI._callAnalyzeAPI();
     });
   },
@@ -1413,6 +1474,8 @@ const ChatUI = {
     this.rlFill      = $('rate-limit-fill');
     this.rlTimer     = $('rate-limit-timer');
     this.rlCountdown = $('rl-countdown');
+
+    if (!this.messagesEl || !this.inputEl || !this.sendBtn || !this.charCount) return;
 
     if (this._initialized) {
       if (restoreHistory) this._renderHistory();
@@ -1893,8 +1956,8 @@ const SupportModal = {
       AppState.results.roadmap   = DEFAULT_ROADMAP;
       AppState.results.isFallback = true;
       AppState.results.isFailure  = false;
-      $('failure-alert').classList.add('hidden');
-      $('fallback-alert').classList.remove('hidden');
+      if ($('failure-alert')) $('failure-alert').classList.add('hidden');
+      if ($('fallback-alert')) $('fallback-alert').classList.remove('hidden');
       Roadmap.render(DEFAULT_ROADMAP);
       Toast.info('Đã khôi phục', 'Lộ trình mặc định đã được hiển thị.');
       this.close();
@@ -1943,14 +2006,16 @@ const SupportModal = {
     ModelConfig.load();
 
     // Show form, hide results
-    if (keepAuth) $('form-section').classList.remove('hidden');
-    $('results-section').classList.add('hidden');
-    $('failure-alert').classList.add('hidden');
-    $('fallback-alert').classList.add('hidden');
+    if (keepAuth && $('form-section')) $('form-section').classList.remove('hidden');
+    if ($('results-section')) $('results-section').classList.add('hidden');
+    if ($('failure-alert')) $('failure-alert').classList.add('hidden');
+    if ($('fallback-alert')) $('fallback-alert').classList.add('hidden');
 
     // Reset step form
-    $('goal-form').reset();
-    StepForm.goToStep(1);
+    if ($('goal-form')) {
+      $('goal-form').reset();
+      StepForm.goToStep(1);
+    }
 
     // Clear chat messages
     if ($('chat-messages')) $('chat-messages').innerHTML = '';
@@ -1965,7 +2030,10 @@ const SupportModal = {
 
 /* ─── HERO CTA ───────────────────────────────────────────────── */
 function initHeroCTA() {
-  $('hero-start-btn').addEventListener('click', () => {
+  const heroStartBtn = $('hero-start-btn');
+  if (!heroStartBtn) return;
+
+  heroStartBtn.addEventListener('click', () => {
     if (!AppState.ui.userId) {
       $('auth-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
       setTimeout(() => $('login-email').focus(), 600);
@@ -2030,8 +2098,33 @@ function trapFocus(modalEl) {
 
 /* ─── RESULTS SECTION: Hide initially ───────────────────────── */
 function ensureResultsHidden() {
-  $('results-section').classList.add('hidden');
+  const resultsSection = $('results-section');
+  if (resultsSection) resultsSection.classList.add('hidden');
 }
+
+const WorkspacePage = {
+  init() {
+    if (!isWorkspacePage()) return;
+
+    const hasQuizResult = Boolean(AppState.quiz.endTime || AppState.results.level || AppState.results.score);
+    if (!hasQuizResult && !AppState.results.roadmap) {
+      window.location.href = 'main.html';
+      return;
+    }
+
+    if ($('results-section')) $('results-section').classList.remove('hidden');
+
+    const shouldAnalyze = new URLSearchParams(window.location.search).get('analyze') === '1';
+    if (shouldAnalyze || !AppState.results.roadmap) {
+      Roadmap.loadSkeleton();
+      ResultsUI._callAnalyzeAPI().finally(() => {
+        if (window.history.replaceState) {
+          window.history.replaceState({}, document.title, 'workspace.html');
+        }
+      });
+    }
+  },
+};
 
 /* ─── MAIN INIT ──────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', async () => {
@@ -2059,12 +2152,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Ensure results are hidden on load
   ensureResultsHidden();
-  AuthUI.checkSession();
+  await AuthUI.checkSession();
+  WorkspacePage.init();
   ModelConfig.load();
 
   // Trap focus in modals
-  trapFocus($('modal-feedback'));
-  trapFocus($('modal-support'));
+  if ($('modal-feedback')) trapFocus($('modal-feedback'));
+  if ($('modal-support')) trapFocus($('modal-support'));
 
   // Rate limit UI init
   ChatUI._updateRateLimit = function() {
@@ -2092,7 +2186,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   console.log('✅ All systems initialized.');
-  Toast.info('Chào mừng!', 'Đăng nhập hoặc tạo tài khoản để bắt đầu lộ trình học của bạn.');
+  Toast.info('Chào mừng!', 'Sẵn sàng tạo lộ trình học AI cá nhân hóa của bạn.');
 });
 
 /* ─── EXPOSE FOR DEBUGGING (dev only) ───────────────────────── */
