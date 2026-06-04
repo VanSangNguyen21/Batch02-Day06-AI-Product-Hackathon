@@ -838,6 +838,10 @@ img { max-width: 100%; display: block; }
   width: 100%;
 }
 
+.page-workspace:not(.chat-expanded) .workspace-results .split-workspace {
+  grid-template-columns: minmax(0, 75fr) minmax(260px, 25fr) !important;
+}
+
 .page-workspace.summary-hidden .confidence-header,
 .page-workspace.summary-hidden #fallback-alert,
 .page-workspace.summary-hidden #failure-alert {
@@ -1483,7 +1487,7 @@ img { max-width: 100%; display: block; }
 /* ─── SPLIT WORKSPACE ───────────────────────────────────────── */
 .split-workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.95fr);
+  grid-template-columns: minmax(0, 3fr) minmax(280px, 1fr);
   gap: var(--sp-5);
   align-items: stretch;
 }
@@ -2338,7 +2342,10 @@ img { max-width: 100%; display: block; }
   .page-workspace { overflow: auto; height: auto; min-height: 100vh; }
   .page-workspace .workspace-page-shell { height: auto; min-height: calc(100vh - 58px); overflow: visible; }
   .page-workspace .workspace-results { height: auto; }
-  .page-workspace .workspace-results .split-workspace { height: auto; }
+  .page-workspace .workspace-results .split-workspace {
+    height: auto;
+    grid-template-columns: 1fr !important;
+  }
   .page-workspace .workspace-results .chat-container { height: 480px; }
   .page-workspace .workspace-results .roadmap-panel { min-height: 480px; }
   .page-workspace.chat-expanded { overflow: hidden; height: 100vh; min-height: 0; }
