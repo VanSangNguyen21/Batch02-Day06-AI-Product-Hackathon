@@ -2,3 +2,14 @@
 node_modules/
 .env
 *.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyc
+
+# Data & runtime files
+codebase/backend/data/*.db
+codebase/backend/data/*.jsonl
+codebase/backend/models/*.db
