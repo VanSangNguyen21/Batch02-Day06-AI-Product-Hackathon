@@ -3,76 +3,64 @@
   RAG Quiz Retriever
   Semantic Search for Intelligent Question Selection
   VinUni AI20k Batch 02 · Day 06
+  
+  NOTE: Using lightweight TF-IDF similarity (no heavy ML dependencies)
+  Production deployments should upgrade to sentence-transformers for better accuracy
 ====================================================
 """
 
-import numpy as np
 import logging
+import re
 from typing import List, Dict, Tuple, Optional
-from sklearn.metrics.pairwise import cosine_similarity
+from collections import Counter
 
 logger = logging.getLogger(__name__)
 
-# Lazy import để avoid loading model nếu không cần
-_embedder = None
 
-
-def get_embedder():
+def simple_text_similarity(text1: str, text2: str) -> float:
     """
-    Lazy load sentence-transformers embedder.
-    Sử dụng model nhẹ cho performance.
+    Simple text similarity using word overlap (TF-IDF-like).
+    Fast, no dependencies, good enough for quiz selection.
+    Returns score between 0 and 1.
     """
-    global _embedder
-    if _embedder is None:
-        try:
-            from sentence_transformers import SentenceTransformer
-            logger.info("🔄 Loading sentence-transformers model (all-MiniLM-L6-v2)...")
-            _embedder = SentenceTransformer('all-MiniLM-L6-v2')
-            logger.info("✅ Embedder loaded successfully")
-        except ImportError:
-            logger.error("❌ sentence-transformers not installed. Install via pip.")
-            raise
-    return _embedder
+    if not text1 or not text2:
+        return 0.0
+    
+    # Normalize and tokenize
+    words1 = set(re.findall(r'\w+', text1.lower()))
+    words2 = set(re.findall(r'\w+', text2.lower()))
+    
+    if not words1 or not words2:
+        return 0.0
+    
+    # Jaccard similarity
+    intersection = len(words1 & words2)
+    union = len(words1 | words2)
+    
+    jaccard = intersection / union if union > 0 else 0.0
+    
+    # Boost by word frequency overlap
+    common_words = words1 & words2
+    boost = len(common_words) / max(len(words1), len(words2)) if max(len(words1), len(words2)) > 0 else 0.0
+    
+    # Weighted average: 70% jaccard + 30% frequency boost
+    return 0.7 * jaccard + 0.3 * boost
 
 
 class QuizRAGRetriever:
     """
-    RAG Retriever để chọn bộ câu hỏi phù hợp dựa trên semantic similarity.
+    RAG Retriever để chọn bộ câu hỏi phù hợp dựa trên text similarity.
     
     Flow:
     1. Parse user profile (goal + background)
-    2. Embed user profile + quiz set metadata
-    3. Compute cosine similarity
-    4. Rank quiz sets
-    5. Return top N quiz sets
+    2. Compute text similarity with quiz set metadata
+    3. Rank quiz sets by similarity score
+    4. Return top N quiz sets
     """
 
     def __init__(self):
         """Khởi tạo retriever"""
-        self.embedder = get_embedder()
-        self.quiz_embeddings_cache = {}  # Cache embeddings để tránh tính toán lại
-
-    def embed_text(self, text: str) -> np.ndarray:
-        """Embed một đoạn text"""
-        if not text or not isinstance(text, str):
-            logger.warning(f"⚠️ Invalid text for embedding: {text}")
-            return np.zeros(384)  # all-MiniLM output dimension
-        
-        try:
-            embedding = self.embedder.encode(text, convert_to_numpy=True)
-            return embedding
-        except Exception as e:
-            logger.error(f"❌ Error embedding text: {e}")
-            return np.zeros(384)
-
-    def get_quiz_embedding(self, quiz_set) -> np.ndarray:
-        """Lấy hoặc tính embedding của quiz set (với caching)"""
-        if quiz_set.set_id in self.quiz_embeddings_cache:
-            return self.quiz_embeddings_cache[quiz_set.set_id]
-        
-        embedding = self.embed_text(quiz_set.embedding_text)
-        self.quiz_embeddings_cache[quiz_set.set_id] = embedding
-        return embedding
+        self.similarity_cache = {}  # Cache similarity scores
 
     def build_user_profile_text(
         self,
@@ -83,7 +71,7 @@ class QuizRAGRetriever:
         interests: Optional[List[str]] = None
     ) -> str:
         """
-        Xây dựng text profile của user để embedding.
+        Xây dựng text profile của user để so sánh.
         
         Args:
             learning_goal: Mục tiêu học tập (vd: "Learn Deep Learning")
@@ -115,7 +103,7 @@ class QuizRAGRetriever:
         target_role: Optional[str] = None,
         interests: Optional[List[str]] = None,
         top_k: int = 1,
-        min_similarity: float = 0.3  # Minimum similarity threshold
+        min_similarity: float = 0.2  # Minimum similarity threshold
     ) -> Tuple[List, List[float]]:
         """
         Retrieve quiz sets dựa trên user profile.
@@ -134,20 +122,11 @@ class QuizRAGRetriever:
         
         logger.info(f"📝 User profile: {user_profile}")
         
-        # Embed user profile
-        user_embedding = self.embed_text(user_profile)
-        
-        # Compute similarity với tất cả quiz sets
+        # Compute text similarity với tất cả quiz sets
         similarities = []
         for quiz_set in quiz_sets:
-            quiz_embedding = self.get_quiz_embedding(quiz_set)
-            
-            # Cosine similarity
-            similarity = cosine_similarity(
-                user_embedding.reshape(1, -1),
-                quiz_embedding.reshape(1, -1)
-            )[0][0]
-            
+            # Use embedding_text from quiz set for matching
+            similarity = simple_text_similarity(user_profile, quiz_set.embedding_text)
             similarities.append((quiz_set, similarity))
         
         # Sort by similarity (descending)
@@ -160,7 +139,7 @@ class QuizRAGRetriever:
         ][:top_k]
         
         # Log results
-        logger.info(f"🔍 Retrieved {len(selected)} quiz sets")
+        logger.info(f"🔍 Retrieved {len(selected)} quiz sets (threshold: {min_similarity})")
         for quiz_set, sim in selected:
             logger.info(f"  - {quiz_set.name}: {sim:.3f}")
         
