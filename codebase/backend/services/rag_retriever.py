@@ -11,7 +11,7 @@
 
 import logging
 import re
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Tuple, Optional, Any
 from collections import Counter
 
 logger = logging.getLogger(__name__)
@@ -206,7 +206,7 @@ def select_quiz_for_user(
     interests: Optional[List[str]] = None,
     use_semantic: bool = True,
     top_k: int = 1
-) -> Tuple[Optional, float]:
+) -> Tuple[Optional[Any], float]:
     """
     Main function: Chọn 1 quiz set phù hợp cho user.
     
