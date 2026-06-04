@@ -34,15 +34,19 @@ def get_provider(model_name: Optional[str] = None) -> str:
     model_lower = (model_name or get_model_name()).lower()
     if model_lower.startswith("ollama/"):
         return "ollama"
+    if "claude" in model_lower or "anthropic" in model_lower:
+        return "claude"
     if "gemini" in model_lower:
         return "gemini"
     if any(token in model_lower for token in ("gpt", "deepseek", "nvidia", "nemotron", "openai")):
         return "openai"
 
     provider = os.getenv("LLM_PROVIDER", "").strip().lower()
-    if provider in {"ollama", "openai", "gemini"}:
+    if provider in {"ollama", "openai", "gemini", "claude"}:
         return provider
 
+    if os.getenv("ANTHROPIC_API_KEY"):
+        return "claude"
     if os.getenv("OLLAMA_BASE_URL"):
         return "ollama"
     return "ollama"
@@ -50,6 +54,9 @@ def get_provider(model_name: Optional[str] = None) -> str:
 
 def is_local_model(model_name: Optional[str] = None) -> bool:
     return get_provider(model_name) == "ollama"
+
+
+DEFAULT_CLAUDE_MODEL = "claude-haiku-4-5-20251001"
 
 
 def normalize_model_name(model_name: str, provider: Optional[str] = None) -> str:
@@ -87,12 +94,17 @@ def normalize_roadmap_payload(data: Dict[str, Any]) -> Dict[str, Any]:
     for item in milestones:
         if not isinstance(item, dict):
             continue
+        # Build duration — handle "week" int field from backend prompt schema
+        week_val = item.get("week")
+        duration_fallback = f"Tuần {week_val}" if isinstance(week_val, int) else "1-2 tuần"
+        # Handle both resource_links (main schema) and resources (backend schema)
+        links = item.get("resource_links") or item.get("resources") or []
         normalized_milestones.append({
             "milestone_title": str(item.get("milestone_title") or item.get("title") or "Milestone"),
-            "duration": str(item.get("duration") or item.get("time") or "1-2 tuần"),
-            "resource_links": item.get("resource_links") if isinstance(item.get("resource_links"), list) else [],
+            "duration": str(item.get("duration") or item.get("time") or duration_fallback),
+            "resource_links": links if isinstance(links, list) else [],
             "difficulty": _normalize_difficulty(item.get("difficulty")),
-            "description": str(item.get("description") or item.get("desc") or "Cột mốc học tập được cá nhân hóa."),
+            "description": str(item.get("description") or item.get("desc") or item.get("deliverable") or "Cột mốc học tập được cá nhân hóa."),
         })
 
     confidence = data.get("confidence_score", 0.55)
@@ -139,6 +151,9 @@ async def generate_roadmap(system_prompt: str, user_prompt: str, model_name: Opt
         result = await _call_ollama(messages, model, temperature=0.1, max_tokens=2000, json_mode=True)
     elif provider == "gemini":
         result = await _call_gemini(messages, model, temperature=0.1, max_tokens=2048, json_mode=True)
+    elif provider == "claude":
+        claude_model = model if "claude" in model.lower() else DEFAULT_CLAUDE_MODEL
+        result = await _call_claude(messages, claude_model, temperature=0.1, max_tokens=2000, json_mode=True)
     else:
         result = await _call_openai_compatible(messages, model, temperature=0.1, max_tokens=2000, json_mode=True)
 
@@ -158,6 +173,9 @@ async def generate_chat_response(messages: List[Dict[str, str]], model_name: Opt
         return await _call_ollama(messages, model, temperature=0.7, max_tokens=1024, json_mode=False)
     if provider == "gemini":
         return await _call_gemini(messages, model, temperature=0.7, max_tokens=1024, json_mode=False)
+    if provider == "claude":
+        claude_model = model if "claude" in model.lower() else DEFAULT_CLAUDE_MODEL
+        return await _call_claude(messages, claude_model, temperature=0.7, max_tokens=1024, json_mode=False)
     return await _call_openai_compatible(messages, model, temperature=0.7, max_tokens=1024, json_mode=False)
 
 
@@ -242,6 +260,50 @@ async def _call_openai_compatible(
         }
     except Exception as exc:
         raise LLMError(f"OpenAI-compatible request failed: {exc}") from exc
+
+
+async def _call_claude(
+    messages: List[Dict[str, str]],
+    model_name: str,
+    temperature: float,
+    max_tokens: int,
+    json_mode: bool,
+) -> Dict[str, Any]:
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    if not api_key:
+        raise LLMError("ANTHROPIC_API_KEY is not configured.")
+
+    try:
+        import anthropic
+
+        # Separate system from conversation messages
+        system_parts = [m["content"] for m in messages if m.get("role") == "system"]
+        user_messages = [m for m in messages if m.get("role") != "system"]
+
+        system_text = "\n\n".join(system_parts) if system_parts else anthropic.NOT_GIVEN
+        if json_mode and system_text is not anthropic.NOT_GIVEN:
+            system_text += "\n\nIMPORTANT: Respond with valid JSON ONLY. No text before or after the JSON object."
+        elif json_mode:
+            system_text = "Respond with valid JSON ONLY. No text before or after the JSON object."
+
+        client = anthropic.AsyncAnthropic(api_key=api_key)
+        response = await client.messages.create(
+            model=model_name,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            system=system_text,
+            messages=user_messages,
+        )
+
+        content = response.content[0].text if response.content else ""
+        usage = response.usage
+        return {
+            "content": content,
+            "input_tokens": usage.input_tokens if usage else estimate_tokens(json.dumps(messages, ensure_ascii=False)),
+            "output_tokens": usage.output_tokens if usage else estimate_tokens(content),
+        }
+    except Exception as exc:
+        raise LLMError(f"Claude request failed: {exc}") from exc
 
 
 async def _call_gemini(

@@ -2106,6 +2106,8 @@ const WorkspacePage = {
   init() {
     if (!isWorkspacePage()) return;
 
+    this.initControls();
+
     const hasQuizResult = Boolean(AppState.quiz.endTime || AppState.results.level || AppState.results.score);
     if (!hasQuizResult && !AppState.results.roadmap) {
       window.location.href = 'main.html';
@@ -2123,6 +2125,56 @@ const WorkspacePage = {
         }
       });
     }
+  },
+
+  initControls() {
+    const summaryBtn = $('btn-toggle-summary');
+    const expandBtn = $('btn-expand-chat');
+    const summaryHidden = localStorage.getItem('AI_PATH_WORKSPACE_SUMMARY_HIDDEN') === '1';
+
+    document.body.classList.toggle('summary-hidden', summaryHidden);
+    this.updateSummaryButton(summaryBtn);
+
+    if (summaryBtn) {
+      summaryBtn.addEventListener('click', () => {
+        const nextHidden = !document.body.classList.contains('summary-hidden');
+        document.body.classList.toggle('summary-hidden', nextHidden);
+        localStorage.setItem('AI_PATH_WORKSPACE_SUMMARY_HIDDEN', nextHidden ? '1' : '0');
+        this.updateSummaryButton(summaryBtn);
+      });
+    }
+
+    if (expandBtn) {
+      expandBtn.addEventListener('click', () => {
+        const isExpanded = !document.body.classList.contains('chat-expanded');
+        document.body.classList.toggle('chat-expanded', isExpanded);
+        this.updateExpandButton(expandBtn);
+        requestAnimationFrame(() => ChatUI.scrollToBottom());
+      });
+      this.updateExpandButton(expandBtn);
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || !document.body.classList.contains('chat-expanded')) return;
+      document.body.classList.remove('chat-expanded');
+      this.updateExpandButton(expandBtn);
+    });
+  },
+
+  updateSummaryButton(button) {
+    if (!button) return;
+    const hidden = document.body.classList.contains('summary-hidden');
+    button.setAttribute('aria-pressed', String(hidden));
+    button.lastChild.textContent = hidden ? ' Hiện phần điểm' : ' Ẩn phần điểm';
+  },
+
+  updateExpandButton(button) {
+    if (!button) return;
+    const expanded = document.body.classList.contains('chat-expanded');
+    const label = expanded ? 'Thu nhỏ chat' : 'Mở rộng chat';
+    button.setAttribute('aria-pressed', String(expanded));
+    button.setAttribute('aria-label', label);
+    button.setAttribute('title', label);
   },
 };
 
