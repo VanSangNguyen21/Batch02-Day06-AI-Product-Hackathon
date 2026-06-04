@@ -14,6 +14,8 @@ let turnstileWidgetId = null;
 let currentSiteKey = '1x00000000000000000000AA'; // Default: Always Pass
 let verifiedSession = false;
 let selectedModel = 'llama-3';
+const NON_LOCAL_QUESTION_LIMIT = 5;
+let nonLocalQuestionCount = 0;
 
 // DOM elements
 const logConsole = document.getElementById('log-console');
@@ -282,6 +284,27 @@ function selectAIModel(modelId) {
   }
 
   updateCodeSnippet();
+  if (isLocalModel(modelId)) {
+    logToConsole(`Model policy: ${modelId} is local. Question limit disabled.`, 'success');
+  } else {
+    logToConsole(`Model policy: ${modelId} is non-local. Limit ${NON_LOCAL_QUESTION_LIMIT} questions/session.`, 'info');
+  }
+}
+
+function isLocalModel(modelId = selectedModel) {
+  return modelId.startsWith('local-') || modelId.startsWith('ollama/');
+}
+
+function canRunSelectedModel() {
+  if (isLocalModel()) return true;
+  if (nonLocalQuestionCount >= NON_LOCAL_QUESTION_LIMIT) {
+    showToast(`Đã đạt giới hạn ${NON_LOCAL_QUESTION_LIMIT} câu hỏi cho model không local. Hãy chọn local model để hỏi không giới hạn.`, 'error');
+    logToConsole(`[Policy] Blocked non-local model after ${NON_LOCAL_QUESTION_LIMIT} questions.`, 'error');
+    return false;
+  }
+  nonLocalQuestionCount += 1;
+  logToConsole(`[Policy] Non-local question ${nonLocalQuestionCount}/${NON_LOCAL_QUESTION_LIMIT}.`, 'info');
+  return true;
 }
 
 function updateCodeSnippet() {
@@ -355,6 +378,8 @@ async function runTextGeneration() {
   const runButton = document.getElementById('btn-run-ai');
   const responseBox = document.getElementById('response-snippet');
 
+  if (!canRunSelectedModel()) return;
+
   logToConsole(`[Workers AI] Sending prompt to Meta Llama 3.1: "${prompt.substring(0, 40)}..."`, 'info');
   
   runButton.disabled = true;
@@ -367,7 +392,7 @@ async function runTextGeneration() {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ prompt })
+      body: JSON.stringify({ prompt, model_id: selectedModel })
     });
 
     const data = await response.json();

@@ -89,6 +89,10 @@ def calculate_cost(input_tokens: int, output_tokens: int, model_name: str) -> fl
     Returns:
         total_cost: Tổng chi phí (USD)
     """
+    model_lower = (model_name or "").lower()
+    if os.getenv("LLM_PROVIDER", "").lower() == "ollama" or model_lower.startswith("ollama/"):
+        return 0.0
+
     prices = PRICE_TABLE.get(model_name, PRICE_TABLE["gpt-4o-mini"])
     
     total_cost = (input_tokens * prices["input"]) + (output_tokens * prices["output"])

@@ -8,6 +8,7 @@ import os
 import time
 import httpx
 import logging
+from collections import defaultdict, deque
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -40,6 +41,24 @@ class TurnstileRequest(BaseModel):
 
 class AIRequest(BaseModel):
     prompt: str
+    model_id: str = "llama-3"
+
+NON_LOCAL_QUESTION_LIMIT = int(os.environ.get("NON_LOCAL_QUESTION_LIMIT", "5"))
+_question_windows = defaultdict(lambda: deque())
+
+def is_local_model(model_id: str) -> bool:
+    return model_id.startswith("local-") or model_id.startswith("ollama/")
+
+def check_non_local_question_limit(client_id: str) -> bool:
+    now = time.time()
+    window_start = now - 3600
+    timestamps = _question_windows[client_id]
+    while timestamps and timestamps[0] < window_start:
+        timestamps.popleft()
+    if len(timestamps) >= NON_LOCAL_QUESTION_LIMIT:
+        return False
+    timestamps.append(now)
+    return True
 
 # Cloudflare Turnstile Testing Secret Keys mapping
 SECRET_KEYS_MAP = {
@@ -119,7 +138,45 @@ async def verify_turnstile(req: TurnstileRequest, request: Request):
 
 # ─── WORKERS AI TEXT PROXY ────────────────────────────────────
 @app.post("/api/workers-ai/text")
-async def run_ai_text(req: AIRequest):
+async def run_ai_text(req: AIRequest, request: Request):
+    if not is_local_model(req.model_id):
+        client_id = request.client.host if request.client else "anonymous"
+        if not check_non_local_question_limit(client_id):
+            raise HTTPException(
+                status_code=429,
+                detail=f"Non-local model question limit reached ({NON_LOCAL_QUESTION_LIMIT}/hour). Choose a local Ollama model for unlimited questions."
+            )
+    else:
+        ollama_model = req.model_id.split("/", 1)[1] if req.model_id.startswith("ollama/") else os.environ.get("OLLAMA_MODEL", "qwen2:7b")
+        ollama_base_url = os.environ.get("OLLAMA_BASE_URL", "http://127.0.0.1:11434").rstrip("/")
+        try:
+            async with httpx.AsyncClient(timeout=90.0) as client:
+                res = await client.post(
+                    f"{ollama_base_url}/api/chat",
+                    json={
+                        "model": ollama_model,
+                        "stream": False,
+                        "messages": [
+                            {"role": "system", "content": "You are a concise Vietnamese AI learning assistant."},
+                            {"role": "user", "content": req.prompt}
+                        ]
+                    },
+                )
+                res.raise_for_status()
+                data = res.json()
+            return {
+                "model": ollama_model,
+                "provider": "ollama",
+                "success": True,
+                "result": {"response": data.get("message", {}).get("content", "")},
+                "tokens_used": data.get("eval_count", 0),
+                "cost_usd": 0.0,
+                "question_limit": None
+            }
+        except Exception as e:
+            logger.error(f"Error calling local Ollama model: {e}")
+            raise HTTPException(status_code=502, detail=f"Local Ollama Error: {e}")
+
     # Try fetching Cloudflare credentials from environment (if set by user)
     cf_account_id = os.environ.get("CF_ACCOUNT_ID")
     cf_api_token = os.environ.get("CF_API_TOKEN")

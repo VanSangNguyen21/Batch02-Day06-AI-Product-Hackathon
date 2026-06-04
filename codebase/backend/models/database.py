@@ -155,6 +155,37 @@ def init_feedback_db():
                 FOREIGN KEY (feedback_id) REFERENCES feedback_logs(id)
             );
 
+            -- Bảng người dùng / Registered users
+            CREATE TABLE IF NOT EXISTS users (
+                id               INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id          TEXT UNIQUE NOT NULL,
+                name             TEXT NOT NULL,
+                email            TEXT UNIQUE NOT NULL,
+                password_hash    TEXT NOT NULL,
+                created_at       TEXT DEFAULT (datetime('now')),
+                updated_at       TEXT DEFAULT (datetime('now'))
+            );
+
+            -- Phiên đăng nhập web / Web login sessions
+            CREATE TABLE IF NOT EXISTS auth_sessions (
+                id               INTEGER PRIMARY KEY AUTOINCREMENT,
+                token            TEXT UNIQUE NOT NULL,
+                user_id          TEXT NOT NULL,
+                created_at       TEXT NOT NULL,
+                expires_at       TEXT NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES users(user_id)
+            );
+
+            -- Tiến độ học được lưu theo tài khoản / Saved learner progress per account
+            CREATE TABLE IF NOT EXISTS learning_progress (
+                id               INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id          TEXT UNIQUE NOT NULL,
+                progress_data    TEXT NOT NULL,
+                created_at       TEXT DEFAULT (datetime('now')),
+                updated_at       TEXT NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES users(user_id)
+            );
+
             -- Index tối ưu / Optimized indexes
             CREATE INDEX IF NOT EXISTS idx_feedback_user_id
                 ON feedback_logs(user_id);
@@ -167,6 +198,15 @@ def init_feedback_db():
 
             CREATE INDEX IF NOT EXISTS idx_sessions_user_id
                 ON sessions(user_id);
+
+            CREATE INDEX IF NOT EXISTS idx_users_email
+                ON users(email);
+
+            CREATE INDEX IF NOT EXISTS idx_auth_sessions_token
+                ON auth_sessions(token);
+
+            CREATE INDEX IF NOT EXISTS idx_learning_progress_user_id
+                ON learning_progress(user_id);
         """)
         conn.commit()
         logger.info("✅ Feedback database tables initialized")
@@ -462,6 +502,134 @@ def get_session(session_id: str) -> Optional[Dict[str, Any]]:
             data["conversation_history"] = json.loads(data.get("conversation_history") or "[]")
             return data
         return None
+    finally:
+        conn.close()
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# CRUD Helpers - auth users
+# ──────────────────────────────────────────────────────────────────────────────
+
+def create_user(user_id: str, name: str, email: str, password_hash: str) -> Dict[str, Any]:
+    conn = get_feedback_db_connection()
+    try:
+        cursor = conn.cursor()
+        now = datetime.utcnow().isoformat()
+        cursor.execute("""
+            INSERT INTO users (user_id, name, email, password_hash, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (user_id, name, email.lower(), password_hash, now, now))
+        conn.commit()
+        return {
+            "user_id": user_id,
+            "name": name,
+            "email": email.lower(),
+            "created_at": now,
+        }
+    finally:
+        conn.close()
+
+
+def get_user_by_email(email: str) -> Optional[Dict[str, Any]]:
+    conn = get_feedback_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE email = ?", (email.lower(),))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()
+
+
+def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
+    conn = get_feedback_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()
+
+
+def create_auth_session(token: str, user_id: str, expires_at: str) -> None:
+    conn = get_feedback_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO auth_sessions (token, user_id, created_at, expires_at)
+            VALUES (?, ?, ?, ?)
+        """, (token, user_id, datetime.utcnow().isoformat(), expires_at))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def get_user_by_session_token(token: str) -> Optional[Dict[str, Any]]:
+    conn = get_feedback_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT users.*
+            FROM auth_sessions
+            JOIN users ON users.user_id = auth_sessions.user_id
+            WHERE auth_sessions.token = ?
+              AND auth_sessions.expires_at > ?
+        """, (token, datetime.utcnow().isoformat()))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()
+
+
+def delete_auth_session(token: str) -> None:
+    conn = get_feedback_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM auth_sessions WHERE token = ?", (token,))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def upsert_learning_progress(user_id: str, progress_data: dict) -> None:
+    conn = get_feedback_db_connection()
+    try:
+        cursor = conn.cursor()
+        now = datetime.utcnow().isoformat()
+        cursor.execute("""
+            INSERT INTO learning_progress (user_id, progress_data, updated_at)
+            VALUES (?, ?, ?)
+            ON CONFLICT(user_id) DO UPDATE SET
+                progress_data = excluded.progress_data,
+                updated_at = excluded.updated_at
+        """, (user_id, json.dumps(progress_data, ensure_ascii=False), now))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def get_learning_progress(user_id: str) -> Optional[Dict[str, Any]]:
+    conn = get_feedback_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM learning_progress WHERE user_id = ?", (user_id,))
+        row = cursor.fetchone()
+        if not row:
+            return None
+        data = dict(row)
+        data["progress_data"] = json.loads(data.get("progress_data") or "{}")
+        return data
+    finally:
+        conn.close()
+
+
+def delete_learning_progress(user_id: str) -> None:
+    conn = get_feedback_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM learning_progress WHERE user_id = ?", (user_id,))
+        conn.commit()
     finally:
         conn.close()
 

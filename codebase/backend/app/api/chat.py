@@ -13,10 +13,8 @@ import asyncio
 from collections import defaultdict, deque
 import json
 from typing import List, Optional, Dict, Any
-import requests
-import base64
-from openai import OpenAI, AsyncOpenAI
 
+from app.llm_client import LLMError, generate_chat_response, get_model_name, get_provider, is_local_model
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
@@ -66,6 +64,7 @@ class ChatResponse(BaseModel):
     cost:         Dict[str, Any]
     blocked:      bool = False
     block_reason: Optional[str] = None
+    model_info:   Optional[Dict[str, Any]] = None
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -160,145 +159,15 @@ async def call_chat_llm(
     Gọi LLM cho hội thoại chat
     Call LLM API with conversation history.
     """
-    model_lower = model_name.lower()
-
-    if "gpt" in model_lower or "deepseek" in model_lower or "nvidia" in model_lower or "nemotron" in model_lower or "llama" in model_lower:
-        return await _call_openai_chat(messages, model_name)
-    if "gemini" in model_lower:
-        return await _call_gemini_chat(messages, model_name)
-
-    raise HTTPException(status_code=500, detail=f"Unsupported model: {model_name}")
-
-
-async def _call_openai_chat(messages: List[Dict], model_name: str) -> Dict[str, Any]:
-    """Gọi OpenAI Chat API / Call OpenAI Chat API with full message history."""
     try:
-        api_key = os.getenv("OPENAI_API_KEY")
-        base_url = os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1")
-        
-        # Override API key for Nvidia models or if using Nvidia base URL
-        if "nvidia" in model_name.lower() or "nemotron" in model_name.lower() or "nvidia" in base_url.lower():
-            api_key = "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"
-
-        if not api_key:
-            raise HTTPException(status_code=500, detail="API key not configured")
-
-        # Chèn system message / Prepend system message
         full_messages = [{"role": "system", "content": CHAT_SYSTEM_PROMPT}] + messages
-
-        try:
-            client = AsyncOpenAI(api_key=api_key, base_url=base_url)
-            kwargs = {
-                "model": model_name,
-                "messages": full_messages,
-                "temperature": 0.7,
-                "max_tokens": 1024,
-            }
-
-            # Handle DeepSeek specific prompt kwargs
-            if "deepseek" in model_name.lower():
-                kwargs["extra_body"] = {"chat_template_kwargs": {"thinking": True, "reasoning_effort": "high"}}
-
-            response = await client.chat.completions.create(**kwargs)
-            
-            # Check for reasoning/thinking block if any
-            reasoning = getattr(response.choices[0].message, "reasoning", None) or getattr(response.choices[0].message, "reasoning_content", None)
-            content = response.choices[0].message.content
-            if reasoning:
-                content = f"> **Thinking:**\n> {reasoning.strip()}\n\n{content}"
-
-            return {
-                "content":       content,
-                "input_tokens":  response.usage.prompt_tokens if response.usage else 0,
-                "output_tokens": response.usage.completion_tokens if response.usage else 0,
-            }
-        except Exception as api_err:
-            logger.warning(f"AsyncOpenAI failed, trying requests fallback: {api_err}")
-            headers = {
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            }
-            payload = {
-                "model": model_name,
-                "messages": full_messages,
-                "temperature": 0.7,
-                "max_tokens": 1024,
-            }
-            if "deepseek" in model_name.lower():
-                payload["extra_body"] = {"chat_template_kwargs": {"thinking": True, "reasoning_effort": "high"}}
-                
-            loop = asyncio.get_event_loop()
-            
-            def _post():
-                url = f"{base_url.rstrip('/')}/chat/completions"
-                return requests.post(url, headers=headers, json=payload, timeout=30)
-                
-            res = await loop.run_in_executor(None, _post)
-            if res.status_code != 200:
-                raise Exception(f"HTTP {res.status_code}: {res.text}")
-                
-            data = res.json()
-            content = data["choices"][0]["message"]["content"]
-            
-            reasoning = data["choices"][0]["message"].get("reasoning_content") or data["choices"][0]["message"].get("reasoning")
-            if reasoning:
-                content = f"> **Thinking:**\n> {reasoning.strip()}\n\n{content}"
-                
-            usage = data.get("usage", {})
-            return {
-                "content": content,
-                "input_tokens": usage.get("prompt_tokens", 0),
-                "output_tokens": usage.get("completion_tokens", 0)
-            }
-
-    except Exception as e:
-        logger.error(f"OpenAI/Nvidia chat error: {e}")
+        return await generate_chat_response(full_messages, model_name)
+    except LLMError as e:
+        logger.error(f"Chat LLM error: {e}")
         raise HTTPException(status_code=502, detail=f"LLM API error: {str(e)}")
-
-
-async def _call_gemini_chat(messages: List[Dict], model_name: str) -> Dict[str, Any]:
-    """Gọi Gemini API cho hội thoại / Call Gemini API for chat conversation."""
-    try:
-        import google.generativeai as genai
-        api_key = os.getenv("GEMINI_API_KEY")
-        if not api_key:
-            raise HTTPException(status_code=500, detail="GEMINI_API_KEY not configured")
-
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel(
-            model_name=model_name,
-            system_instruction=CHAT_SYSTEM_PROMPT,
-            generation_config=genai.GenerationConfig(
-                temperature=0.7,
-                max_output_tokens=1024,
-            ),
-        )
-
-        # Chuyển đổi định dạng messages cho Gemini / Convert message format for Gemini
-        gemini_history = []
-        for msg in messages[:-1]:  # Tất cả trừ tin nhắn cuối / All except last
-            role = "user" if msg["role"] == "user" else "model"
-            gemini_history.append({"role": role, "parts": [msg["content"]]})
-
-        chat = model.start_chat(history=gemini_history)
-        # Gửi tin nhắn cuối cùng / Send the last message
-        last_message = messages[-1]["content"] if messages else ""
-        response = chat.send_message(last_message)
-
-        input_tokens  = response.usage_metadata.prompt_token_count     if response.usage_metadata else 100
-        output_tokens = response.usage_metadata.candidates_token_count if response.usage_metadata else 50
-
-        return {
-            "content":       response.text,
-            "input_tokens":  input_tokens,
-            "output_tokens": output_tokens,
-        }
-    except ImportError:
-        raise HTTPException(status_code=500, detail="google-generativeai package not installed")
     except Exception as e:
-        logger.error(f"Gemini chat error: {e}")
-        raise HTTPException(status_code=502, detail=f"Gemini API error: {str(e)}")
+        logger.error(f"Unexpected chat LLM error: {e}")
+        raise HTTPException(status_code=502, detail=f"LLM API error: {str(e)}")
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -323,10 +192,12 @@ async def chat(payload: ChatRequest):
     user_id    = payload.user_id
     session_id = payload.session_id
     message    = mask_sensitive_data(payload.message.strip())
-    model_name = payload.model_override or os.getenv("MODEL_NAME", "gpt-4o")
+    model_name = get_model_name(payload.model_override)
+    model_provider = get_provider(model_name)
+    uses_local_model = is_local_model(model_name)
 
     # ── Bước 1: Rate limit / Step 1: Rate limit ──────────────────────────────
-    if await check_rate_limit(user_id):
+    if not uses_local_model and await check_rate_limit(user_id):
         raise HTTPException(
             status_code=429,
             detail={
@@ -351,6 +222,12 @@ async def chat(payload: ChatRequest):
             cost={"request_cost_usd": 0.0, "daily_cost_usd": 0.0, "rate_limited": False},
             blocked=True,
             block_reason=reason,
+            model_info={
+                "model": model_name,
+                "provider": model_provider,
+                "is_local": uses_local_model,
+                "question_limit": None if uses_local_model else RATE_LIMIT_PER_MINUTE,
+            },
         )
 
     # ── Bước 3: Quiz gate / Step 3: Quiz completion gate ─────────────────────
@@ -381,10 +258,16 @@ async def chat(payload: ChatRequest):
             cost={"request_cost_usd": 0.0, "daily_cost_usd": 0.0, "rate_limited": False},
             blocked=True,
             block_reason="quiz_not_completed",
+            model_info={
+                "model": model_name,
+                "provider": model_provider,
+                "is_local": uses_local_model,
+                "question_limit": None if uses_local_model else RATE_LIMIT_PER_MINUTE,
+            },
         )
 
     # ── Bước 4: Kiểm tra chi phí ngày / Step 4: Daily cost limit ─────────────
-    if is_user_rate_limited(user_id):
+    if not uses_local_model and is_user_rate_limited(user_id):
         raise HTTPException(
             status_code=429,
             detail={
@@ -469,4 +352,24 @@ async def chat(payload: ChatRequest):
             "daily_cost_usd":   cost_info["daily_cost_total"],
             "rate_limited":     cost_info["rate_limited"],
         },
+        model_info={
+            "model": model_name,
+            "provider": model_provider,
+            "is_local": uses_local_model,
+            "question_limit": None if uses_local_model else RATE_LIMIT_PER_MINUTE,
+        },
     )
+
+
+@router.get("/model-config", summary="Current LLM model and question limit policy")
+async def model_config(model_override: Optional[str] = None):
+    model_name = get_model_name(model_override)
+    provider = get_provider(model_name)
+    local = is_local_model(model_name)
+    return {
+        "model": model_name,
+        "provider": provider,
+        "is_local": local,
+        "question_limit": None if local else RATE_LIMIT_PER_MINUTE,
+        "unlimited_questions": local,
+    }

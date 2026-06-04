@@ -19,13 +19,23 @@
 'use strict';
 
 /* ─── API CONFIGURATION ──────────────────────────────────────── */
-const API_BASE = (window.location.origin === 'null' || window.location.origin.startsWith('file:') || !window.location.port || window.location.port !== '8000') 
-  ? 'http://127.0.0.1:8000' 
-  : window.location.origin;
+const API_BASE = (() => {
+  const origin = window.location.origin;
+  if (origin && origin !== 'null' && /^https?:\/\//.test(origin)) {
+    return origin;
+  }
+  return localStorage.getItem('AI_PATH_API_BASE') || 'http://127.0.0.1:8000';
+})();
 const ENDPOINTS = {
   analyze:  `${API_BASE}/api/analyze`,
   chat:     `${API_BASE}/api/chat`,
   feedback: `${API_BASE}/api/feedback`,
+  modelConfig: `${API_BASE}/api/model-config`,
+  authMe:   `${API_BASE}/api/auth/me`,
+  login:    `${API_BASE}/api/auth/login`,
+  register: `${API_BASE}/api/auth/register`,
+  logout:   `${API_BASE}/api/auth/logout`,
+  progress: `${API_BASE}/api/progress`,
 };
 
 /* ─── INPUT SANITIZATION GUARDRAIL ──────────────────────────── */
@@ -87,6 +97,9 @@ const AppState = {
     rateLimit: {
       remaining:    5,
       max:          5,
+      unlimited:    false,
+      modelName:    '',
+      provider:     '',
       resetAt:      null, // timestamp when limit resets
       countdown:    null, // setInterval ref
     },
@@ -100,9 +113,163 @@ const AppState = {
 
   // UI state
   ui: {
-    currentTab:    'chat',
     currentStep:   1,
     feedbackRating: 0,
+    userId:         null,
+    user:           null,
+  },
+};
+
+/* ─── PROGRESS PERSISTENCE ──────────────────────────────────── */
+const ProgressStore = {
+  version: 1,
+  saveTimer: null,
+
+  key(userId) {
+    return `AI_PATH_PROGRESS_V${this.version}_${userId}`;
+  },
+
+  save() {
+    const userId = AppState.ui.userId;
+    if (!userId) return;
+
+    const payload = this.snapshot();
+    localStorage.setItem(this.key(userId), JSON.stringify(payload));
+    this.saveRemote(payload);
+  },
+
+  snapshot() {
+    return {
+      savedAt: Date.now(),
+      userData: AppState.userData,
+      quiz: {
+        currentIndex: AppState.quiz.currentIndex,
+        answers: AppState.quiz.answers,
+        startTime: AppState.quiz.startTime,
+        endTime: AppState.quiz.endTime,
+      },
+      results: AppState.results,
+      chat: {
+        history: AppState.chat.history,
+        totalTokens: AppState.chat.totalTokens,
+        totalCostUSD: AppState.chat.totalCostUSD,
+      },
+      completedMilestones: Array.from(AppState.completedMilestones),
+      ui: {
+        currentStep: AppState.ui.currentStep,
+      },
+    };
+  },
+
+  saveRemote(payload) {
+    clearTimeout(this.saveTimer);
+    this.saveTimer = setTimeout(async () => {
+      try {
+        await fetch(ENDPOINTS.progress, {
+          method: 'PUT',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ progress: payload }),
+        });
+      } catch (err) {
+        console.warn('[Progress] Remote save failed:', err.message);
+      }
+    }, 350);
+  },
+
+  loadLocal(userId) {
+    try {
+      const raw = localStorage.getItem(this.key(userId));
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  },
+
+  clear(userId = AppState.ui.userId) {
+    if (userId) localStorage.removeItem(this.key(userId));
+    fetch(ENDPOINTS.progress, {
+      method: 'DELETE',
+      credentials: 'include',
+    }).catch(() => {});
+  },
+
+  apply(saved) {
+    AppState.userData = { ...AppState.userData, ...(saved.userData || {}) };
+    AppState.quiz = {
+      ...AppState.quiz,
+      ...(saved.quiz || {}),
+      timerInterval: null,
+    };
+    AppState.results = { ...AppState.results, ...(saved.results || {}) };
+    AppState.chat = {
+      ...AppState.chat,
+      history: saved.chat?.history || [],
+      totalTokens: saved.chat?.totalTokens || 0,
+      totalCostUSD: saved.chat?.totalCostUSD || 0,
+      isLoading: false,
+    };
+    AppState.completedMilestones = new Set(saved.completedMilestones || []);
+    AppState.ui.currentStep = saved.ui?.currentStep || AppState.ui.currentStep;
+
+    this.restoreInputs();
+    this.restoreView();
+    return true;
+  },
+
+  restore(userId) {
+    const local = this.loadLocal(userId);
+    const restored = local ? this.apply(local) : false;
+    this.restoreRemote(userId, local);
+    return restored;
+  },
+
+  async restoreRemote(userId, localProgress = null) {
+    try {
+      const response = await fetch(ENDPOINTS.progress, { credentials: 'include' });
+      if (!response.ok) return;
+      const data = await response.json();
+      if (!data.has_progress || !data.progress) return;
+
+      const remote = data.progress;
+      const remoteIsNewer = !localProgress || (remote.savedAt || 0) > (localProgress.savedAt || 0);
+      if (!remoteIsNewer) return;
+
+      localStorage.setItem(this.key(userId), JSON.stringify(remote));
+      this.apply(remote);
+    } catch (err) {
+      console.warn('[Progress] Remote restore failed:', err.message);
+    }
+  },
+
+  restoreInputs() {
+    const fields = {
+      'goal-why': AppState.userData.goal_why,
+      'goal-time': AppState.userData.goal_time,
+      'goal-style': AppState.userData.goal_style,
+      'goal-job': AppState.userData.goal_job,
+    };
+
+    Object.entries(fields).forEach(([id, value]) => {
+      const el = $(id);
+      if (!el) return;
+      el.value = value || '';
+      el.classList.toggle('has-value', Boolean(value));
+    });
+  },
+
+  restoreView() {
+    const hasResults = Boolean(AppState.results.roadmap);
+    if (hasResults) {
+      $('form-section').classList.add('hidden');
+      $('results-section').classList.remove('hidden');
+      ResultsUI.renderExisting();
+      return;
+    }
+
+    $('form-section').classList.remove('hidden');
+    $('results-section').classList.add('hidden');
+    StepForm.goToStep(AppState.ui.currentStep || 1, { restartQuiz: false });
   },
 };
 
@@ -283,62 +450,160 @@ const CostDisplay = {
     const total = AppState.chat.totalTokens;
     const cost  = AppState.chat.totalCostUSD.toFixed(4);
     if (this.label) this.label.textContent = `${total.toLocaleString()} tokens · $${cost}`;
+    ProgressStore.save();
   },
 };
 
-/* ─── TAB SYSTEM ─────────────────────────────────────────────── */
-const Tabs = {
-  chatBtn:     null,
-  roadmapBtn:  null,
-  chatPanel:   null,
-  roadmapPanel:null,
-  underline:   null,
+/* ─── MODEL LIMIT POLICY ────────────────────────────────────── */
+const ModelConfig = {
+  async load() {
+    try {
+      const response = await fetch(ENDPOINTS.modelConfig, { credentials: 'include' });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      const rl = AppState.chat.rateLimit;
+
+      rl.unlimited = Boolean(data.unlimited_questions || data.is_local);
+      rl.modelName = data.model || '';
+      rl.provider = data.provider || '';
+
+      if (rl.unlimited) {
+        rl.remaining = Infinity;
+      } else {
+        rl.max = data.question_limit || rl.max || 5;
+        rl.remaining = rl.max;
+      }
+
+      if (typeof ChatUI !== 'undefined' && ChatUI._updateRateLimit) {
+        ChatUI._updateRateLimit();
+      }
+    } catch (err) {
+      console.warn('[Model Config] Using limited default policy:', err.message);
+    }
+  },
+};
+
+/* ─── AUTH UI ───────────────────────────────────────────────── */
+const AuthUI = {
+  currentMode: 'login',
 
   init() {
-    this.chatBtn      = $('tab-chat-btn');
-    this.roadmapBtn   = $('tab-roadmap-btn');
-    this.chatPanel    = $('tab-chat');
-    this.roadmapPanel = $('tab-roadmap');
-    this.underline    = $('tab-underline');
+    this.authSection = $('auth-section');
+    this.appContainer = $('app-container');
+    this.accountMenu = $('account-menu');
+    this.loginTab = $('auth-login-tab');
+    this.registerTab = $('auth-register-tab');
+    this.loginForm = $('login-form');
+    this.registerForm = $('register-form');
 
-    this.chatBtn.addEventListener('click',    () => this.switchTo('chat'));
-    this.roadmapBtn.addEventListener('click', () => this.switchTo('roadmap'));
-
-    // Set initial underline position
-    this._updateUnderline(this.chatBtn);
+    this.loginTab.addEventListener('click', () => this.switchMode('login'));
+    this.registerTab.addEventListener('click', () => this.switchMode('register'));
+    this.loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+    this.registerForm.addEventListener('submit', (e) => this.handleRegister(e));
+    $('btn-logout').addEventListener('click', () => this.logout());
   },
 
-  switchTo(tabName) {
-    AppState.ui.currentTab = tabName;
-
-    const isChat = (tabName === 'chat');
-    this.chatBtn.classList.toggle('active', isChat);
-    this.roadmapBtn.classList.toggle('active', !isChat);
-    this.chatBtn.setAttribute('aria-selected', isChat);
-    this.roadmapBtn.setAttribute('aria-selected', !isChat);
-
-    // Animate panel switch
-    const showing = isChat ? this.chatPanel    : this.roadmapPanel;
-    const hiding  = isChat ? this.roadmapPanel : this.chatPanel;
-
-    hiding.classList.remove('active');
-    showing.classList.add('active');
-
-    // Update underline
-    this._updateUnderline(isChat ? this.chatBtn : this.roadmapBtn);
-
-    // Scroll to bottom of chat when switching to it
-    if (isChat) {
-      requestAnimationFrame(() => ChatUI.scrollToBottom());
+  async checkSession() {
+    try {
+      const response = await fetch(ENDPOINTS.authMe, { credentials: 'include' });
+      if (!response.ok) throw new Error('not_authenticated');
+      const data = await response.json();
+      this.showAuthenticated(data.user, false);
+    } catch {
+      this.showUnauthenticated(false);
     }
   },
 
-  _updateUnderline(activeBtn) {
-    if (!this.underline || !activeBtn) return;
-    const rect  = activeBtn.getBoundingClientRect();
-    const navRect = activeBtn.closest('.tabs-nav').getBoundingClientRect();
-    this.underline.style.left  = `${rect.left - navRect.left}px`;
-    this.underline.style.width = `${rect.width}px`;
+  switchMode(mode) {
+    this.currentMode = mode;
+    const isLogin = mode === 'login';
+    this.loginTab.classList.toggle('active', isLogin);
+    this.registerTab.classList.toggle('active', !isLogin);
+    this.loginForm.classList.toggle('hidden', !isLogin);
+    this.registerForm.classList.toggle('hidden', isLogin);
+    $('login-error').textContent = '';
+    $('register-error').textContent = '';
+  },
+
+  async handleLogin(event) {
+    event.preventDefault();
+    await this.submitAuth('login', {
+      email: sanitizeInput($('login-email').value),
+      password: $('login-password').value,
+    });
+  },
+
+  async handleRegister(event) {
+    event.preventDefault();
+    await this.submitAuth('register', {
+      name: sanitizeInput($('register-name').value),
+      email: sanitizeInput($('register-email').value),
+      password: $('register-password').value,
+    });
+  },
+
+  async submitAuth(mode, payload) {
+    const errorEl = mode === 'login' ? $('login-error') : $('register-error');
+    errorEl.textContent = '';
+
+    try {
+      const response = await fetch(mode === 'login' ? ENDPOINTS.login : ENDPOINTS.register, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(typeof data.detail === 'string' ? data.detail : 'Không thể xử lý yêu cầu.');
+      }
+
+      this.showAuthenticated(data.user, true);
+      Toast.success(mode === 'login' ? 'Đăng nhập thành công' : 'Tạo tài khoản thành công', 'Bạn có thể bắt đầu cá nhân hóa lộ trình.');
+    } catch (err) {
+      errorEl.textContent = err.message;
+    }
+  },
+
+  showAuthenticated(user, shouldScroll = true) {
+    AppState.ui.user = user;
+    AppState.ui.userId = user.user_id;
+
+    this.authSection.classList.add('hidden');
+    this.appContainer.classList.remove('hidden');
+    this.accountMenu.classList.remove('hidden');
+
+    $('account-name').textContent = user.name;
+    $('account-email').textContent = user.email;
+    $('account-avatar').textContent = (user.name || user.email || 'U').trim().charAt(0).toUpperCase();
+
+    const restored = ProgressStore.restore(user.user_id);
+
+    if (shouldScroll) {
+      (restored && AppState.results.roadmap ? $('results-section') : $('form-section'))
+        .scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  },
+
+  showUnauthenticated(shouldScroll = true) {
+    AppState.ui.user = null;
+    AppState.ui.userId = null;
+    this.authSection.classList.remove('hidden');
+    this.appContainer.classList.add('hidden');
+    this.accountMenu.classList.add('hidden');
+    if (shouldScroll) {
+      this.authSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  },
+
+  async logout() {
+    try {
+      await fetch(ENDPOINTS.logout, { method: 'POST', credentials: 'include' });
+    } finally {
+      SupportModal._resetSession({ keepAuth: false, silent: true, clearProgress: false });
+      this.showUnauthenticated(true);
+      Toast.info('Đã đăng xuất', 'Hẹn gặp lại bạn ở phiên học tiếp theo.');
+    }
   },
 };
 
@@ -406,11 +671,12 @@ const StepForm = {
     AppState.userData.goal_time  = sanitizeInput($('goal-time').value);
     AppState.userData.goal_style = sanitizeInput($('goal-style').value);
     AppState.userData.goal_job   = sanitizeInput($('goal-job').value);
+    ProgressStore.save();
 
     this.goToStep(2);
   },
 
-  goToStep(step) {
+  goToStep(step, { restartQuiz = true } = {}) {
     AppState.ui.currentStep = step;
 
     if (step === 1) {
@@ -427,7 +693,11 @@ const StepForm = {
       this.ind1.classList.add('completed');
       this.ind2.classList.add('active');
       this.line1.classList.add('active');
-      Quiz.start();
+      if (restartQuiz) {
+        Quiz.start();
+      } else {
+        Quiz.resume();
+      }
     }
   },
 };
@@ -472,6 +742,7 @@ const Quiz = {
     AppState.quiz.currentIndex = 0;
     AppState.quiz.answers      = new Array(QUIZ_QUESTIONS.length).fill(null);
     AppState.quiz.startTime    = Date.now();
+    AppState.quiz.endTime      = null;
 
     // Build dots
     this._buildDots();
@@ -483,6 +754,17 @@ const Quiz = {
     this._startTimer();
 
     Toast.info('Bài kiểm tra bắt đầu!', '10 câu hỏi về nền tảng AI. Chọn đáp án tốt nhất!');
+    ProgressStore.save();
+  },
+
+  resume() {
+    this._buildDots();
+    const index = Math.min(AppState.quiz.currentIndex || 0, QUIZ_QUESTIONS.length - 1);
+    this._renderQuestion(index);
+    if (!AppState.quiz.endTime) {
+      if (!AppState.quiz.startTime) AppState.quiz.startTime = Date.now();
+      this._startTimer();
+    }
   },
 
   _startTimer() {
@@ -600,6 +882,7 @@ const Quiz = {
 
   _selectAnswer(questionIndex, optionIndex) {
     AppState.quiz.answers[questionIndex] = optionIndex;
+    ProgressStore.save();
 
     // Re-render to show correct/wrong states
     this._renderQuestion(questionIndex);
@@ -613,6 +896,7 @@ const Quiz = {
     if (next < 0 || next >= QUIZ_QUESTIONS.length) return;
     AppState.quiz.currentIndex = next;
     this._renderQuestion(next);
+    ProgressStore.save();
   },
 
   _submitQuiz() {
@@ -676,9 +960,6 @@ const ResultsUI = {
       $('fallback-alert').classList.remove('hidden');
     }
 
-    // Init tabs
-    Tabs.switchTo('chat');
-
     // Load roadmap (with loading state)
     Roadmap.loadSkeleton();
 
@@ -687,9 +968,31 @@ const ResultsUI = {
 
     // Setup chat welcome message
     ChatUI.init();
+    ProgressStore.save();
 
     // Smooth scroll to results
     resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  },
+
+  renderExisting() {
+    this._animateConfidence();
+    $('score-display').textContent = `${AppState.results.score} / 10`;
+    const levelInfo = SCORE_LEVELS.find(l => AppState.results.score >= l.min && AppState.results.score <= l.max);
+    $('score-level').textContent = levelInfo ? levelInfo.label : (AppState.results.level || '--');
+
+    $('fallback-alert').classList.toggle('hidden', !AppState.results.isFallback);
+    $('failure-alert').classList.toggle('hidden', !AppState.results.isFailure);
+
+    if (AppState.results.roadmap) {
+      Roadmap.render(AppState.results.roadmap);
+    }
+
+    if ($('cost-label')) {
+      $('cost-label').textContent = `${AppState.chat.totalTokens.toLocaleString()} tokens · $${AppState.chat.totalCostUSD.toFixed(4)}`;
+    }
+
+    ChatUI.init({ restoreHistory: true });
+    requestAnimationFrame(() => ChatUI.scrollToBottom());
   },
 
   _animateConfidence() {
@@ -721,9 +1024,13 @@ const ResultsUI = {
   },
 
   async _callAnalyzeAPI() {
+    if (!AppState.results.sessionId) {
+      AppState.results.sessionId = `session_${Date.now()}`;
+    }
+
     const payload = {
       user_id:          AppState.ui.userId || 'guest_user',
-      session_id:       AppState.results.sessionId || 'session_' + Date.now(),
+      session_id:       AppState.results.sessionId,
       goal_description: `Mục đích học AI: ${AppState.userData.goal_why}. Hình thức học ưa thích: ${AppState.userData.goal_style}.`,
       quiz_answers:     AppState.quiz.answers,
       time_per_week:    `${AppState.userData.goal_time} tiếng/tuần`,
@@ -804,6 +1111,7 @@ const ResultsUI = {
     try {
       const response = await fetch(ENDPOINTS.analyze, {
         method:  'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify(payload),
       });
@@ -844,6 +1152,7 @@ const ResultsUI = {
         
         // Render
         Roadmap.render(AppState.results.roadmap);
+        ProgressStore.save();
         Toast.success('Lộ trình đã sẵn sàng!', 'AI đã phân tích xong và tạo lộ trình phù hợp cho bạn.');
         
       } else if (pathType === 'low_conf') {
@@ -857,6 +1166,7 @@ const ResultsUI = {
         
         // Render baseline VinUni roadmap
         Roadmap.render(DEFAULT_ROADMAP);
+        ProgressStore.save();
         
         // Proactive Chatbot suggestion
         setTimeout(() => {
@@ -883,6 +1193,7 @@ const ResultsUI = {
       $('fallback-alert').classList.remove('hidden');
 
       Roadmap.render(DEFAULT_ROADMAP);
+      ProgressStore.save();
 
       Toast.warning('Dùng lộ trình mặc định', 'Hệ thống đang bận tối ưu cấu trúc, vui lòng đợi trong giây lát.');
     }
@@ -1044,6 +1355,7 @@ const Roadmap = {
       checkBtn.title = 'Đã hoàn thành';
       Toast.success('Hoàn thành!', `Bạn đã hoàn thành: ${cardEl.querySelector('.milestone-title').textContent}`);
     }
+    ProgressStore.save();
   },
 
   exportAsText() {
@@ -1092,7 +1404,7 @@ const ChatUI = {
   rlTimer:     null,
   rlCountdown: null,
 
-  init() {
+  init({ restoreHistory = false } = {}) {
     this.messagesEl  = $('chat-messages');
     this.inputEl     = $('chat-input');
     this.sendBtn     = $('btn-send');
@@ -1102,8 +1414,18 @@ const ChatUI = {
     this.rlTimer     = $('rate-limit-timer');
     this.rlCountdown = $('rl-countdown');
 
-    // Welcome message
-    this._addWelcomeMessage();
+    if (this._initialized) {
+      if (restoreHistory) this._renderHistory();
+      this._updateRateLimit();
+      return;
+    }
+    this._initialized = true;
+
+    if (restoreHistory && AppState.chat.history.length) {
+      this._renderHistory();
+    } else {
+      this._addWelcomeMessage();
+    }
 
     // Event listeners
     this.inputEl.addEventListener('input', () => this._onInputChange());
@@ -1119,6 +1441,16 @@ const ChatUI = {
     this.inputEl.addEventListener('input', () => {
       this.inputEl.style.height = 'auto';
       this.inputEl.style.height = Math.min(this.inputEl.scrollHeight, 120) + 'px';
+    });
+
+    this._updateRateLimit();
+  },
+
+  _renderHistory() {
+    if (!this.messagesEl) return;
+    this.messagesEl.innerHTML = '';
+    (AppState.chat.history || []).forEach(msg => {
+      this._appendMessage(msg.role, msg.content, true);
     });
   },
 
@@ -1143,7 +1475,7 @@ Tôi đã phân tích kết quả quiz của bạn:
 • **Mục tiêu**: ${AppState.userData.goal_why || 'Học AI'}
 • **Thời gian học**: ${AppState.userData.goal_time || 'N/A'}/tuần
 
-Lộ trình học của bạn đã được tạo trong tab **Lộ trình học**. Hãy hỏi tôi bất cứ điều gì về lộ trình, tài nguyên học tập, hoặc các chủ đề AI bạn quan tâm! 🚀`;
+Lộ trình học của bạn đã được tạo ở khung **Lộ trình học** bên phải. Hãy hỏi tôi bất cứ điều gì về lộ trình, tài nguyên học tập, hoặc các chủ đề AI bạn quan tâm! 🚀`;
 
     this._appendMessage('ai', welcome);
   },
@@ -1175,6 +1507,7 @@ Lộ trình học của bạn đã được tạo trong tab **Lộ trình học*
     // Save to history
     if (!skipState) {
       AppState.chat.history.push({ role, content, time: new Date() });
+      ProgressStore.save();
     }
 
     return el;
@@ -1218,6 +1551,17 @@ Lộ trình học của bạn đã được tạo trong tab **Lộ trình học*
 
   _updateRateLimit() {
     const rl = AppState.chat.rateLimit;
+    if (rl.unlimited) {
+      if (this.rlLabel) {
+        this.rlLabel.textContent = `Không giới hạn câu hỏi${rl.modelName ? ` · ${rl.modelName}` : ''}`;
+      }
+      if (this.rlFill) {
+        this.rlFill.style.width = '100%';
+        this.rlFill.style.background = 'var(--color-success)';
+      }
+      return;
+    }
+
     const pct = (rl.remaining / rl.max) * 100;
 
     if (this.rlLabel) {
@@ -1262,7 +1606,7 @@ Lộ trình học của bạn đã được tạo trong tab **Lộ trình học*
     const rl = AppState.chat.rateLimit;
 
     // Rate limit check
-    if (rl.remaining <= 0) {
+    if (!rl.unlimited && rl.remaining <= 0) {
       Toast.warning('Đã đạt giới hạn', 'Bạn chỉ có thể gửi 5 tin nhắn/phút. Vui lòng chờ.');
       return;
     }
@@ -1281,11 +1625,13 @@ Lộ trình học của bạn đã được tạo trong tab **Lộ trình học*
     // Append user message
     this._appendMessage('user', content);
 
-    // Decrement rate limit
-    rl.remaining -= 1;
-    this._updateRateLimit();
+    // Decrement rate limit for non-local models only.
+    if (!rl.unlimited) {
+      rl.remaining -= 1;
+      this._updateRateLimit();
+    }
 
-    if (rl.remaining <= 0) {
+    if (!rl.unlimited && rl.remaining <= 0) {
       this.sendBtn.disabled = true;
       this.inputEl.disabled = true;
       this._startRateLimitCountdown();
@@ -1299,11 +1645,12 @@ Lộ trình học của bạn đã được tạo trong tab **Lộ trình học*
     try {
       const response = await fetch(ENDPOINTS.chat, {
         method:  'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({
           user_id:            AppState.ui.userId || 'guest_user',
           message:            content,
-          session_id:         AppState.results.sessionId || 'session_' + Date.now(),
+          session_id:         AppState.results.sessionId || `session_${Date.now()}`,
           quiz_completed:     true,
           questions_answered: AppState.quiz.answers.filter(a => a !== null).length,
         }),
@@ -1334,7 +1681,7 @@ Lộ trình học của bạn đã được tạo trong tab **Lộ trình học*
     } finally {
       AppState.chat.isLoading = false;
       // Re-enable send if rate limit allows
-      if (rl.remaining > 0) {
+      if (rl.unlimited || rl.remaining > 0) {
         this.sendBtn.disabled = false;
         this.inputEl.disabled = false;
       }
@@ -1484,7 +1831,7 @@ const FeedbackModal = {
 
     const payload = {
       user_id:          AppState.ui.userId || 'guest_user',
-      session_id:       AppState.results.sessionId || 'session_' + Date.now(),
+      session_id:       AppState.results.sessionId || `session_${Date.now()}`,
       rating:           rating,
       comment:          comment || '',
       roadmap_data:     AppState.results.roadmap,
@@ -1496,6 +1843,7 @@ const FeedbackModal = {
     try {
       const response = await fetch(ENDPOINTS.feedback, {
         method:  'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify(payload),
       });
@@ -1558,20 +1906,44 @@ const SupportModal = {
     document.body.style.overflow = '';
   },
 
-  _resetSession() {
+  _resetSession({ keepAuth = true, silent = false, clearProgress = true } = {}) {
+    const currentUser = AppState.ui.user;
+    const currentUserId = AppState.ui.userId;
+    if (clearProgress && currentUserId) ProgressStore.clear(currentUserId);
+
     // Reset state
-    AppState.userData          = { goal_why: '', goal_time: '', goal_job: '', goal_bg: '' };
+    AppState.userData          = { goal_why: '', goal_time: '', goal_job: '', goal_style: '' };
     AppState.quiz              = { currentIndex: 0, answers: new Array(QUIZ_QUESTIONS.length).fill(null), startTime: null, endTime: null, timerInterval: null };
     AppState.results           = { score: 0, confidence: 0, level: '', roadmap: null, isFallback: false, isFailure: false, sessionId: null };
-    AppState.chat              = { history: [], rateLimit: { remaining: 5, max: 5, resetAt: null, countdown: null }, totalTokens: 0, totalCostUSD: 0, isLoading: false };
+    AppState.chat              = {
+      history: [],
+      rateLimit: {
+        remaining: 5,
+        max: 5,
+        unlimited: false,
+        modelName: '',
+        provider: '',
+        resetAt: null,
+        countdown: null,
+      },
+      totalTokens: 0,
+      totalCostUSD: 0,
+      isLoading: false,
+    };
     AppState.completedMilestones = new Set();
-    AppState.ui                = { currentTab: 'chat', currentStep: 1, feedbackRating: 0 };
+    AppState.ui                = {
+      currentStep: 1,
+      feedbackRating: 0,
+      user: keepAuth ? currentUser : null,
+      userId: keepAuth ? currentUserId : null,
+    };
 
     // Reset cost display
     if ($('cost-label')) $('cost-label').textContent = '0 tokens · $0.000';
+    ModelConfig.load();
 
     // Show form, hide results
-    $('form-section').classList.remove('hidden');
+    if (keepAuth) $('form-section').classList.remove('hidden');
     $('results-section').classList.add('hidden');
     $('failure-alert').classList.add('hidden');
     $('fallback-alert').classList.add('hidden');
@@ -1584,16 +1956,21 @@ const SupportModal = {
     if ($('chat-messages')) $('chat-messages').innerHTML = '';
 
     this.close();
-    Toast.info('Đặt lại thành công', 'Phiên làm việc đã được xoá. Bắt đầu lại từ đầu!');
+    if (!silent) Toast.info('Đặt lại thành công', 'Phiên làm việc đã được xoá. Bắt đầu lại từ đầu!');
 
     // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (!silent) window.scrollTo({ top: 0, behavior: 'smooth' });
   },
 };
 
 /* ─── HERO CTA ───────────────────────────────────────────────── */
 function initHeroCTA() {
   $('hero-start-btn').addEventListener('click', () => {
+    if (!AppState.ui.userId) {
+      $('auth-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(() => $('login-email').focus(), 600);
+      return;
+    }
     const formSection = $('form-section');
     formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     setTimeout(() => {
@@ -1630,10 +2007,6 @@ function initKeyboardShortcuts() {
       $('modal-support').classList.add('hidden');
       document.body.style.overflow = '';
     }
-
-    // Alt+1 = Chat tab, Alt+2 = Roadmap tab
-    if (e.altKey && e.key === '1') Tabs.switchTo('chat');
-    if (e.altKey && e.key === '2') Tabs.switchTo('roadmap');
   });
 }
 
@@ -1673,11 +2046,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Core systems
   Toast.init();
   CostDisplay.init();
+  AuthUI.init();
 
   // UI components
   StepForm.init();
   Quiz.init();
-  Tabs.init();
   Roadmap.init();
   FeedbackModal.init();
   SupportModal.init();
@@ -1686,6 +2059,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Ensure results are hidden on load
   ensureResultsHidden();
+  AuthUI.checkSession();
+  ModelConfig.load();
 
   // Trap focus in modals
   trapFocus($('modal-feedback'));
@@ -1694,6 +2069,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Rate limit UI init
   ChatUI._updateRateLimit = function() {
     const rl = AppState.chat.rateLimit;
+    if (rl.unlimited) {
+      const rlLabel = $('rate-limit-label');
+      const rlFill  = $('rate-limit-fill');
+      if (rlLabel) rlLabel.textContent = `Không giới hạn câu hỏi${rl.modelName ? ` · ${rl.modelName}` : ''}`;
+      if (rlFill) {
+        rlFill.style.width = '100%';
+        rlFill.style.background = 'var(--color-success)';
+      }
+      return;
+    }
+
     const pct = (rl.remaining / rl.max) * 100;
     const rlLabel = $('rate-limit-label');
     const rlFill  = $('rate-limit-fill');
@@ -1706,7 +2092,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   console.log('✅ All systems initialized.');
-  Toast.info('Chào mừng!', 'Bắt đầu bằng cách điền thông tin mục tiêu học tập của bạn.');
+  Toast.info('Chào mừng!', 'Đăng nhập hoặc tạo tài khoản để bắt đầu lộ trình học của bạn.');
 });
 
 /* ─── EXPOSE FOR DEBUGGING (dev only) ───────────────────────── */

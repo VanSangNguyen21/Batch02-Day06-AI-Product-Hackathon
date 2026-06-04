@@ -9,7 +9,7 @@ import logging
 from typing import Optional, List, Any, Dict
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 from models.database import insert_feedback, insert_human_review, insert_bad_feedback
 
@@ -35,7 +35,8 @@ class FeedbackRequest(BaseModel):
     report:           bool  = Field(False, description="Người dùng chủ động báo cáo vấn đề / User actively reports an issue")
     comment:          Optional[str] = Field(None, max_length=1000, description="Nhận xét thêm / Additional comment")
 
-    @validator("rating")
+    @field_validator("rating")
+    @classmethod
     def validate_rating(cls, v):
         if not 1 <= v <= 5:
             raise ValueError("Rating must be between 1 and 5")

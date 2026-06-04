@@ -12,7 +12,6 @@ def get_guardrail_rules_path() -> str:
         os.path.join(os.path.dirname(__file__), "..", "..", "prompts", "guardrail_rules.json"),
         os.path.join(os.path.dirname(__file__), "..", "prompts", "guardrail_rules.json"),
         os.path.join(os.path.dirname(__file__), "prompts", "guardrail_rules.json"),
-        "C:\\ai_vinuni\\code_vinuni\Batch02-Day05\\project\\prompts\\guardrail_rules.json"
     ]
     for path in possible_paths:
         if os.path.exists(path):

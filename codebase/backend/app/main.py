@@ -18,7 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 import logging
 
-from app.api import analyze, chat, feedback, admin
+from app.api import analyze, chat, feedback, admin, auth, progress
 from models.database import init_db
 
 # Cấu hình logging
@@ -49,11 +49,22 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+def _allowed_origins() -> list[str]:
+    raw = os.getenv("ALLOWED_ORIGINS", "")
+    origins = [origin.strip() for origin in raw.split(",") if origin.strip()]
+    return origins or [
+        "http://127.0.0.1:8000",
+        "http://127.0.0.1:8001",
+        "http://localhost:8000",
+        "http://localhost:8001",
+    ]
+
+
 # ==================== CORS MIDDLEWARE ====================
-# Cho phép frontend connect (trong production, giới hạn origins cụ thể)
+# Cho phép frontend connect từ origins cấu hình trong .env
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Trong production: ["https://yourdomain.com"]
+    allow_origins=_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -64,6 +75,8 @@ app.include_router(analyze.router, prefix="/api", tags=["Phân tích & Lộ trì
 app.include_router(chat.router,    prefix="/api", tags=["Chatbot"])
 app.include_router(feedback.router, prefix="/api", tags=["Feedback"])
 app.include_router(admin.router,   prefix="/api/admin", tags=["Admin"])
+app.include_router(auth.router,     prefix="/api", tags=["Auth"])
+app.include_router(progress.router, prefix="/api", tags=["Progress"])
 
 
 # ==================== HEALTH CHECK ====================

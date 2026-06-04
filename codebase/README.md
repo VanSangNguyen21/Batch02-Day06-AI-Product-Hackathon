@@ -24,7 +24,7 @@ Hệ thống cá nhân hóa lộ trình học AI cơ bản dành cho người m�
 
 * **Frontend:** HTML5, Vanilla CSS3 (Custom Design System, Glassmorphism, animations), Vanilla JavaScript.
 * **Backend:** FastAPI (Python), Uvicorn, Pydantic, HTTPX, SQLite3.
-* **Mô hình AI:** OpenAI API (GPT-4o, GPT-4o-mini) hoặc Gemini API (Gemini 1.5 Flash).
+* **Mô hình AI:** Ollama local mặc định (`llama3.2`), hoặc OpenAI-compatible / Gemini API khi cấu hình provider tương ứng.
 
 ---
 
@@ -69,12 +69,18 @@ project/
    ```bash
    copy .env.example .env
    ```
-3. Mở file `.env` lên và điền các API Key cần thiết:
+3. Mở file `.env` lên. Cấu hình mặc định dùng Ollama local, không cần API key:
    ```env
-   OPENAI_API_KEY=your_openai_api_key_here
-   GEMINI_API_KEY=your_gemini_api_key_here
-   MODEL_NAME=gpt-4o-mini
+   LLM_PROVIDER=ollama
+   OLLAMA_BASE_URL=http://127.0.0.1:11434
+   MODEL_NAME=llama3.2
    MAX_DAILY_COST_USD=1.0
+   ```
+
+4. Chạy Ollama và tải model nếu máy bạn chưa có:
+   ```bash
+   ollama serve
+   ollama pull llama3.2
    ```
 
 ### 2. Cài Đặt Thư Viện Python
@@ -91,6 +97,5 @@ API docs sẽ khả dụng tại địa chỉ: [http://127.0.0.1:8000/docs](http
 
 ### 4. Chạy Frontend
 Bạn chỉ cần mở trực tiếp file `project/frontend/index.html` bằng trình duyệt web của mình hoặc sử dụng tiện ích Live Server trong VS Code để chạy.
-
 
 

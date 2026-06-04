@@ -16,7 +16,7 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800&display=swap&subset=vietnamese" rel="stylesheet" />
 
   <!-- Main CSS -->
   <link rel="stylesheet" href="src/styles.css" />
@@ -86,6 +86,14 @@
         <button class="btn-icon" id="btn-feedback" title="Đánh giá" aria-label="Mở đánh giá">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         </button>
+        <div class="account-menu hidden" id="account-menu">
+          <div class="account-avatar" id="account-avatar" aria-hidden="true">U</div>
+          <div class="account-copy">
+            <span class="account-name" id="account-name">Người học</span>
+            <span class="account-email" id="account-email">user@example.com</span>
+          </div>
+          <button class="btn-ghost btn-sm" id="btn-logout">Đăng xuất</button>
+        </div>
       </div>
     </div>
   </header>
@@ -136,9 +144,63 @@
   </section>
 
   <!-- ========================================================
+       AUTH SECTION
+       ======================================================== -->
+  <section class="auth-section" id="auth-section">
+    <div class="container auth-layout">
+      <div class="auth-copy">
+        <span class="auth-kicker">Tài khoản học tập</span>
+        <h2>Lưu lộ trình, lịch sử chat và phản hồi của bạn</h2>
+        <p>Đăng ký hoặc đăng nhập để sử dụng app như một website hoàn chỉnh. Mỗi tài khoản có phiên học riêng và dữ liệu phản hồi riêng.</p>
+      </div>
+
+      <div class="auth-card">
+        <div class="auth-tabs" role="tablist" aria-label="Đăng nhập hoặc đăng ký">
+          <button class="auth-tab active" id="auth-login-tab" type="button">Đăng nhập</button>
+          <button class="auth-tab" id="auth-register-tab" type="button">Đăng ký</button>
+        </div>
+
+        <form class="auth-form" id="login-form" novalidate>
+          <div class="form-group floating-label-group">
+            <input type="email" id="login-email" placeholder=" " autocomplete="email" required />
+            <label for="login-email">Email</label>
+          </div>
+          <div class="form-group floating-label-group">
+            <input type="password" id="login-password" placeholder=" " autocomplete="current-password" required />
+            <label for="login-password">Mật khẩu</label>
+          </div>
+          <div class="field-error auth-error" id="login-error"></div>
+          <button class="btn-primary btn-full" type="submit">
+            <span>Đăng nhập</span>
+          </button>
+        </form>
+
+        <form class="auth-form hidden" id="register-form" novalidate>
+          <div class="form-group floating-label-group">
+            <input type="text" id="register-name" placeholder=" " autocomplete="name" maxlength="80" required />
+            <label for="register-name">Họ và tên</label>
+          </div>
+          <div class="form-group floating-label-group">
+            <input type="email" id="register-email" placeholder=" " autocomplete="email" required />
+            <label for="register-email">Email</label>
+          </div>
+          <div class="form-group floating-label-group">
+            <input type="password" id="register-password" placeholder=" " autocomplete="new-password" minlength="8" required />
+            <label for="register-password">Mật khẩu (ít nhất 8 ký tự, có chữ và số)</label>
+          </div>
+          <div class="field-error auth-error" id="register-error"></div>
+          <button class="btn-primary btn-full" type="submit">
+            <span>Tạo tài khoản</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
        MAIN APP CONTAINER
        ======================================================== -->
-  <main class="app-container container" id="app-container">
+  <main class="app-container container hidden" id="app-container">
 
     <!-- ── MULTI-STEP FORM (Steps 1 & 2) ────────────────────── -->
     <section class="form-section" id="form-section">
@@ -309,22 +371,15 @@
         <button class="btn-ghost btn-sm" id="btn-retry">Thử lại</button>
       </div>
 
-      <!-- ── TABS ──────────────────────────────────────────── -->
-      <div class="tabs-container">
-        <div class="tabs-nav" role="tablist" aria-label="Chức năng chính">
-          <button class="tab-btn active" id="tab-chat-btn" role="tab" aria-selected="true" aria-controls="tab-chat">
+      <!-- ── SPLIT WORKSPACE ───────────────────────────────── -->
+      <div class="split-workspace">
+        <section class="workspace-panel chat-panel" id="tab-chat" aria-labelledby="chat-panel-title">
+          <div class="workspace-panel-header">
+            <h2 class="workspace-panel-title" id="chat-panel-title">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             Trợ lý AI
-          </button>
-          <button class="tab-btn" id="tab-roadmap-btn" role="tab" aria-selected="false" aria-controls="tab-roadmap">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            Lộ trình học
-          </button>
-          <div class="tab-underline" id="tab-underline"></div>
-        </div>
-
-        <!-- ── TAB 1: CHATBOT ───────────────────────────── -->
-        <div class="tab-panel active" id="tab-chat" role="tabpanel" aria-labelledby="tab-chat-btn">
+            </h2>
+          </div>
           <div class="chat-container">
             <!-- Chat Messages -->
             <div class="chat-messages" id="chat-messages" aria-live="polite" aria-label="Cuộc trò chuyện">
@@ -364,10 +419,15 @@
               <p class="chat-hint">Nhấn <kbd>Enter</kbd> để gửi, <kbd>Shift+Enter</kbd> để xuống dòng</p>
             </div>
           </div>
-        </div><!-- /tab-chat -->
+        </section><!-- /chat-panel -->
 
-        <!-- ── TAB 2: ROADMAP ───────────────────────────── -->
-        <div class="tab-panel" id="tab-roadmap" role="tabpanel" aria-labelledby="tab-roadmap-btn">
+        <section class="workspace-panel roadmap-panel" id="tab-roadmap" aria-labelledby="roadmap-panel-title">
+          <div class="workspace-panel-header">
+            <h2 class="workspace-panel-title" id="roadmap-panel-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Lộ trình học
+            </h2>
+          </div>
           <!-- Roadmap Header -->
           <div class="roadmap-header">
             <div class="roadmap-meta">
@@ -415,9 +475,9 @@
               <span>Chưa mở khóa</span>
             </div>
           </div>
-        </div><!-- /tab-roadmap -->
+        </section><!-- /roadmap-panel -->
 
-      </div><!-- /tabs-container -->
+      </div><!-- /split-workspace -->
     </section><!-- /results-section -->
   </main>
 
