@@ -786,9 +786,25 @@ const Quiz = {
     this._prevBtn.addEventListener('click', () => this._navigate(-1));
   },
 
-  start() {
-    QUIZ_QUESTIONS = buildRandomQuizQuestions();
-    if (QUIZ_QUESTIONS.length === 0) {
+  async start() {
+    const useRag = document.getElementById('use-rag-quiz') && document.getElementById('use-rag-quiz').checked;
+    
+    let ragQuiz = null;
+    if (useRag && typeof initializeRAGQuiz === 'function') {
+      try {
+        ragQuiz = await initializeRAGQuiz(AppState.userData);
+      } catch (e) {
+        console.warn('RAG Quiz error, falling back to default:', e);
+      }
+    }
+
+    if (ragQuiz && ragQuiz.questions && ragQuiz.questions.length > 0) {
+      QUIZ_QUESTIONS = ragQuiz.questions;
+    } else {
+      QUIZ_QUESTIONS = buildRandomQuizQuestions();
+    }
+
+    if (!QUIZ_QUESTIONS || QUIZ_QUESTIONS.length === 0) {
       Toast.error('Không tải được câu hỏi', 'Kiểm tra file src/quiz_questions.json rồi tải lại trang.');
       return;
     }
@@ -1378,22 +1394,17 @@ const Roadmap = {
       </button>
     `;
 
-    // Toggle completion (not for locked milestones)
-    if (status !== 'locked') {
-      const checkBtn = el.querySelector('.milestone-check');
-      checkBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this._toggleMilestone(ms.id, el, checkBtn);
-      });
+    const checkBtn = el.querySelector('.milestone-check');
+    checkBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this._toggleMilestone(ms.id, el, checkBtn);
+    });
 
-      // Click on card to expand / mark active
-      el.addEventListener('click', (e) => {
-        if (e.target.closest('a')) return;
-        if (!el.classList.contains('locked')) {
-          el.classList.toggle('active');
-        }
-      });
-    }
+    // Click on card to expand / mark active
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('a, button')) return;
+      el.classList.toggle('active');
+    });
 
     return el;
   },

@@ -96,6 +96,18 @@
         </div>
       </div>
     </div>
+<<<<<<< HEAD
+=======
+
+    <!-- Role-gated sub-nav (admin/reviewer only) -->
+    <nav class="role-nav" id="role-nav" aria-label="Quản trị">
+      <div class="container role-nav-inner">
+        <a href="workspace.html" class="role-nav-link" data-role-min="student">Lộ trình</a>
+        <a href="main.html#admin-dashboard" class="role-nav-link" data-role-min="reviewer" id="nav-admin">Quản trị</a>
+        <span class="role-nav-info" id="role-nav-info"></span>
+      </div>
+    </nav>
+>>>>>>> 179b13818c1d4f93e72e0389f9fdc6f7414f6745
   </header>
 
   <main class="workspace-page-shell hidden" id="app-container">
@@ -345,6 +357,19 @@
   </div>
 
   <!-- Main JS -->
+<<<<<<< HEAD
   <script src="src/app.js"></script>
+=======
+  <script src="src/auth.js"></script>
+  <script src="src/app.js"></script>
+  <script>
+    (function bootAuth() {
+      _restore();
+      renderUserBadge();
+      applyRoleGating();
+      if (AuthState.token) refreshMe().finally(() => { renderUserBadge(); applyRoleGating(); });
+    })();
+  </script>
+>>>>>>> 179b13818c1d4f93e72e0389f9fdc6f7414f6745
 </body>
 </html>

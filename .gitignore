@@ -3,12 +3,15 @@ node_modules/
 .env
 *.log
 <<<<<<< HEAD
+<<<<<<< HEAD
 __pycache__/
 *.pyc
 codebase/backend/data/*.db
 codebase/backend/data/*.jsonl
 codebase/backend/data/sandbox_storage.jsonl
 =======
+=======
+>>>>>>> 179b13818c1d4f93e72e0389f9fdc6f7414f6745
 
 # Python
 __pycache__/
@@ -19,5 +22,10 @@ __pycache__/
 # Data & runtime files
 codebase/backend/data/*.db
 codebase/backend/data/*.jsonl
+<<<<<<< HEAD
 codebase/backend/models/*.db
 >>>>>>> e879695cfdc5ffb67c800617885c13387fb1b489
+=======
+codebase/backend/data/sandbox_storage.jsonl
+codebase/backend/models/*.db
+>>>>>>> 179b13818c1d4f93e72e0389f9fdc6f7414f6745
