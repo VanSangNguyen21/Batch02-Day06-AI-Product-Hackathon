@@ -29,7 +29,6 @@ python-multipart==0.0.9   # Form data parsing (cần cho FastAPI uploads / neede
 # ── Development Tools ──────────────────────────────────────
 pytest==8.2.2             # Unit testing framework
 pytest-asyncio==0.23.7    # Async test support
-httpx==0.27.0             # Test client cho FastAPI / FastAPI test client
 
 # ── Logging & Monitoring ───────────────────────────────────
 # Logging sử dụng stdlib / Logging uses stdlib (no extra package needed)

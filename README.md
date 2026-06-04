@@ -9,12 +9,12 @@
 
 | Tên tài khoản | Họ và tên | Vai trò |
 |---|---|---|
-| **VanSangNguyen21** (sangthon2003@gmail.com) | Nguyễn Văn Sang | Product Manager / Lead |
+| **VanSangNguyen21** (sangthon2003@gmail.com) | Nguyễn Văn Sáng | Product Manager / Lead |
 | **phammaianh11102005@gmail.com** | Phạm Mai Anh | Prompt / AI Engineer |
-| **Shiner-2** | Phan Nhật Huy | Backend Core Developer |
+| **Shiner-2** | Phạm Ngọc Hải Dương | Backend Core Developer |
 | **letho1608** | Lê Quang Thọ | Backend Data & Ops |
 | **DoTrungDuc1908** | Đỗ Trung Đức | Frontend UI/UX Developer |
-| **nguyetbinh** | Nguyễn Nguyệt Bình | QA / Test & Pitching |
+| **nguyetbinh** | Vương Nguyệt Bình | QA / Test & Pitching |
 
 ---
 
@@ -86,13 +86,19 @@ pip install -r requirements.txt
 copy .env.example .env
 ```
 
-Mở `.env` và điền:
+Mặc định project chạy với Ollama local:
 ```env
-OPENAI_API_KEY=your_api_key_here
-OPENAI_API_BASE=https://integrate.api.nvidia.com/v1   # hoặc https://api.openai.com/v1
-MODEL_NAME=deepseek-ai/deepseek-v4-flash              # hoặc gpt-4o-mini
+LLM_PROVIDER=ollama
+OLLAMA_BASE_URL=http://127.0.0.1:11434
+MODEL_NAME=llama3.2
 MAX_DAILY_COST_USD=1.0
 RATE_LIMIT_PER_MINUTE=5
+```
+
+Trước khi chạy backend, mở Ollama và tải model nếu cần:
+```bash
+ollama serve
+ollama pull llama3.2
 ```
 
 ### 3. Chạy backend server
@@ -115,7 +121,7 @@ Mở file `codebase/frontend/index.html` trực tiếp bằng trình duyệt ho�
 |-------|-----------|
 | Frontend | HTML5, Vanilla CSS3 (Glassmorphism, Dark theme), Vanilla JavaScript |
 | Backend | FastAPI (Python), Uvicorn, Pydantic, SQLite3 |
-| AI Model | NVIDIA API / OpenAI API — `deepseek-ai/deepseek-v4-flash` |
+| AI Model | Ollama local mặc định — `llama3.2`; tùy chọn OpenAI-compatible / Gemini |
 | Guardrails | Custom regex + keyword filter (guardrail_rules.json) |
 | Cost tracking | SQLite cost_logs table + in-memory rate limiter |
 

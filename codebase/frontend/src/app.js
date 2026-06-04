@@ -29,7 +29,25 @@ const ENDPOINTS = {
   analyze:  `${API_BASE}/api/analyze`,
   chat:     `${API_BASE}/api/chat`,
   feedback: `${API_BASE}/api/feedback`,
+  modelConfig: `${API_BASE}/api/model-config`,
+  authMe:   `${API_BASE}/api/auth/me`,
+  login:    `${API_BASE}/api/auth/login`,
+  register: `${API_BASE}/api/auth/register`,
+  logout:   `${API_BASE}/api/auth/logout`,
+  progress: `${API_BASE}/api/progress`,
 };
+
+const LOCAL_AUTH_KEY = 'AI_PATH_LOCAL_AUTH_USER';
+
+function getLocalAuthUser() {
+  try {
+    const raw = localStorage.getItem(LOCAL_AUTH_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    localStorage.removeItem(LOCAL_AUTH_KEY);
+    return null;
+  }
+}
 
 /* ─── INPUT SANITIZATION GUARDRAIL ──────────────────────────── */
 /**
@@ -67,7 +85,7 @@ const AppState = {
   // Quiz
   quiz: {
     currentIndex: 0,
-    answers: new Array(10).fill(null), // index → selected option index
+    answers: [], // index → selected option index
     startTime:  null,
     endTime:    null,
     timerInterval: null,
@@ -90,6 +108,9 @@ const AppState = {
     rateLimit: {
       remaining:    5,
       max:          5,
+      unlimited:    false,
+      modelName:    '',
+      provider:     '',
       resetAt:      null, // timestamp when limit resets
       countdown:    null, // setInterval ref
     },
@@ -103,9 +124,179 @@ const AppState = {
 
   // UI state
   ui: {
-    currentTab:    'chat',
     currentStep:   1,
     feedbackRating: 0,
+    userId:         null,
+    user:           null,
+  },
+};
+
+/* ─── PROGRESS PERSISTENCE ──────────────────────────────────── */
+const ProgressStore = {
+  version: 1,
+  saveTimer: null,
+
+  key(userId) {
+    return `AI_PATH_PROGRESS_V${this.version}_${userId}`;
+  },
+
+  save() {
+    const userId = AppState.ui.userId;
+    if (!userId) return;
+
+    const payload = this.snapshot();
+    localStorage.setItem(this.key(userId), JSON.stringify(payload));
+    this.saveRemote(payload);
+  },
+
+  snapshot() {
+    return {
+      savedAt: Date.now(),
+      userData: AppState.userData,
+      quiz: {
+        currentIndex: AppState.quiz.currentIndex,
+        answers: AppState.quiz.answers,
+        startTime: AppState.quiz.startTime,
+        endTime: AppState.quiz.endTime,
+      },
+      results: AppState.results,
+      chat: {
+        history: AppState.chat.history,
+        totalTokens: AppState.chat.totalTokens,
+        totalCostUSD: AppState.chat.totalCostUSD,
+      },
+      completedMilestones: Array.from(AppState.completedMilestones),
+      ui: {
+        currentStep: AppState.ui.currentStep,
+      },
+    };
+  },
+
+  saveRemote(payload) {
+    clearTimeout(this.saveTimer);
+    this.saveTimer = setTimeout(async () => {
+      try {
+        await fetch(ENDPOINTS.progress, {
+          method: 'PUT',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ progress: payload }),
+        });
+      } catch (err) {
+        console.warn('[Progress] Remote save failed:', err.message);
+      }
+    }, 350);
+  },
+
+  loadLocal(userId) {
+    try {
+      const raw = localStorage.getItem(this.key(userId));
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  },
+
+  clear(userId = AppState.ui.userId) {
+    if (userId) localStorage.removeItem(this.key(userId));
+    fetch(ENDPOINTS.progress, {
+      method: 'DELETE',
+      credentials: 'include',
+    }).catch(() => {});
+  },
+
+  apply(saved) {
+    AppState.userData = { ...AppState.userData, ...(saved.userData || {}) };
+    AppState.quiz = {
+      ...AppState.quiz,
+      ...(saved.quiz || {}),
+      timerInterval: null,
+    };
+    AppState.results = { ...AppState.results, ...(saved.results || {}) };
+    AppState.chat = {
+      ...AppState.chat,
+      history: saved.chat?.history || [],
+      totalTokens: saved.chat?.totalTokens || 0,
+      totalCostUSD: saved.chat?.totalCostUSD || 0,
+      isLoading: false,
+    };
+    AppState.completedMilestones = new Set(saved.completedMilestones || []);
+    AppState.ui.currentStep = saved.ui?.currentStep || AppState.ui.currentStep;
+
+    this.restoreInputs();
+    this.restoreView();
+    return true;
+  },
+
+  restore(userId) {
+    const local = this.loadLocal(userId);
+    const restored = local ? this.apply(local) : false;
+    this.restoreRemote(userId, local);
+    return restored;
+  },
+
+  async restoreRemote(userId, localProgress = null) {
+    try {
+      const response = await fetch(ENDPOINTS.progress, { credentials: 'include' });
+      if (!response.ok) return;
+      const data = await response.json();
+      if (!data.has_progress || !data.progress) return;
+
+      const remote = data.progress;
+      const remoteIsNewer = !localProgress || (remote.savedAt || 0) > (localProgress.savedAt || 0);
+      if (!remoteIsNewer) return;
+
+      localStorage.setItem(this.key(userId), JSON.stringify(remote));
+      this.apply(remote);
+    } catch (err) {
+      console.warn('[Progress] Remote restore failed:', err.message);
+    }
+  },
+
+  restoreInputs() {
+    const fields = {
+      'goal-why': AppState.userData.goal_why,
+      'goal-time': AppState.userData.goal_time,
+      'goal-style': AppState.userData.goal_style,
+      'goal-job': AppState.userData.goal_job,
+    };
+
+    Object.entries(fields).forEach(([id, value]) => {
+      const el = $(id);
+      if (!el) return;
+      el.value = value || '';
+      el.classList.toggle('has-value', Boolean(value));
+    });
+  },
+
+  restoreView() {
+    const hasResults = Boolean(AppState.results.roadmap);
+    const hasQuizResult = Boolean(AppState.quiz.endTime || AppState.results.level || AppState.results.score);
+    const formSection = $('form-section');
+    const resultsSection = $('results-section');
+
+    if (hasResults && !resultsSection) {
+      goToWorkspace(false);
+      return;
+    }
+
+    if (!hasResults && isWorkspacePage() && !hasQuizResult) {
+      window.location.href = 'main.html';
+      return;
+    }
+
+    if ((hasResults || (isWorkspacePage() && hasQuizResult)) && resultsSection) {
+      if (formSection) formSection.classList.add('hidden');
+      resultsSection.classList.remove('hidden');
+      ResultsUI.renderExisting();
+      return;
+    }
+
+    if (!formSection || !resultsSection) return;
+
+    formSection.classList.remove('hidden');
+    resultsSection.classList.add('hidden');
+    StepForm.goToStep(AppState.ui.currentStep || 1, { restartQuiz: false });
   },
 };
 
@@ -117,270 +308,118 @@ function setState(path, value) {
   obj[keys[keys.length - 1]] = value;
 }
 
-/* ─── QUIZ DATA (10 Vietnamese AI Questions) ─────────────────── */
-const QUIZ_QUESTIONS = [
-  {
-    id: 1,
-    text: 'Trong Python, cấu trúc dữ liệu nào sau đây không cho phép thay đổi giá trị (Immutable) sau khi khởi tạo?',
-    options: [
-      { label: 'A', text: 'List' },
-      { label: 'B', text: 'Dictionary' },
-      { label: 'C', text: 'Tuple' },
-      { label: 'D', text: 'Set' },
-    ],
-    correct: 2, // C = Tuple
-    explanation: 'Tuple trong Python là cấu trúc dữ liệu không thể thay đổi giá trị (Immutable). Sau khi khởi tạo, bạn không thể thêm, sửa, hoặc xóa các phần tử trong tuple.',
-  },
-  {
-    id: 2,
-    text: 'Kết quả của đoạn code sau là gì? print([x**2 for x in range(3)])',
-    options: [
-      { label: 'A', text: '[1, 4, 9]' },
-      { label: 'B', text: '[0, 1, 4]' },
-      { label: 'C', text: '[0, 1, 2]' },
-      { label: 'D', text: 'Lỗi cú pháp' },
-    ],
-    correct: 1, // B = [0, 1, 4]
-    explanation: 'range(3) sinh ra dãy số [0, 1, 2]. List comprehension bình phương từng số: 0²=0, 1²=1, 2²=4. Kết quả là [0, 1, 4].',
-  },
-  {
-    id: 3,
-    text: 'Khi viết một hàm xử lý ngoại lệ trong Python để tránh chương trình bị crash giữa chừng, cặp từ khóa nào bắt buộc phải sử dụng?',
-    options: [
-      { label: 'A', text: 'if / else' },
-      { label: 'B', text: 'try / except' },
-      { label: 'C', text: 'for / while' },
-      { label: 'D', text: 'def / return' },
-    ],
-    correct: 1, // B = try / except
-    explanation: 'Cấu trúc try/except dùng để bắt và xử lý các ngoại lệ (exceptions) giúp chương trình tiếp tục chạy khi gặp lỗi.',
-  },
-  {
-    id: 4,
-    text: 'Thư viện Python nào sau đây được sử dụng phổ biến nhất để thao tác với dữ liệu bảng (Tabular Data/DataFrame)?',
-    options: [
-      { label: 'A', text: 'Requests' },
-      { label: 'B', text: 'Matplotlib' },
-      { label: 'C', text: 'Pandas' },
-      { label: 'D', text: 'Os' },
-    ],
-    correct: 2, // C = Pandas
-    explanation: 'Pandas là thư viện hàng đầu của Python dùng để thao tác, phân tích và xử lý cấu trúc dữ liệu dạng bảng (DataFrame).',
-  },
-  {
-    id: 5,
-    text: 'Giá trị trung bình (Mean) của tập dữ liệu [2, 4, 4, 4, 6] là bao nhiêu?',
-    options: [
-      { label: 'A', text: '4' },
-      { label: 'B', text: '3' },
-      { label: 'C', text: '5' },
-      { label: 'D', text: '6' },
-    ],
-    correct: 0, // A = 4
-    explanation: 'Mean = (2 + 4 + 4 + 4 + 6) / 5 = 20 / 5 = 4.',
-  },
-  {
-    id: 6,
-    text: 'Trong đại số tuyến tính, một ma trận có kích thước 3×2 nhân với một ma trận kích thước 2×4 sẽ tạo ra một ma trận mới có kích thước bao nhiêu?',
-    options: [
-      { label: 'A', text: '2×2' },
-      { label: 'B', text: '3×4' },
-      { label: 'C', text: '2×4' },
-      { label: 'D', text: 'Không thể nhân được' },
-    ],
-    correct: 1, // B = 3x4
-    explanation: 'Phép nhân ma trận kích thước (m×n) và (n×p) sẽ cho kết quả có kích thước (m×p). Ở đây (3×2) và (2×4) cho kết quả (3×4).',
-  },
-  {
-    id: 7,
-    text: 'Nếu xác suất để một email là spam là 20%, và bộ lọc AI nhận diện chính xác 90% số email spam đó, xác suất một email vừa là spam vừa bị lọc trúng là bao nhiêu?',
-    options: [
-      { label: 'A', text: '11%' },
-      { label: 'B', text: '18%' },
-      { label: 'C', text: '70%' },
-      { label: 'D', text: '2%' },
-    ],
-    correct: 1, // B = 18%
-    explanation: 'Xác suất giao nhau P(Spam ∩ Lọc) = P(Spam) × P(Lọc|Spam) = 20% × 90% = 18%.',
-  },
-  {
-    id: 8,
-    text: 'Trong các mô hình ngôn ngữ lớn (LLM) như GPT-4, cơ chế kiến trúc cốt lõi nào giúp mô hình hiểu được mối liên hệ giữa các từ trong câu cách xa nhau?',
-    options: [
-      { label: 'A', text: 'RNN (Recurrent Neural Network)' },
-      { label: 'B', text: 'CNN (Convolutional Neural Network)' },
-      { label: 'C', text: 'Attention / Transformer' },
-      { label: 'D', text: 'K-Means Clustering' },
-    ],
-    correct: 2, // C = Attention / Transformer
-    explanation: 'Cơ chế Attention trong kiến trúc Transformer giúp các LLM theo dõi mối liên hệ giữa tất cả các từ trong ngữ cảnh mà không bị giới hạn khoảng cách.',
-  },
-  {
-    id: 9,
-    text: 'Hiện tượng một mô hình ngôn ngữ lớn (LLM) tự tin sinh ra thông tin sai lệch, không có trong dữ liệu huấn luyện hoặc thực tế được gọi là gì?',
-    options: [
-      { label: 'A', text: 'Overfitting' },
-      { label: 'B', text: 'Hallucination (Ảo giác)' },
-      { label: 'C', text: 'Underfitting' },
-      { label: 'D', text: 'Tokenization' },
-    ],
-    correct: 1, // B = Hallucination
-    explanation: 'Hallucination (Ảo giác) là hiện tượng mô hình sinh ra câu từ trôi chảy, tự tin nhưng thông tin hoàn toàn sai lệch hoặc không có thực.',
-  },
-  {
-    id: 10,
-    text: 'Kỹ thuật nào giúp điều chỉnh hoặc hướng dẫn hành vi của một mô hình ngôn ngữ lớn (LLM) mà không cần cập nhật lại trọng số (weights) của mô hình?',
-    options: [
-      { label: 'A', text: 'Fine-tuning' },
-      { label: 'B', text: 'Prompt Engineering (Kỹ thuật đặt câu lệnh)' },
-      { label: 'C', text: 'Pre-training' },
-      { label: 'D', text: 'Backpropagation' },
-    ],
-    correct: 1, // B = Prompt Engineering
-    explanation: 'Prompt Engineering là việc thiết kế các chỉ dẫn đầu vào tối ưu để kiểm soát đầu ra của LLM mà không cần huấn luyện lại hay cập nhật tham số.',
-  },
-];
+/* --- DATA LOADING ------------------------------------------------ */
+let QUIZ_QUESTIONS = [];
+let QUIZ_QUESTION_BANK = [];
+let DEFAULT_ROADMAP = null;
+let STAR_LABELS = {};
+let SCORE_LEVELS = [];
 
-/* ─── DEFAULT ROADMAP DATA ───────────────────────────────────── */
-/**
- * Baseline roadmap shown in fallback/failure mode.
- * Production system generates this from /api/analyze.
- */
-const DEFAULT_ROADMAP = {
-  title:    'Lộ trình học AI cơ bản',
-  subtitle: 'Từ zero đến AI practitioner trong 6–12 tháng',
-  phases: [
-    {
-      id: 'phase-1',
-      number: 1,
-      title: 'Nền tảng Toán học & Lập trình',
-      duration: '4–6 tuần',
-      milestones: [
-        {
-          id: 'm-1-1', icon: '🔢', status: 'active',
-          title: 'Đại số tuyến tính cơ bản',
-          desc:  'Vector, ma trận, phép nhân ma trận, trị riêng — nền tảng cho ML.',
-          tags:  ['Toán học', 'Cơ bản'],
-          time:  '1–2 tuần',
-        },
-        {
-          id: 'm-1-2', icon: '📊', status: 'locked',
-          title: 'Xác suất & Thống kê',
-          desc:  'Phân phối xác suất, kỳ vọng, variance, Bayes theorem.',
-          tags:  ['Toán học', 'Thống kê'],
-          time:  '1–2 tuần',
-        },
-        {
-          id: 'm-1-3', icon: '🐍', status: 'locked',
-          title: 'Python cho Data Science',
-          desc:  'NumPy, Pandas, Matplotlib — bộ công cụ thiết yếu.',
-          tags:  ['Python', 'Công cụ'],
-          time:  '1–2 tuần',
-        },
-      ],
-    },
-    {
-      id: 'phase-2',
-      number: 2,
-      title: 'Machine Learning cơ bản',
-      duration: '6–8 tuần',
-      milestones: [
-        {
-          id: 'm-2-1', icon: '📈', status: 'locked',
-          title: 'Supervised Learning',
-          desc:  'Linear/Logistic Regression, Decision Trees, SVM, k-NN.',
-          tags:  ['ML', 'Supervised'],
-          time:  '2–3 tuần',
-        },
-        {
-          id: 'm-2-2', icon: '🔍', status: 'locked',
-          title: 'Unsupervised Learning',
-          desc:  'K-Means, PCA, DBSCAN — tìm kiếm pattern trong dữ liệu.',
-          tags:  ['ML', 'Unsupervised'],
-          time:  '1–2 tuần',
-        },
-        {
-          id: 'm-2-3', icon: '🛠️', status: 'locked',
-          title: 'Model Evaluation & Tuning',
-          desc:  'Cross-validation, grid search, bias-variance tradeoff.',
-          tags:  ['ML', 'Kỹ thuật'],
-          time:  '1–2 tuần',
-        },
-      ],
-    },
-    {
-      id: 'phase-3',
-      number: 3,
-      title: 'Deep Learning & Neural Networks',
-      duration: '8–10 tuần',
-      milestones: [
-        {
-          id: 'm-3-1', icon: '🧠', status: 'locked',
-          title: 'Neural Networks & Backpropagation',
-          desc:  'Kiến trúc MLP, activation functions, gradient descent.',
-          tags:  ['Deep Learning', 'Core'],
-          time:  '2–3 tuần',
-        },
-        {
-          id: 'm-3-2', icon: '👁️', status: 'locked',
-          title: 'Computer Vision với CNN',
-          desc:  'Convolutional layers, image classification, object detection.',
-          tags:  ['CNN', 'Vision'],
-          time:  '2–3 tuần',
-        },
-        {
-          id: 'm-3-3', icon: '💬', status: 'locked',
-          title: 'NLP & Transformers',
-          desc:  'RNN, LSTM, Attention, BERT, GPT — nền tảng LLM.',
-          tags:  ['NLP', 'Transformer'],
-          time:  '3–4 tuần',
-        },
-      ],
-    },
-    {
-      id: 'phase-4',
-      number: 4,
-      title: 'Dự án thực tế & Triển khai',
-      duration: '4–6 tuần',
-      milestones: [
-        {
-          id: 'm-4-1', icon: '🚀', status: 'locked',
-          title: 'Xây dựng dự án AI hoàn chỉnh',
-          desc:  'End-to-end ML pipeline: thu thập data → model → API → UI.',
-          tags:  ['Project', 'Production'],
-          time:  '2–3 tuần',
-        },
-        {
-          id: 'm-4-2', icon: '☁️', status: 'locked',
-          title: 'Triển khai & MLOps cơ bản',
-          desc:  'Docker, REST API, model serving, monitoring cơ bản.',
-          tags:  ['MLOps', 'Deploy'],
-          time:  '2–3 tuần',
-        },
-      ],
-    },
-  ],
-};
+async function loadJsonData(path, label) {
+  const response = await fetch(path, { cache: 'no-store' });
+  if (!response.ok) throw new Error(`${label} HTTP ${response.status}`);
+  return response.json();
+}
 
-/* ─── STAR RATING LABELS ─────────────────────────────────────── */
-const STAR_LABELS = {
-  1: '😞 Rất không phù hợp',
-  2: '😕 Không phù hợp',
-  3: '😐 Tạm được',
-  4: '😊 Phù hợp',
-  5: '🤩 Rất phù hợp! Xuất sắc!',
-};
+async function loadAppData() {
+  try {
+    const data = await loadJsonData('src/app_data.json', 'App data');
+    if (!data || !data.defaultRoadmap || !data.starLabels || !Array.isArray(data.scoreLevels)) {
+      throw new Error('app_data.json is missing required fields');
+    }
 
-const SCORE_LEVELS = [
-  { min: 0,  max: 3,  label: '🌱 Mới bắt đầu',       badge: 'Beginner' },
-  { min: 4,  max: 6,  label: '📘 Đang phát triển',    badge: 'Intermediate' },
-  { min: 7,  max: 8,  label: '🔥 Khá tốt',            badge: 'Advanced Beginner' },
-  { min: 9,  max: 10, label: '⚡ Nâng cao',           badge: 'Advanced' },
-];
+    DEFAULT_ROADMAP = data.defaultRoadmap;
+    STAR_LABELS = data.starLabels;
+    SCORE_LEVELS = data.scoreLevels;
+  } catch (err) {
+    console.error('[App Data] Could not load app_data.json:', err.message);
+    DEFAULT_ROADMAP = null;
+    STAR_LABELS = {};
+    SCORE_LEVELS = [];
+  }
+}
 
-/* ─── DOM REFERENCES (cached on init) ───────────────────────── */
+function isValidQuestion(question) {
+  return Boolean(
+    question &&
+    typeof question.text === 'string' &&
+    Array.isArray(question.options) &&
+    question.options.length >= 2 &&
+    Number.isInteger(question.correct) &&
+    question.correct >= 0 &&
+    question.correct < question.options.length
+  );
+}
+
+async function loadQuizQuestionBank() {
+  try {
+    const data = await loadJsonData('src/quiz_questions.json', 'Quiz bank');
+    const topics = Array.isArray(data) ? data : data.topics;
+    if (!Array.isArray(topics) || topics.length !== 10) {
+      throw new Error('Quiz bank must contain exactly 10 topics');
+    }
+
+    const normalizedTopics = topics.map((variants, topicIndex) => {
+      if (!Array.isArray(variants) || variants.length === 0) {
+        throw new Error(`Topic ${topicIndex + 1} has no variants`);
+      }
+      const validVariants = variants.filter(isValidQuestion);
+      if (validVariants.length === 0) {
+        throw new Error(`Topic ${topicIndex + 1} has no valid variants`);
+      }
+      return validVariants;
+    });
+
+    QUIZ_QUESTION_BANK = normalizedTopics;
+    QUIZ_QUESTIONS = normalizedTopics.map((variants, topicIndex) => cloneQuizQuestion(variants[0], topicIndex, 0));
+  } catch (err) {
+    console.error('[Quiz Bank] Could not load quiz_questions.json:', err.message);
+    QUIZ_QUESTION_BANK = [];
+    QUIZ_QUESTIONS = [];
+  }
+}
+
+function cloneQuizQuestion(question, topicIndex, variantIndex) {
+  return {
+    ...question,
+    id: `${topicIndex + 1}-${question.id || variantIndex + 1}`,
+    options: question.options.map(option => ({ ...option })),
+  };
+}
+
+let lastQuizSignature = '';
+
+function buildRandomQuizQuestions() {
+  if (!Array.isArray(QUIZ_QUESTION_BANK) || QUIZ_QUESTION_BANK.length === 0) {
+    return [];
+  }
+
+  let selectedIndexes = [];
+  let signature = '';
+
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    selectedIndexes = QUIZ_QUESTION_BANK.map(variants => Math.floor(Math.random() * variants.length));
+    signature = selectedIndexes.join('-');
+    if (signature !== lastQuizSignature) break;
+  }
+
+  lastQuizSignature = signature;
+  return QUIZ_QUESTION_BANK.map((variants, topicIndex) => (
+    cloneQuizQuestion(variants[selectedIndexes[topicIndex]], topicIndex, selectedIndexes[topicIndex])
+  ));
+}
+
+/* --- DOM REFERENCES (cached on init) ---------------------------- */
 const $ = (id) => document.getElementById(id);
 const $$ = (sel) => document.querySelectorAll(sel);
+
+function isWorkspacePage() {
+  return document.body.classList.contains('page-workspace');
+}
+
+function goToWorkspace(shouldAnalyze = false) {
+  window.location.href = shouldAnalyze ? 'workspace.html?analyze=1' : 'workspace.html';
+}
 
 /* ─── TOAST SYSTEM ───────────────────────────────────────────── */
 const Toast = {
@@ -446,62 +485,177 @@ const CostDisplay = {
     const total = AppState.chat.totalTokens;
     const cost  = AppState.chat.totalCostUSD.toFixed(4);
     if (this.label) this.label.textContent = `${total.toLocaleString()} tokens · $${cost}`;
+    ProgressStore.save();
   },
 };
 
-/* ─── TAB SYSTEM ─────────────────────────────────────────────── */
-const Tabs = {
-  chatBtn:     null,
-  roadmapBtn:  null,
-  chatPanel:   null,
-  roadmapPanel:null,
-  underline:   null,
+/* ─── MODEL LIMIT POLICY ────────────────────────────────────── */
+const ModelConfig = {
+  async load() {
+    try {
+      const response = await fetch(ENDPOINTS.modelConfig, { credentials: 'include' });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      const rl = AppState.chat.rateLimit;
+
+      rl.unlimited = Boolean(data.unlimited_questions || data.is_local);
+      rl.modelName = data.model || '';
+      rl.provider = data.provider || '';
+
+      if (rl.unlimited) {
+        rl.remaining = Infinity;
+      } else {
+        rl.max = data.question_limit || rl.max || 5;
+        rl.remaining = rl.max;
+      }
+
+      if (typeof ChatUI !== 'undefined' && ChatUI._updateRateLimit) {
+        ChatUI._updateRateLimit();
+      }
+    } catch (err) {
+      console.warn('[Model Config] Using limited default policy:', err.message);
+    }
+  },
+};
+
+/* ─── AUTH UI ───────────────────────────────────────────────── */
+const AuthUI = {
+  currentMode: 'login',
 
   init() {
-    this.chatBtn      = $('tab-chat-btn');
-    this.roadmapBtn   = $('tab-roadmap-btn');
-    this.chatPanel    = $('tab-chat');
-    this.roadmapPanel = $('tab-roadmap');
-    this.underline    = $('tab-underline');
+    this.authSection = $('auth-section');
+    this.appContainer = $('app-container');
+    this.accountMenu = $('account-menu');
+    this.loginTab = $('auth-login-tab');
+    this.registerTab = $('auth-register-tab');
+    this.loginForm = $('login-form');
+    this.registerForm = $('register-form');
 
-    this.chatBtn.addEventListener('click',    () => this.switchTo('chat'));
-    this.roadmapBtn.addEventListener('click', () => this.switchTo('roadmap'));
+    if (this.loginTab && this.registerTab && this.loginForm && this.registerForm) {
+      this.loginTab.addEventListener('click', () => this.switchMode('login'));
+      this.registerTab.addEventListener('click', () => this.switchMode('register'));
+      this.loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+      this.registerForm.addEventListener('submit', (e) => this.handleRegister(e));
+    }
 
-    // Set initial underline position
-    this._updateUnderline(this.chatBtn);
+    const logoutBtn = $('btn-logout');
+    if (logoutBtn) logoutBtn.addEventListener('click', () => this.logout());
   },
 
-  switchTo(tabName) {
-    AppState.ui.currentTab = tabName;
+  async checkSession() {
+    const localUser = getLocalAuthUser();
+    if (localUser) {
+      this.showAuthenticated(localUser, false);
+      return;
+    }
 
-    const isChat = (tabName === 'chat');
-    this.chatBtn.classList.toggle('active', isChat);
-    this.roadmapBtn.classList.toggle('active', !isChat);
-    this.chatBtn.setAttribute('aria-selected', isChat);
-    this.roadmapBtn.setAttribute('aria-selected', !isChat);
-
-    // Animate panel switch
-    const showing = isChat ? this.chatPanel    : this.roadmapPanel;
-    const hiding  = isChat ? this.roadmapPanel : this.chatPanel;
-
-    hiding.classList.remove('active');
-    showing.classList.add('active');
-
-    // Update underline
-    this._updateUnderline(isChat ? this.chatBtn : this.roadmapBtn);
-
-    // Scroll to bottom of chat when switching to it
-    if (isChat) {
-      requestAnimationFrame(() => ChatUI.scrollToBottom());
+    try {
+      const response = await fetch(ENDPOINTS.authMe, { credentials: 'include' });
+      if (!response.ok) throw new Error('not_authenticated');
+      const data = await response.json();
+      this.showAuthenticated(data.user, false);
+    } catch {
+      this.showUnauthenticated(false);
     }
   },
 
-  _updateUnderline(activeBtn) {
-    if (!this.underline || !activeBtn) return;
-    const rect  = activeBtn.getBoundingClientRect();
-    const navRect = activeBtn.closest('.tabs-nav').getBoundingClientRect();
-    this.underline.style.left  = `${rect.left - navRect.left}px`;
-    this.underline.style.width = `${rect.width}px`;
+  switchMode(mode) {
+    this.currentMode = mode;
+    const isLogin = mode === 'login';
+    this.loginTab.classList.toggle('active', isLogin);
+    this.registerTab.classList.toggle('active', !isLogin);
+    this.loginForm.classList.toggle('hidden', !isLogin);
+    this.registerForm.classList.toggle('hidden', isLogin);
+    $('login-error').textContent = '';
+    $('register-error').textContent = '';
+  },
+
+  async handleLogin(event) {
+    event.preventDefault();
+    await this.submitAuth('login', {
+      email: sanitizeInput($('login-email').value),
+      password: $('login-password').value,
+    });
+  },
+
+  async handleRegister(event) {
+    event.preventDefault();
+    await this.submitAuth('register', {
+      name: sanitizeInput($('register-name').value),
+      email: sanitizeInput($('register-email').value),
+      password: $('register-password').value,
+    });
+  },
+
+  async submitAuth(mode, payload) {
+    const errorEl = mode === 'login' ? $('login-error') : $('register-error');
+    errorEl.textContent = '';
+
+    try {
+      const response = await fetch(mode === 'login' ? ENDPOINTS.login : ENDPOINTS.register, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(typeof data.detail === 'string' ? data.detail : 'Không thể xử lý yêu cầu.');
+      }
+
+      this.showAuthenticated(data.user, true);
+      Toast.success(mode === 'login' ? 'Đăng nhập thành công' : 'Tạo tài khoản thành công', 'Bạn có thể bắt đầu cá nhân hóa lộ trình.');
+    } catch (err) {
+      errorEl.textContent = err.message;
+    }
+  },
+
+  showAuthenticated(user, shouldScroll = true) {
+    AppState.ui.user = user;
+    AppState.ui.userId = user.user_id;
+
+    if (this.authSection) this.authSection.classList.add('hidden');
+    if (this.appContainer) this.appContainer.classList.remove('hidden');
+    if (this.accountMenu) this.accountMenu.classList.remove('hidden');
+
+    if ($('account-name')) $('account-name').textContent = user.name;
+    if ($('account-email')) $('account-email').textContent = user.email;
+    if ($('account-avatar')) $('account-avatar').textContent = (user.name || user.email || 'U').trim().charAt(0).toUpperCase();
+
+    const restored = ProgressStore.restore(user.user_id);
+
+    if (shouldScroll) {
+      const target = restored && AppState.results.roadmap ? $('results-section') : $('form-section');
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  },
+
+  showUnauthenticated(shouldScroll = true) {
+    AppState.ui.user = null;
+    AppState.ui.userId = null;
+
+    if (!this.authSection) {
+      window.location.href = 'auth.html?mode=login';
+      return;
+    }
+
+    this.authSection.classList.remove('hidden');
+    if (this.appContainer) this.appContainer.classList.add('hidden');
+    if (this.accountMenu) this.accountMenu.classList.add('hidden');
+    if (shouldScroll) {
+      this.authSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  },
+
+  async logout() {
+    try {
+      await fetch(ENDPOINTS.logout, { method: 'POST', credentials: 'include' });
+    } finally {
+      localStorage.removeItem(LOCAL_AUTH_KEY);
+      SupportModal._resetSession({ keepAuth: false, silent: true, clearProgress: false });
+      this.showUnauthenticated(true);
+      Toast.info('Đã đăng xuất', 'Hẹn gặp lại bạn ở phiên học tiếp theo.');
+    }
   },
 };
 
@@ -519,6 +673,7 @@ const StepForm = {
     this.ind1    = $('step-ind-1');
     this.ind2    = $('step-ind-2');
     this.line1   = $('step-line-1');
+    if (!$('goal-form') || !this.step1El || !this.step2El) return;
 
     // Form submission (Step 1 → Step 2)
     $('goal-form').addEventListener('submit', (e) => {
@@ -569,11 +724,12 @@ const StepForm = {
     AppState.userData.goal_time  = sanitizeInput($('goal-time').value);
     AppState.userData.goal_style = sanitizeInput($('goal-style').value);
     AppState.userData.goal_job   = sanitizeInput($('goal-job').value);
+    ProgressStore.save();
 
     this.goToStep(2);
   },
 
-  goToStep(step) {
+  goToStep(step, { restartQuiz = true } = {}) {
     AppState.ui.currentStep = step;
 
     if (step === 1) {
@@ -590,7 +746,11 @@ const StepForm = {
       this.ind1.classList.add('completed');
       this.ind2.classList.add('active');
       this.line1.classList.add('active');
-      Quiz.start();
+      if (restartQuiz) {
+        Quiz.start();
+      } else {
+        Quiz.resume();
+      }
     }
   },
 };
@@ -621,15 +781,22 @@ const Quiz = {
     this._dotsEl       = $('quiz-dots');
     this._prevBtn      = $('btn-quiz-prev');
     this._nextBtn      = $('btn-quiz-next');
+    if (!this._cardEl || !this._qOptions || !this._prevBtn || !this._nextBtn) return;
 
     this._prevBtn.addEventListener('click', () => this._navigate(-1));
-    this._nextBtn.addEventListener('click', () => this._navigate(1));
   },
 
   start() {
+    QUIZ_QUESTIONS = buildRandomQuizQuestions();
+    if (QUIZ_QUESTIONS.length === 0) {
+      Toast.error('Không tải được câu hỏi', 'Kiểm tra file src/quiz_questions.json rồi tải lại trang.');
+      return;
+    }
+
     AppState.quiz.currentIndex = 0;
-    AppState.quiz.answers      = new Array(10).fill(null);
+    AppState.quiz.answers      = new Array(QUIZ_QUESTIONS.length).fill(null);
     AppState.quiz.startTime    = Date.now();
+    AppState.quiz.endTime      = null;
 
     // Build dots
     this._buildDots();
@@ -641,6 +808,17 @@ const Quiz = {
     this._startTimer();
 
     Toast.info('Bài kiểm tra bắt đầu!', '10 câu hỏi về nền tảng AI. Chọn đáp án tốt nhất!');
+    ProgressStore.save();
+  },
+
+  resume() {
+    this._buildDots();
+    const index = Math.min(AppState.quiz.currentIndex || 0, QUIZ_QUESTIONS.length - 1);
+    this._renderQuestion(index);
+    if (!AppState.quiz.endTime) {
+      if (!AppState.quiz.startTime) AppState.quiz.startTime = Date.now();
+      this._startTimer();
+    }
   },
 
   _startTimer() {
@@ -758,6 +936,7 @@ const Quiz = {
 
   _selectAnswer(questionIndex, optionIndex) {
     AppState.quiz.answers[questionIndex] = optionIndex;
+    ProgressStore.save();
 
     // Re-render to show correct/wrong states
     this._renderQuestion(questionIndex);
@@ -771,6 +950,7 @@ const Quiz = {
     if (next < 0 || next >= QUIZ_QUESTIONS.length) return;
     AppState.quiz.currentIndex = next;
     this._renderQuestion(next);
+    ProgressStore.save();
   },
 
   _submitQuiz() {
@@ -789,15 +969,16 @@ const Quiz = {
     AppState.results.score = score;
 
     // Determine level
-    const levelInfo = SCORE_LEVELS.find(l => score >= l.min && score <= l.max) || SCORE_LEVELS[0];
+    const levelInfo = SCORE_LEVELS.find(l => score >= l.min && score <= l.max) || SCORE_LEVELS[0] || { badge: 'Beginner' };
     AppState.results.level = levelInfo.badge;
 
     // Calculate confidence (0–100)
     // Base: (score/10) * 80 + 20 (min 20%)
     // Reduce if many unanswered (shouldn't happen but guard)
     const answered = AppState.quiz.answers.filter(a => a !== null).length;
-    const base = (score / 10) * 80 + 20;
-    const completionFactor = answered / 10;
+    const totalQuestions = QUIZ_QUESTIONS.length;
+    const base = (score / totalQuestions) * 80 + 20;
+    const completionFactor = answered / totalQuestions;
     AppState.results.confidence = Math.round(base * completionFactor);
 
     // Determine fallback mode
@@ -814,27 +995,29 @@ const Quiz = {
 const ResultsUI = {
   show() {
     // Hide form section
-    $('form-section').classList.add('hidden');
+    if ($('form-section')) $('form-section').classList.add('hidden');
 
     // Show results
     const resultsEl = $('results-section');
+    if (!resultsEl) {
+      ProgressStore.save();
+      goToWorkspace(true);
+      return;
+    }
     resultsEl.classList.remove('hidden');
 
     // Update confidence meter
     this._animateConfidence();
 
     // Update score
-    $('score-display').textContent = `${AppState.results.score} / 10`;
+    if ($('score-display')) $('score-display').textContent = `${AppState.results.score} / 10`;
     const levelInfo = SCORE_LEVELS.find(l => AppState.results.score >= l.min && AppState.results.score <= l.max);
-    $('score-level').textContent = levelInfo ? levelInfo.label : '—';
+    if ($('score-level')) $('score-level').textContent = levelInfo ? levelInfo.label : '—';
 
     // Show fallback alert if needed
-    if (AppState.results.isFallback) {
-      $('fallback-alert').classList.remove('hidden');
+    if (AppState.results.isFallback && $('fallback-alert')) {
+      if ($('fallback-alert')) $('fallback-alert').classList.remove('hidden');
     }
-
-    // Init tabs
-    Tabs.switchTo('chat');
 
     // Load roadmap (with loading state)
     Roadmap.loadSkeleton();
@@ -844,9 +1027,31 @@ const ResultsUI = {
 
     // Setup chat welcome message
     ChatUI.init();
+    ProgressStore.save();
 
     // Smooth scroll to results
     resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  },
+
+  renderExisting() {
+    this._animateConfidence();
+    if ($('score-display')) $('score-display').textContent = `${AppState.results.score} / 10`;
+    const levelInfo = SCORE_LEVELS.find(l => AppState.results.score >= l.min && AppState.results.score <= l.max);
+    if ($('score-level')) $('score-level').textContent = levelInfo ? levelInfo.label : (AppState.results.level || '--');
+
+    if ($('fallback-alert')) $('fallback-alert').classList.toggle('hidden', !AppState.results.isFallback);
+    if ($('failure-alert')) $('failure-alert').classList.toggle('hidden', !AppState.results.isFailure);
+
+    if (AppState.results.roadmap) {
+      Roadmap.render(AppState.results.roadmap);
+    }
+
+    if ($('cost-label')) {
+      $('cost-label').textContent = `${AppState.chat.totalTokens.toLocaleString()} tokens · $${AppState.chat.totalCostUSD.toFixed(4)}`;
+    }
+
+    ChatUI.init({ restoreHistory: true });
+    requestAnimationFrame(() => ChatUI.scrollToBottom());
   },
 
   _animateConfidence() {
@@ -855,6 +1060,7 @@ const ResultsUI = {
     const val  = $('confidence-value');
     const badge    = $('confidence-badge');
     const badgeText= $('confidence-badge-text');
+    if (!badge) return;
     const badgeDot = badge.querySelector('.badge-dot');
 
     // Animate fill with delay
@@ -878,9 +1084,13 @@ const ResultsUI = {
   },
 
   async _callAnalyzeAPI() {
+    if (!AppState.results.sessionId) {
+      AppState.results.sessionId = `session_${Date.now()}`;
+    }
+
     const payload = {
       user_id:          AppState.ui.userId || 'guest_user',
-      session_id:       AppState.results.sessionId || 'session_' + Date.now(),
+      session_id:       AppState.results.sessionId,
       goal_description: `Mục đích học AI: ${AppState.userData.goal_why}. Hình thức học ưa thích: ${AppState.userData.goal_style}.`,
       quiz_answers:     AppState.quiz.answers,
       time_per_week:    `${AppState.userData.goal_time} tiếng/tuần`,
@@ -961,6 +1171,7 @@ const ResultsUI = {
     try {
       const response = await fetchWithAuth(ENDPOINTS.analyze, {
         method:  'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify(payload),
       });
@@ -996,11 +1207,12 @@ const ResultsUI = {
         AppState.results.isFallback = false;
         AppState.results.isFailure = false;
         
-        $('fallback-alert').classList.add('hidden');
-        $('failure-alert').classList.add('hidden');
+        if ($('fallback-alert')) $('fallback-alert').classList.add('hidden');
+        if ($('failure-alert')) $('failure-alert').classList.add('hidden');
         
         // Render
         Roadmap.render(AppState.results.roadmap);
+        ProgressStore.save();
         Toast.success('Lộ trình đã sẵn sàng!', 'AI đã phân tích xong và tạo lộ trình phù hợp cho bạn.');
         
       } else if (pathType === 'low_conf') {
@@ -1009,11 +1221,12 @@ const ResultsUI = {
         AppState.results.isFailure = false;
         AppState.results.roadmap = DEFAULT_ROADMAP;
         
-        $('fallback-alert').classList.remove('hidden');
-        $('failure-alert').classList.add('hidden');
+        if ($('fallback-alert')) $('fallback-alert').classList.remove('hidden');
+        if ($('failure-alert')) $('failure-alert').classList.add('hidden');
         
         // Render baseline VinUni roadmap
         Roadmap.render(DEFAULT_ROADMAP);
+        ProgressStore.save();
         
         // Proactive Chatbot suggestion
         setTimeout(() => {
@@ -1036,10 +1249,11 @@ const ResultsUI = {
       AppState.results.isFallback = true;
 
       // Show friendly warning alerts
-      $('failure-alert').classList.remove('hidden');
-      $('fallback-alert').classList.remove('hidden');
+      if ($('failure-alert')) $('failure-alert').classList.remove('hidden');
+      if ($('fallback-alert')) $('fallback-alert').classList.remove('hidden');
 
       Roadmap.render(DEFAULT_ROADMAP);
+      ProgressStore.save();
 
       Toast.warning('Dùng lộ trình mặc định', 'Hệ thống đang bận tối ưu cấu trúc, vui lòng đợi trong giây lát.');
     }
@@ -1055,9 +1269,9 @@ const Roadmap = {
     this.treeEl    = $('roadmap-tree');
     this.skeletonEl = $('roadmap-skeleton');
 
-    $('btn-export-roadmap').addEventListener('click', () => this.exportAsText());
-    $('btn-retry').addEventListener('click', () => {
-      $('failure-alert').classList.add('hidden');
+    if ($('btn-export-roadmap')) $('btn-export-roadmap').addEventListener('click', () => this.exportAsText());
+    if ($('btn-retry')) $('btn-retry').addEventListener('click', () => {
+      if ($('failure-alert')) $('failure-alert').classList.add('hidden');
       ResultsUI._callAnalyzeAPI();
     });
   },
@@ -1201,6 +1415,7 @@ const Roadmap = {
       checkBtn.title = 'Đã hoàn thành';
       Toast.success('Hoàn thành!', `Bạn đã hoàn thành: ${cardEl.querySelector('.milestone-title').textContent}`);
     }
+    ProgressStore.save();
   },
 
   exportAsText() {
@@ -1249,7 +1464,7 @@ const ChatUI = {
   rlTimer:     null,
   rlCountdown: null,
 
-  init() {
+  init({ restoreHistory = false } = {}) {
     this.messagesEl  = $('chat-messages');
     this.inputEl     = $('chat-input');
     this.sendBtn     = $('btn-send');
@@ -1259,8 +1474,20 @@ const ChatUI = {
     this.rlTimer     = $('rate-limit-timer');
     this.rlCountdown = $('rl-countdown');
 
-    // Welcome message
-    this._addWelcomeMessage();
+    if (!this.messagesEl || !this.inputEl || !this.sendBtn || !this.charCount) return;
+
+    if (this._initialized) {
+      if (restoreHistory) this._renderHistory();
+      this._updateRateLimit();
+      return;
+    }
+    this._initialized = true;
+
+    if (restoreHistory && AppState.chat.history.length) {
+      this._renderHistory();
+    } else {
+      this._addWelcomeMessage();
+    }
 
     // Event listeners
     this.inputEl.addEventListener('input', () => this._onInputChange());
@@ -1276,6 +1503,16 @@ const ChatUI = {
     this.inputEl.addEventListener('input', () => {
       this.inputEl.style.height = 'auto';
       this.inputEl.style.height = Math.min(this.inputEl.scrollHeight, 120) + 'px';
+    });
+
+    this._updateRateLimit();
+  },
+
+  _renderHistory() {
+    if (!this.messagesEl) return;
+    this.messagesEl.innerHTML = '';
+    (AppState.chat.history || []).forEach(msg => {
+      this._appendMessage(msg.role, msg.content, true);
     });
   },
 
@@ -1300,7 +1537,7 @@ Tôi đã phân tích kết quả quiz của bạn:
 • **Mục tiêu**: ${AppState.userData.goal_why || 'Học AI'}
 • **Thời gian học**: ${AppState.userData.goal_time || 'N/A'}/tuần
 
-Lộ trình học của bạn đã được tạo trong tab **Lộ trình học**. Hãy hỏi tôi bất cứ điều gì về lộ trình, tài nguyên học tập, hoặc các chủ đề AI bạn quan tâm! 🚀`;
+Lộ trình học của bạn đã được tạo ở khung **Lộ trình học** bên phải. Hãy hỏi tôi bất cứ điều gì về lộ trình, tài nguyên học tập, hoặc các chủ đề AI bạn quan tâm! 🚀`;
 
     this._appendMessage('ai', welcome);
   },
@@ -1332,6 +1569,7 @@ Lộ trình học của bạn đã được tạo trong tab **Lộ trình học*
     // Save to history
     if (!skipState) {
       AppState.chat.history.push({ role, content, time: new Date() });
+      ProgressStore.save();
     }
 
     return el;
@@ -1375,6 +1613,17 @@ Lộ trình học của bạn đã được tạo trong tab **Lộ trình học*
 
   _updateRateLimit() {
     const rl = AppState.chat.rateLimit;
+    if (rl.unlimited) {
+      if (this.rlLabel) {
+        this.rlLabel.textContent = `Không giới hạn câu hỏi${rl.modelName ? ` · ${rl.modelName}` : ''}`;
+      }
+      if (this.rlFill) {
+        this.rlFill.style.width = '100%';
+        this.rlFill.style.background = 'var(--color-success)';
+      }
+      return;
+    }
+
     const pct = (rl.remaining / rl.max) * 100;
 
     if (this.rlLabel) {
@@ -1419,7 +1668,7 @@ Lộ trình học của bạn đã được tạo trong tab **Lộ trình học*
     const rl = AppState.chat.rateLimit;
 
     // Rate limit check
-    if (rl.remaining <= 0) {
+    if (!rl.unlimited && rl.remaining <= 0) {
       Toast.warning('Đã đạt giới hạn', 'Bạn chỉ có thể gửi 5 tin nhắn/phút. Vui lòng chờ.');
       return;
     }
@@ -1438,11 +1687,13 @@ Lộ trình học của bạn đã được tạo trong tab **Lộ trình học*
     // Append user message
     this._appendMessage('user', content);
 
-    // Decrement rate limit
-    rl.remaining -= 1;
-    this._updateRateLimit();
+    // Decrement rate limit for non-local models only.
+    if (!rl.unlimited) {
+      rl.remaining -= 1;
+      this._updateRateLimit();
+    }
 
-    if (rl.remaining <= 0) {
+    if (!rl.unlimited && rl.remaining <= 0) {
       this.sendBtn.disabled = true;
       this.inputEl.disabled = true;
       this._startRateLimitCountdown();
@@ -1456,11 +1707,12 @@ Lộ trình học của bạn đã được tạo trong tab **Lộ trình học*
     try {
       const response = await fetchWithAuth(ENDPOINTS.chat, {
         method:  'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({
           user_id:            AppState.ui.userId || 'guest_user',
           message:            content,
-          session_id:         AppState.results.sessionId || 'session_' + Date.now(),
+          session_id:         AppState.results.sessionId || `session_${Date.now()}`,
           quiz_completed:     true,
           questions_answered: AppState.quiz.answers.filter(a => a !== null).length,
         }),
@@ -1491,7 +1743,7 @@ Lộ trình học của bạn đã được tạo trong tab **Lộ trình học*
     } finally {
       AppState.chat.isLoading = false;
       // Re-enable send if rate limit allows
-      if (rl.remaining > 0) {
+      if (rl.unlimited || rl.remaining > 0) {
         this.sendBtn.disabled = false;
         this.inputEl.disabled = false;
       }
@@ -1641,7 +1893,7 @@ const FeedbackModal = {
 
     const payload = {
       user_id:          AppState.ui.userId || 'guest_user',
-      session_id:       AppState.results.sessionId || 'session_' + Date.now(),
+      session_id:       AppState.results.sessionId || `session_${Date.now()}`,
       rating:           rating,
       comment:          comment || '',
       roadmap_data:     AppState.results.roadmap,
@@ -1653,6 +1905,7 @@ const FeedbackModal = {
     try {
       const response = await fetchWithAuth(ENDPOINTS.feedback, {
         method:  'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify(payload),
       });
@@ -1702,8 +1955,8 @@ const SupportModal = {
       AppState.results.roadmap   = DEFAULT_ROADMAP;
       AppState.results.isFallback = true;
       AppState.results.isFailure  = false;
-      $('failure-alert').classList.add('hidden');
-      $('fallback-alert').classList.remove('hidden');
+      if ($('failure-alert')) $('failure-alert').classList.add('hidden');
+      if ($('fallback-alert')) $('fallback-alert').classList.remove('hidden');
       Roadmap.render(DEFAULT_ROADMAP);
       Toast.info('Đã khôi phục', 'Lộ trình mặc định đã được hiển thị.');
       this.close();
@@ -1715,42 +1968,76 @@ const SupportModal = {
     document.body.style.overflow = '';
   },
 
-  _resetSession() {
+  _resetSession({ keepAuth = true, silent = false, clearProgress = true } = {}) {
+    const currentUser = AppState.ui.user;
+    const currentUserId = AppState.ui.userId;
+    if (clearProgress && currentUserId) ProgressStore.clear(currentUserId);
+
     // Reset state
-    AppState.userData          = { goal_why: '', goal_time: '', goal_job: '', goal_bg: '' };
-    AppState.quiz              = { currentIndex: 0, answers: new Array(10).fill(null), startTime: null, endTime: null, timerInterval: null };
+    AppState.userData          = { goal_why: '', goal_time: '', goal_job: '', goal_style: '' };
+    AppState.quiz              = { currentIndex: 0, answers: new Array(QUIZ_QUESTIONS.length).fill(null), startTime: null, endTime: null, timerInterval: null };
     AppState.results           = { score: 0, confidence: 0, level: '', roadmap: null, isFallback: false, isFailure: false, sessionId: null };
-    AppState.chat              = { history: [], rateLimit: { remaining: 5, max: 5, resetAt: null, countdown: null }, totalTokens: 0, totalCostUSD: 0, isLoading: false };
+    AppState.chat              = {
+      history: [],
+      rateLimit: {
+        remaining: 5,
+        max: 5,
+        unlimited: false,
+        modelName: '',
+        provider: '',
+        resetAt: null,
+        countdown: null,
+      },
+      totalTokens: 0,
+      totalCostUSD: 0,
+      isLoading: false,
+    };
     AppState.completedMilestones = new Set();
-    AppState.ui                = { currentTab: 'chat', currentStep: 1, feedbackRating: 0 };
+    AppState.ui                = {
+      currentStep: 1,
+      feedbackRating: 0,
+      user: keepAuth ? currentUser : null,
+      userId: keepAuth ? currentUserId : null,
+    };
 
     // Reset cost display
     if ($('cost-label')) $('cost-label').textContent = '0 tokens · $0.000';
+    ModelConfig.load();
 
     // Show form, hide results
-    $('form-section').classList.remove('hidden');
-    $('results-section').classList.add('hidden');
-    $('failure-alert').classList.add('hidden');
-    $('fallback-alert').classList.add('hidden');
+    if (keepAuth && $('form-section')) $('form-section').classList.remove('hidden');
+    if ($('results-section')) $('results-section').classList.add('hidden');
+    if ($('failure-alert')) $('failure-alert').classList.add('hidden');
+    if ($('fallback-alert')) $('fallback-alert').classList.add('hidden');
 
     // Reset step form
-    $('goal-form').reset();
-    StepForm.goToStep(1);
+    if ($('goal-form')) {
+      $('goal-form').reset();
+      StepForm.goToStep(1);
+    }
 
     // Clear chat messages
     if ($('chat-messages')) $('chat-messages').innerHTML = '';
 
     this.close();
-    Toast.info('Đặt lại thành công', 'Phiên làm việc đã được xoá. Bắt đầu lại từ đầu!');
+    if (!silent) Toast.info('Đặt lại thành công', 'Phiên làm việc đã được xoá. Bắt đầu lại từ đầu!');
 
     // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (!silent) window.scrollTo({ top: 0, behavior: 'smooth' });
   },
 };
 
 /* ─── HERO CTA ───────────────────────────────────────────────── */
 function initHeroCTA() {
-  $('hero-start-btn').addEventListener('click', () => {
+  const heroStartBtn = $('hero-start-btn');
+  if (!heroStartBtn) return;
+
+  heroStartBtn.addEventListener('click', () => {
+    if (!AppState.ui.userId) {
+      $('auth-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(() => $('login-email').focus(), 600);
+      return;
+    }
     const formSection = $('form-section');
     formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     setTimeout(() => {
@@ -1787,10 +2074,6 @@ function initKeyboardShortcuts() {
       $('modal-support').classList.add('hidden');
       document.body.style.overflow = '';
     }
-
-    // Alt+1 = Chat tab, Alt+2 = Roadmap tab
-    if (e.altKey && e.key === '1') Tabs.switchTo('chat');
-    if (e.altKey && e.key === '2') Tabs.switchTo('roadmap');
   });
 }
 
@@ -1814,22 +2097,104 @@ function trapFocus(modalEl) {
 
 /* ─── RESULTS SECTION: Hide initially ───────────────────────── */
 function ensureResultsHidden() {
-  $('results-section').classList.add('hidden');
+  const resultsSection = $('results-section');
+  if (resultsSection) resultsSection.classList.add('hidden');
 }
 
+const WorkspacePage = {
+  init() {
+    if (!isWorkspacePage()) return;
+
+    this.initControls();
+
+    const hasQuizResult = Boolean(AppState.quiz.endTime || AppState.results.level || AppState.results.score);
+    if (!hasQuizResult && !AppState.results.roadmap) {
+      window.location.href = 'main.html';
+      return;
+    }
+
+    if ($('results-section')) $('results-section').classList.remove('hidden');
+
+    const shouldAnalyze = new URLSearchParams(window.location.search).get('analyze') === '1';
+    if (shouldAnalyze || !AppState.results.roadmap) {
+      Roadmap.loadSkeleton();
+      ResultsUI._callAnalyzeAPI().finally(() => {
+        if (window.history.replaceState) {
+          window.history.replaceState({}, document.title, 'workspace.html');
+        }
+      });
+    }
+  },
+
+  initControls() {
+    const summaryBtn = $('btn-toggle-summary');
+    const expandBtn = $('btn-expand-chat');
+    const summaryHidden = localStorage.getItem('AI_PATH_WORKSPACE_SUMMARY_HIDDEN') === '1';
+
+    document.body.classList.toggle('summary-hidden', summaryHidden);
+    this.updateSummaryButton(summaryBtn);
+
+    if (summaryBtn) {
+      summaryBtn.addEventListener('click', () => {
+        const nextHidden = !document.body.classList.contains('summary-hidden');
+        document.body.classList.toggle('summary-hidden', nextHidden);
+        localStorage.setItem('AI_PATH_WORKSPACE_SUMMARY_HIDDEN', nextHidden ? '1' : '0');
+        this.updateSummaryButton(summaryBtn);
+      });
+    }
+
+    if (expandBtn) {
+      expandBtn.addEventListener('click', () => {
+        const isExpanded = !document.body.classList.contains('chat-expanded');
+        document.body.classList.toggle('chat-expanded', isExpanded);
+        this.updateExpandButton(expandBtn);
+        requestAnimationFrame(() => ChatUI.scrollToBottom());
+      });
+      this.updateExpandButton(expandBtn);
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || !document.body.classList.contains('chat-expanded')) return;
+      document.body.classList.remove('chat-expanded');
+      this.updateExpandButton(expandBtn);
+    });
+  },
+
+  updateSummaryButton(button) {
+    if (!button) return;
+    const hidden = document.body.classList.contains('summary-hidden');
+    button.setAttribute('aria-pressed', String(hidden));
+    button.lastChild.textContent = hidden ? ' Hiện phần điểm' : ' Ẩn phần điểm';
+  },
+
+  updateExpandButton(button) {
+    if (!button) return;
+    const expanded = document.body.classList.contains('chat-expanded');
+    const label = expanded ? 'Thu nhỏ chat' : 'Mở rộng chat';
+    button.setAttribute('aria-pressed', String(expanded));
+    button.setAttribute('aria-label', label);
+    button.setAttribute('title', label);
+  },
+};
+
 /* ─── MAIN INIT ──────────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   console.log('🚀 AI Learning Path Personalizer — Initializing...');
   console.log('   VinUni Batch 02 | Day 05');
+
+  await Promise.all([
+    loadAppData(),
+    loadQuizQuestionBank(),
+  ]);
 
   // Core systems
   Toast.init();
   CostDisplay.init();
+  AuthUI.init();
 
   // UI components
   StepForm.init();
   Quiz.init();
-  Tabs.init();
   Roadmap.init();
   FeedbackModal.init();
   SupportModal.init();
@@ -1838,14 +2203,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Ensure results are hidden on load
   ensureResultsHidden();
+  await AuthUI.checkSession();
+  WorkspacePage.init();
+  ModelConfig.load();
 
   // Trap focus in modals
-  trapFocus($('modal-feedback'));
-  trapFocus($('modal-support'));
+  if ($('modal-feedback')) trapFocus($('modal-feedback'));
+  if ($('modal-support')) trapFocus($('modal-support'));
 
   // Rate limit UI init
   ChatUI._updateRateLimit = function() {
     const rl = AppState.chat.rateLimit;
+    if (rl.unlimited) {
+      const rlLabel = $('rate-limit-label');
+      const rlFill  = $('rate-limit-fill');
+      if (rlLabel) rlLabel.textContent = `Không giới hạn câu hỏi${rl.modelName ? ` · ${rl.modelName}` : ''}`;
+      if (rlFill) {
+        rlFill.style.width = '100%';
+        rlFill.style.background = 'var(--color-success)';
+      }
+      return;
+    }
+
     const pct = (rl.remaining / rl.max) * 100;
     const rlLabel = $('rate-limit-label');
     const rlFill  = $('rate-limit-fill');
@@ -1858,7 +2237,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   console.log('✅ All systems initialized.');
-  Toast.info('Chào mừng!', 'Bắt đầu bằng cách điền thông tin mục tiêu học tập của bạn.');
+  Toast.info('Chào mừng!', 'Sẵn sàng tạo lộ trình học AI cá nhân hóa của bạn.');
 });
 
 /* ─── EXPOSE FOR DEBUGGING (dev only) ───────────────────────── */

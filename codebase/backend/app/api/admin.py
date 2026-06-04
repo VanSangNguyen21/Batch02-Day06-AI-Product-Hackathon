@@ -18,6 +18,7 @@ from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, HTTPException, Query, Header, Depends
 from pydantic import BaseModel, Field
 
+from core.settings import get_settings
 from models.database import (
     get_review_queue,
     resolve_review_item,
