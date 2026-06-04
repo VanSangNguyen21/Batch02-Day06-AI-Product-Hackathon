@@ -8,7 +8,7 @@
  *   - Tab system
  *   - Multi-step form + validation
  *   - Quiz engine (10 questions, scoring, confidence)
- *   - Chat interface + rate limiter
+ *   - Chat interface + local model status
  *   - Roadmap renderer (tree from JSON)
  *   - Fallback / Failure / Correction modes
  *   - Toast notification system
@@ -47,6 +47,45 @@ function getLocalAuthUser() {
     localStorage.removeItem(LOCAL_AUTH_KEY);
     return null;
   }
+}
+
+function normalizeAuthUser(data = {}, fallback = {}) {
+  const rawUser = data.user || data;
+  const userId = rawUser.user_id || rawUser.username || fallback.email || fallback.username || fallback.name || 'student';
+  return {
+    user_id: userId,
+    name: rawUser.name || fallback.name || userId,
+    email: rawUser.email || fallback.email || userId,
+    role: rawUser.role || data.role || 'student',
+    token: data.token || rawUser.token || fallback.token || null,
+    expires_at: data.expires_at || rawUser.expires_at || fallback.expires_at || null,
+    limits: data.limits || rawUser.limits || fallback.limits || null,
+  };
+}
+
+function saveLocalAuthUser(user) {
+  localStorage.setItem(LOCAL_AUTH_KEY, JSON.stringify(user));
+}
+
+async function fetchWithAuth(url, options = {}) {
+  const authUser = getLocalAuthUser();
+  const headers = new Headers(options.headers || {});
+  if (authUser?.token) headers.set('Authorization', `Bearer ${authUser.token}`);
+  if (authUser?.user_id) headers.set('X-User-Id', authUser.user_id);
+
+  const response = await fetch(url, {
+    ...options,
+    headers,
+  });
+
+  if (response.status === 401) {
+    localStorage.removeItem(LOCAL_AUTH_KEY);
+    const error = new Error('AUTH_REQUIRED');
+    error.status = 401;
+    throw error;
+  }
+
+  return response;
 }
 
 /* ─── INPUT SANITIZATION GUARDRAIL ──────────────────────────── */
@@ -106,9 +145,9 @@ const AppState = {
   chat: {
     history:        [],   // { role: 'user'|'ai', content: string, time: Date }
     rateLimit: {
-      remaining:    5,
-      max:          5,
-      unlimited:    false,
+      remaining:    Infinity,
+      max:          Infinity,
+      unlimited:    true,
       modelName:    '',
       provider:     '',
       resetAt:      null, // timestamp when limit resets
@@ -117,6 +156,7 @@ const AppState = {
     totalTokens:   0,
     totalCostUSD:  0,
     isLoading:     false,
+    pendingMessages: [],
   },
 
   // Milestones completion
@@ -489,7 +529,7 @@ const CostDisplay = {
   },
 };
 
-/* ─── MODEL LIMIT POLICY ────────────────────────────────────── */
+/* ─── MODEL CHAT POLICY ─────────────────────────────────────── */
 const ModelConfig = {
   async load() {
     try {
@@ -513,7 +553,7 @@ const ModelConfig = {
         ChatUI._updateRateLimit();
       }
     } catch (err) {
-      console.warn('[Model Config] Using limited default policy:', err.message);
+      console.warn('[Model Config] Using unlimited local default policy:', err.message);
     }
   },
 };
@@ -545,8 +585,23 @@ const AuthUI = {
   async checkSession() {
     const localUser = getLocalAuthUser();
     if (localUser) {
-      this.showAuthenticated(localUser, false);
-      return;
+      if (!localUser.token) {
+        localStorage.removeItem(LOCAL_AUTH_KEY);
+        this.showUnauthenticated(false);
+        return;
+      }
+
+      try {
+        const response = await fetchWithAuth(ENDPOINTS.authMe);
+        if (!response.ok) throw new Error('not_authenticated');
+        const data = await response.json();
+        const refreshed = normalizeAuthUser(data, localUser);
+        saveLocalAuthUser(refreshed);
+        this.showAuthenticated(refreshed, false);
+        return;
+      } catch {
+        localStorage.removeItem(LOCAL_AUTH_KEY);
+      }
     }
 
     try {
@@ -592,18 +647,23 @@ const AuthUI = {
     errorEl.textContent = '';
 
     try {
+      const username = payload.email || payload.username || payload.name;
       const response = await fetch(mode === 'login' ? ENDPOINTS.login : ENDPOINTS.register, {
         method: 'POST',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          username,
+          password: payload.password,
+        }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
         throw new Error(typeof data.detail === 'string' ? data.detail : 'Không thể xử lý yêu cầu.');
       }
 
-      this.showAuthenticated(data.user, true);
+      const user = normalizeAuthUser(data, payload);
+      saveLocalAuthUser(user);
+      this.showAuthenticated(user, true);
       Toast.success(mode === 'login' ? 'Đăng nhập thành công' : 'Tạo tài khoản thành công', 'Bạn có thể bắt đầu cá nhân hóa lộ trình.');
     } catch (err) {
       errorEl.textContent = err.message;
@@ -649,7 +709,7 @@ const AuthUI = {
 
   async logout() {
     try {
-      await fetch(ENDPOINTS.logout, { method: 'POST', credentials: 'include' });
+      await fetchWithAuth(ENDPOINTS.logout, { method: 'POST' });
     } finally {
       localStorage.removeItem(LOCAL_AUTH_KEY);
       SupportModal._resetSession({ keepAuth: false, silent: true, clearProgress: false });
@@ -1474,6 +1534,7 @@ const ChatUI = {
   rlFill:      null,
   rlTimer:     null,
   rlCountdown: null,
+  pendingMessages: [],
 
   init({ restoreHistory = false } = {}) {
     this.messagesEl  = $('chat-messages');
@@ -1517,13 +1578,14 @@ const ChatUI = {
     });
 
     this._updateRateLimit();
+    this._clearInput();
   },
 
   _renderHistory() {
     if (!this.messagesEl) return;
     this.messagesEl.innerHTML = '';
     (AppState.chat.history || []).forEach(msg => {
-      this._appendMessage(msg.role, msg.content, true);
+      this._appendMessage(msg.role, msg.content, true, { trace: msg.trace || null });
     });
   },
 
@@ -1532,6 +1594,15 @@ const ChatUI = {
     this.charCount.textContent = `${len}/500`;
     this.charCount.classList.toggle('near-limit', len > 400 && len <= 490);
     this.charCount.classList.toggle('at-limit',   len > 490);
+  },
+
+  _clearInput() {
+    if (!this.inputEl) return;
+    this.inputEl.value = '';
+    this.inputEl.defaultValue = '';
+    this.inputEl.textContent = '';
+    this.inputEl.style.height = 'auto';
+    this._onInputChange();
   },
 
   _addWelcomeMessage() {
@@ -1553,7 +1624,7 @@ Lộ trình học của bạn đã được tạo ở khung **Lộ trình học*
     this._appendMessage('ai', welcome);
   },
 
-  _appendMessage(role, content, skipState = false) {
+  _appendMessage(role, content, skipState = false, meta = {}) {
     if (!this.messagesEl) return;
 
     const now = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
@@ -1570,6 +1641,7 @@ Lộ trình học của bạn đã được tạo ở khung **Lộ trình học*
       <div class="msg-avatar" aria-hidden="true">${avatar}</div>
       <div>
         <div class="msg-bubble">${formatted}</div>
+        ${role === 'ai' && meta.trace ? this._formatTrace(meta.trace) : ''}
         <div class="msg-time">${now}</div>
       </div>
     `;
@@ -1579,7 +1651,7 @@ Lộ trình học của bạn đã được tạo ở khung **Lộ trình học*
 
     // Save to history
     if (!skipState) {
-      AppState.chat.history.push({ role, content, time: new Date() });
+      AppState.chat.history.push({ role, content, time: new Date(), trace: meta.trace || null });
       ProgressStore.save();
     }
 
@@ -1592,6 +1664,74 @@ Lộ trình học của bạn đã được tạo ở khung **Lộ trình học*
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
       .replace(/`(.+?)`/g, '<code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:3px">$1</code>')
       .replace(/\n/g, '<br>');
+  },
+
+  _escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    }[char]));
+  },
+
+  _formatTraceValue(value) {
+    if (Array.isArray(value)) return `[${value.map(v => this._formatTraceValue(v)).join(', ')}]`;
+    if (value && typeof value === 'object') {
+      return `{${Object.entries(value).map(([k, v]) => `${k}: ${this._formatTraceValue(v)}`).join(', ')}}`;
+    }
+    if (typeof value === 'string') return `"${value}"`;
+    return String(value);
+  },
+
+  _formatTraceAction(step) {
+    const action = this._escapeHtml(step.action || '');
+    const args = step.action_args && typeof step.action_args === 'object'
+      ? Object.entries(step.action_args)
+          .map(([key, value]) => `${this._escapeHtml(key)}=${this._escapeHtml(this._formatTraceValue(value))}`)
+          .join(', ')
+      : '';
+    return `${action}(${args})`;
+  },
+
+  _formatTrace(trace) {
+    const steps = Array.isArray(trace.steps) ? trace.steps : [];
+    if (!steps.length) return '';
+
+    const statusLabel = trace.final_status || 'pending';
+    const rows = steps.map(step => {
+      const status = this._escapeHtml(step.status || 'pending');
+      const thought = this._escapeHtml(step.thought || '');
+      const actionCall = this._formatTraceAction(step);
+      const observation = this._escapeHtml(step.observation || step.error || '');
+      return `
+        <li class="trace-step trace-${status}">
+          <div class="trace-thought-card">
+            <div class="trace-line trace-line-main"><strong>Thought ${step.step}:</strong> ${thought}</div>
+            <div class="trace-line trace-line-main"><strong>Action ${step.step}:</strong> <code>${actionCall}</code></div>
+          </div>
+          <div class="trace-observation-card">
+            <div class="trace-step-status">${status}</div>
+            <div class="trace-line trace-line-main"><strong>Observation ${step.step}:</strong> ${observation}</div>
+          </div>
+        </li>
+      `;
+    }).join('');
+    const finalAnswer = trace.final_answer
+      ? `<div class="trace-final-answer"><strong>Final Answer:</strong> ${this._formatContent(this._escapeHtml(trace.final_answer))}</div>`
+      : '';
+
+    return `
+      <details class="chat-trace">
+        <summary>
+          <span>Trace xử lý</span>
+          <span class="trace-summary-status">${this._escapeHtml(statusLabel)} · ${steps.length} steps</span>
+        </summary>
+        <ol class="trace-list">${rows}</ol>
+        ${finalAnswer}
+      </details>
+    `;
   },
 
   _showTyping() {
@@ -1672,33 +1812,35 @@ Lộ trình học của bạn đã được tạo ở khung **Lộ trình học*
     }, 1000);
   },
 
-  async sendMessage() {
-    const raw = this.inputEl.value.trim();
+  async sendMessage(queuedContent = null, alreadyAppended = false) {
+    const raw = queuedContent ?? this.inputEl.value.trim();
     if (!raw) return;
 
     const rl = AppState.chat.rateLimit;
 
-    // Rate limit check
+    // Cloud-model quota check. Local Ollama runs unlimited.
     if (!rl.unlimited && rl.remaining <= 0) {
       Toast.warning('Đã đạt giới hạn', 'Bạn chỉ có thể gửi 5 tin nhắn/phút. Vui lòng chờ.');
       return;
     }
 
-    if (AppState.chat.isLoading) return;
-
     // Sanitize
     const content = sanitizeInput(raw);
     if (!content) return;
 
-    // Clear input
-    this.inputEl.value = '';
-    this.inputEl.style.height = 'auto';
-    this._onInputChange();
+    // Clear input immediately after accepting the message.
+    this._clearInput();
+
+    if (AppState.chat.isLoading && !queuedContent) {
+      this._appendMessage('user', content);
+      this.pendingMessages.push(content);
+      return;
+    }
 
     // Append user message
-    this._appendMessage('user', content);
+    if (!alreadyAppended) this._appendMessage('user', content);
 
-    // Decrement rate limit for non-local models only.
+    // Decrement quota for non-local models only.
     if (!rl.unlimited) {
       rl.remaining -= 1;
       this._updateRateLimit();
@@ -1726,6 +1868,7 @@ Lộ trình học của bạn đã được tạo ở khung **Lộ trình học*
           session_id:         AppState.results.sessionId || `session_${Date.now()}`,
           quiz_completed:     true,
           questions_answered: AppState.quiz.answers.filter(a => a !== null).length,
+          roadmap_data:        AppState.results.roadmap || DEFAULT_ROADMAP,
         }),
       });
 
@@ -1733,7 +1876,12 @@ Lộ trình học của bạn đã được tạo ở khung **Lộ trình học*
       const data = await response.json();
 
       this._removeTyping();
-      this._appendMessage('ai', data.response || data.message || 'Xin lỗi, tôi không thể trả lời lúc này.');
+      this._appendMessage(
+        'ai',
+        data.response || data.message || 'Xin lỗi, tôi không thể trả lời lúc này.',
+        false,
+        { trace: data.trace || null }
+      );
 
       // Update cost
       if (data.tokens_used) {
@@ -1742,9 +1890,18 @@ Lộ trình học của bạn đã được tạo ở khung **Lộ trình học*
         CostDisplay.update(totalTokens, costUsd);
       }
 
+      this._applyRoadmapUpdate(data.roadmap_update);
+
     } catch (err) {
       console.warn('[Chat API] Error:', err.message);
       this._removeTyping();
+
+      if (err.message === 'AUTH_REQUIRED' || err.status === 401) {
+        AuthUI.showUnauthenticated(true);
+        this._appendMessage('ai', 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục dùng Trợ lý AI.');
+        Toast.warning('Cần đăng nhập', 'Phiên đăng nhập đã hết hạn hoặc chưa hợp lệ.');
+        return;
+      }
 
       // Fallback response
       const fallbackMsg = this._generateFallbackResponse(content);
@@ -1753,12 +1910,28 @@ Lộ trình học của bạn đã được tạo ở khung **Lộ trình học*
       Toast.warning('Chế độ offline', 'Không kết nối được API. Đang dùng phản hồi cục bộ.');
     } finally {
       AppState.chat.isLoading = false;
-      // Re-enable send if rate limit allows
+      // Re-enable send when the local model is unlimited, or quota remains.
       if (rl.unlimited || rl.remaining > 0) {
         this.sendBtn.disabled = false;
         this.inputEl.disabled = false;
       }
+      const nextMessage = this.pendingMessages.shift();
+      if (nextMessage) {
+        this.sendMessage(nextMessage, true);
+      }
     }
+  },
+
+  _applyRoadmapUpdate(update) {
+    if (!update || update.tool !== 'roadmap_modifier' || !update.result) return;
+    AppState.results.roadmap = update.result;
+    AppState.results.isFallback = false;
+    AppState.results.isFailure = false;
+    Roadmap.render(AppState.results.roadmap);
+    ProgressStore.save();
+
+    const changes = Array.isArray(update.changes) ? update.changes.join(' ') : '';
+    Toast.success('Đã cập nhật lộ trình', changes || 'Lộ trình học đã được điều chỉnh theo chat.');
   },
 
   /**
@@ -1991,9 +2164,9 @@ const SupportModal = {
     AppState.chat              = {
       history: [],
       rateLimit: {
-        remaining: 5,
-        max: 5,
-        unlimited: false,
+        remaining: Infinity,
+        max: Infinity,
+        unlimited: true,
         modelName: '',
         provider: '',
         resetAt: null,
@@ -2002,7 +2175,9 @@ const SupportModal = {
       totalTokens: 0,
       totalCostUSD: 0,
       isLoading: false,
+      pendingMessages: [],
     };
+    ChatUI.pendingMessages = [];
     AppState.completedMilestones = new Set();
     AppState.ui                = {
       currentStep: 1,
@@ -2222,7 +2397,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if ($('modal-feedback')) trapFocus($('modal-feedback'));
   if ($('modal-support')) trapFocus($('modal-support'));
 
-  // Rate limit UI init
+  // Local model/quota UI init
   ChatUI._updateRateLimit = function() {
     const rl = AppState.chat.rateLimit;
     if (rl.unlimited) {
@@ -2398,4 +2573,3 @@ if (typeof window !== 'undefined') {
   // Also try after a short delay (in case DOMContentLoaded already fired)
   setTimeout(() => Admin.init(), 200);
 }
-

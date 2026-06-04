@@ -13,15 +13,6 @@ const AUTH_ENDPOINTS = {
 };
 
 const LOCAL_AUTH_KEY = 'AI_PATH_LOCAL_AUTH_USER';
-const DEFAULT_ACCOUNT = {
-  username: 'admin',
-  password: 'admin',
-  user: {
-    user_id: 'local_admin',
-    name: 'Admin',
-    email: 'admin',
-  },
-};
 
 const $ = (id) => document.getElementById(id);
 
@@ -41,8 +32,35 @@ function saveLocalSession(user) {
   localStorage.setItem(LOCAL_AUTH_KEY, JSON.stringify(user));
 }
 
-function hasLocalSession() {
-  return Boolean(localStorage.getItem(LOCAL_AUTH_KEY));
+function getLocalSession() {
+  try {
+    const raw = localStorage.getItem(LOCAL_AUTH_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    localStorage.removeItem(LOCAL_AUTH_KEY);
+    return null;
+  }
+}
+
+function normalizeAuthUser(data = {}, fallback = {}) {
+  const rawUser = data.user || data;
+  const userId = rawUser.user_id || rawUser.username || fallback.username || fallback.email || 'student';
+  return {
+    user_id: userId,
+    name: rawUser.name || fallback.name || userId,
+    email: rawUser.email || fallback.email || userId,
+    role: rawUser.role || data.role || 'student',
+    token: data.token || rawUser.token || null,
+    expires_at: data.expires_at || rawUser.expires_at || null,
+    limits: data.limits || rawUser.limits || null,
+  };
+}
+
+async function fetchWithSavedToken(url, options = {}) {
+  const session = getLocalSession();
+  const headers = new Headers(options.headers || {});
+  if (session?.token) headers.set('Authorization', `Bearer ${session.token}`);
+  return fetch(url, { ...options, headers });
 }
 
 const AuthPage = {
@@ -63,17 +81,23 @@ const AuthPage = {
   },
 
   async checkExistingSession() {
-    if (hasLocalSession()) {
-      window.location.href = 'main.html';
-      return;
+    const session = getLocalSession();
+    if (session?.token) {
+      try {
+        const response = await fetchWithSavedToken(AUTH_ENDPOINTS.me);
+        if (response.ok) {
+          const data = await response.json().catch(() => ({}));
+          saveLocalSession(normalizeAuthUser(data, session));
+          window.location.href = 'workspace.html';
+          return;
+        }
+      } catch {
+        // Continue to login screen.
+      }
+      localStorage.removeItem(LOCAL_AUTH_KEY);
     }
 
-    try {
-      const response = await fetch(AUTH_ENDPOINTS.me, { credentials: 'include' });
-      if (response.ok) window.location.href = 'main.html';
-    } catch {
-      // Stay on auth page when backend is offline.
-    }
+    localStorage.removeItem(LOCAL_AUTH_KEY);
   },
 
   switchMode(mode) {
@@ -113,27 +137,25 @@ const AuthPage = {
     const errorEl = mode === 'login' ? $('login-error') : $('register-error');
     errorEl.textContent = '';
 
-    if (mode === 'login' && payload.username === DEFAULT_ACCOUNT.username && payload.password === DEFAULT_ACCOUNT.password) {
-      saveLocalSession(DEFAULT_ACCOUNT.user);
-      window.location.href = 'main.html';
-      return;
-    }
-
     try {
+      const username = payload.username || payload.email || payload.name;
       const response = await fetch(mode === 'login' ? AUTH_ENDPOINTS.login : AUTH_ENDPOINTS.register, {
         method: 'POST',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          username,
+          password: payload.password,
+        }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
         throw new Error(typeof data.detail === 'string' ? data.detail : 'Không thể xử lý yêu cầu.');
       }
-      window.location.href = 'main.html';
+      saveLocalSession(normalizeAuthUser(data, payload));
+      window.location.href = 'workspace.html';
     } catch (err) {
       errorEl.textContent = mode === 'login'
-        ? 'Sai tài khoản hoặc mật khẩu. Tài khoản mặc định là admin/admin.'
+        ? 'Sai tài khoản hoặc mật khẩu. Tài khoản mặc định là admin/admin123.'
         : err.message;
     }
   },

@@ -93,6 +93,7 @@ for _stream in (sys.stdout, sys.stderr):
             pass
 
 from app.api import analyze, chat, feedback, admin, auth, progress, quiz
+from app.jsonl_logging import install_jsonl_logging
 from models.database import init_db
 
 # Cấu hình logging / Logging config
@@ -101,6 +102,8 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     stream=sys.stdout,
 )
+_BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+install_jsonl_logging(os.path.join(_BACKEND_DIR, "data"))
 logger = logging.getLogger(__name__)
 
 
