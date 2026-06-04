@@ -96,8 +96,6 @@
         </div>
       </div>
     </div>
-<<<<<<< HEAD
-=======
 
     <!-- Role-gated sub-nav (admin/reviewer only) -->
     <nav class="role-nav" id="role-nav" aria-label="Quản trị">
@@ -107,7 +105,6 @@
         <span class="role-nav-info" id="role-nav-info"></span>
       </div>
     </nav>
->>>>>>> 179b13818c1d4f93e72e0389f9fdc6f7414f6745
   </header>
 
   <!-- ========================================================
@@ -181,8 +178,6 @@
             <div class="field-error" id="err-job"></div>
           </div>
 
-<<<<<<< HEAD
-=======
           <!-- RAG Quiz Toggle -->
           <div class="form-group checkbox-group" style="margin-top: 1rem; display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 8px;">
             <input type="checkbox" id="use-rag-quiz" checked style="width:18px; height:18px; accent-color: var(--primary-500);" />
@@ -191,7 +186,6 @@
             </label>
           </div>
 
->>>>>>> 179b13818c1d4f93e72e0389f9fdc6f7414f6745
           <button type="submit" class="btn-primary btn-full" id="btn-step1-next">
             <span>Tiếp theo: Bài kiểm tra</span>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -292,8 +286,6 @@
   </div>
 
   <!-- ========================================================
-<<<<<<< HEAD
-=======
        ADMIN DASHBOARD (reviewer / admin only)
        ======================================================== -->
   <section class="admin-dashboard container hidden" id="admin-dashboard" data-role-min="reviewer">
@@ -353,7 +345,6 @@
   </section>
 
   <!-- ========================================================
->>>>>>> 179b13818c1d4f93e72e0389f9fdc6f7414f6745
        MODAL: RESET & SUPPORT
        ======================================================== -->
   <div class="modal-overlay hidden" id="modal-support" role="dialog" aria-modal="true" aria-labelledby="modal-support-title">
@@ -397,9 +388,6 @@
   </div>
 
   <!-- Main JS -->
-<<<<<<< HEAD
-  <script src="src/app.js"></script>
-=======
   <script src="src/rag-quiz-selector.js"></script>
   <script src="src/auth.js"></script>
   <script src="src/app.js"></script>
@@ -411,6 +399,5 @@
       if (AuthState.token) refreshMe().finally(() => { renderUserBadge(); applyRoleGating(); });
     })();
   </script>
->>>>>>> 179b13818c1d4f93e72e0389f9fdc6f7414f6745
 </body>
 </html>

@@ -303,7 +303,7 @@ def verify_password(stored_password: str, provided_password: str) -> bool:
     except Exception:
         return False
 
-def create_user(username: str, password_hash: str, role: str = "student") -> int:
+def create_login_user(username: str, password_hash: str, role: str = "student") -> int:
     conn = get_users_db_connection()
     try:
         cursor = conn.cursor()

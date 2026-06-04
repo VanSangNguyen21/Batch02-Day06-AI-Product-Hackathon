@@ -40,7 +40,7 @@ from middleware.auth import (
 )
 from models.database import (
     get_user_by_username,
-    create_user,
+    create_login_user,
     verify_password,
     hash_password,
 )
@@ -252,7 +252,7 @@ def register(payload: RegisterRequest):
         
     hashed = hash_password(payload.password)
     try:
-        create_user(username, hashed, role="student")
+        create_login_user(username, hashed, role="student")
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:

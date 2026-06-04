@@ -38,35 +38,14 @@
         </div>
       </a>
       <div class="header-actions">
-        <!-- Auth Badge (login or user pill) -->
         <div class="auth-badge" id="user-badge"></div>
-        <!-- Cost Display -->
-        <div class="cost-display" id="cost-display" title="Token usage &amp; estimated cost">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          <span id="cost-label">0 tokens · $0.000</span>
-        </div>
-        <!-- Support Button -->
-        <button class="btn-icon" id="btn-support" title="Hỗ trợ &amp; Đặt lại" aria-label="Mở hỗ trợ">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        </button>
-        <!-- Feedback Button -->
-        <button class="btn-icon" id="btn-feedback" title="Đánh giá" aria-label="Mở đánh giá">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        </button>
       </div>
     </div>
 
-    <!-- Role-gated sub-nav (admin/reviewer only) -->
     <nav class="role-nav" id="role-nav" aria-label="Quản trị">
       <div class="container role-nav-inner">
-<<<<<<< HEAD
-        <a href="#form-section" class="role-nav-link" data-role="guest,student,premium,reviewer,admin">Trang chủ</a>
-        <a href="#app-container" class="role-nav-link" data-role-min="student">Lộ trình</a>
-        <a href="#admin-dashboard" class="role-nav-link" data-role-min="reviewer" id="nav-admin">Quản trị</a>
-=======
         <a href="workspace.html" class="role-nav-link" data-role-min="student">Lộ trình</a>
         <a href="main.html#admin-dashboard" class="role-nav-link" data-role-min="reviewer" id="nav-admin">Quản trị</a>
->>>>>>> 179b13818c1d4f93e72e0389f9fdc6f7414f6745
         <span class="role-nav-info" id="role-nav-info"></span>
       </div>
     </nav>
@@ -95,14 +74,10 @@
             <a class="btn-ghost hero-cta-secondary" href="auth.html?mode=login">Đăng nhập admin</a>
           </div>
         </div>
-
       </div>
     </section>
   </main>
 
-  <!-- ========================================================
-       FOOTER
-       ======================================================== -->
   <footer class="site-footer">
     <div class="container footer-inner">
       <div class="footer-brand">
@@ -120,209 +95,14 @@
     </div>
   </footer>
 
-  <!-- ========================================================
-       MODAL: FEEDBACK (Star Rating)
-       ======================================================== -->
-  <div class="modal-overlay hidden" id="modal-feedback" role="dialog" aria-modal="true" aria-labelledby="modal-feedback-title">
-    <div class="modal-card">
-      <button class="modal-close" id="modal-feedback-close" aria-label="Đóng">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-      <div class="modal-icon">⭐</div>
-      <h3 class="modal-title" id="modal-feedback-title">Đánh giá lộ trình</h3>
-      <p class="modal-subtitle">Lộ trình này có phù hợp với bạn không? Phản hồi của bạn giúp AI học tốt hơn!</p>
-
-      <!-- Star Rating -->
-      <div class="star-rating" id="star-rating" role="radiogroup" aria-label="Đánh giá sao">
-        <button class="star-btn" data-rating="1" aria-label="1 sao" title="Rất tệ">★</button>
-        <button class="star-btn" data-rating="2" aria-label="2 sao" title="Tệ">★</button>
-        <button class="star-btn" data-rating="3" aria-label="3 sao" title="Trung bình">★</button>
-        <button class="star-btn" data-rating="4" aria-label="4 sao" title="Tốt">★</button>
-        <button class="star-btn" data-rating="5" aria-label="5 sao" title="Xuất sắc">★</button>
-      </div>
-      <p class="star-label-text" id="star-label-text">Chọn số sao...</p>
-
-      <!-- Comment -->
-      <div class="form-group">
-        <textarea id="feedback-comment" class="form-textarea" placeholder="Nhận xét của bạn (tuỳ chọn)..." rows="3" maxlength="300"></textarea>
-      </div>
-
-      <div class="modal-actions">
-        <button class="btn-ghost" id="btn-feedback-cancel">Huỷ</button>
-        <button class="btn-primary" id="btn-feedback-submit" disabled>
-          Gửi đánh giá
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        </button>
-      </div>
-    </div>
-<<<<<<< HEAD
-  </div>
-
-  <!-- ========================================================
-       MODAL: RESET & SUPPORT
-       ======================================================== -->
-  <div class="modal-overlay hidden" id="modal-support" role="dialog" aria-modal="true" aria-labelledby="modal-support-title">
-    <div class="modal-card">
-      <button class="modal-close" id="modal-support-close" aria-label="Đóng">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-      <div class="modal-icon">🛠️</div>
-      <h3 class="modal-title" id="modal-support-title">Hỗ trợ &amp; Đặt lại</h3>
-      <p class="modal-subtitle">Gặp vấn đề? Bạn có thể đặt lại toàn bộ phiên làm việc hoặc liên hệ hỗ trợ.</p>
-
-      <div class="support-options">
-        <div class="support-option">
-          <div class="support-option-icon">🔄</div>
-          <div class="support-option-content">
-            <strong>Đặt lại phiên</strong>
-            <p>Xoá toàn bộ dữ liệu và bắt đầu lại từ đầu.</p>
-          </div>
-          <button class="btn-danger btn-sm" id="btn-reset-session">Đặt lại</button>
-        </div>
-        <div class="support-option">
-          <div class="support-option-icon">📋</div>
-          <div class="support-option-content">
-            <strong>Lộ trình mặc định</strong>
-            <p>Khôi phục về lộ trình học AI cơ bản.</p>
-          </div>
-          <button class="btn-ghost btn-sm" id="btn-rollback">Khôi phục</button>
-        </div>
-        <div class="support-option">
-          <div class="support-option-icon">✉️</div>
-          <div class="support-option-content">
-            <strong>Liên hệ hỗ trợ</strong>
-            <p>ai-support@vinuni.edu.vn</p>
-          </div>
-          <a href="mailto:ai-support@vinuni.edu.vn" class="btn-ghost btn-sm">Email</a>
-        </div>
-      </div>
-
-      <button class="btn-ghost btn-full" id="btn-support-close-main" style="margin-top:1rem;">Đóng</button>
-    </div>
-  </div>
-
-  <!-- ========================================================
-       ADMIN DASHBOARD (reviewer / admin only)
-       ======================================================== -->
-  <section class="admin-dashboard container hidden" id="admin-dashboard" data-role-min="reviewer">
-    <h2 class="admin-title">Quản trị &amp; Giám sát</h2>
-    <p class="admin-subtitle">Hàng đợi xem xét thủ công và báo cáo chi phí theo ngày.</p>
-
-    <div class="admin-tabs" role="tablist">
-      <button class="admin-tab active" data-tab="review" role="tab">Hàng đợi xem xét</button>
-      <button class="admin-tab" data-tab="cost" role="tab">Báo cáo chi phí</button>
-    </div>
-
-    <!-- Tab: Review queue -->
-    <div class="admin-panel" id="admin-panel-review" role="tabpanel">
-      <div class="admin-toolbar">
-        <label for="review-status-filter">Trạng thái:</label>
-        <select id="review-status-filter">
-          <option value="pending">pending</option>
-          <option value="resolved">resolved</option>
-          <option value="all">all</option>
-        </select>
-        <button class="btn-primary btn-sm" id="btn-refresh-review">Tải lại</button>
-      </div>
-      <div class="admin-table-wrap">
-        <table class="admin-table" id="review-table">
-          <thead>
-            <tr>
-              <th>ID</th><th>User</th><th>Lý do</th><th>Confidence</th>
-              <th>Rating</th><th>Trạng thái</th><th>Hành động</th>
-            </tr>
-          </thead>
-          <tbody id="review-tbody">
-            <tr><td colspan="7" class="admin-empty">Đang tải...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Tab: Cost report -->
-    <div class="admin-panel hidden" id="admin-panel-cost" role="tabpanel">
-      <div class="admin-toolbar">
-        <label for="cost-date">Ngày:</label>
-        <input type="date" id="cost-date" />
-        <button class="btn-primary btn-sm" id="btn-refresh-cost">Tải lại</button>
-      </div>
-      <div class="cost-summary" id="cost-summary"></div>
-      <div class="admin-table-wrap">
-        <table class="admin-table" id="cost-table">
-          <thead>
-            <tr><th>User</th><th>Requests</th><th>Input tokens</th><th>Output tokens</th><th>Tổng USD</th></tr>
-          </thead>
-          <tbody id="cost-tbody">
-            <tr><td colspan="5" class="admin-empty">Đang tải...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================================================
-       MODAL: LOGIN
-       ======================================================== -->
-  <div class="modal-overlay hidden" id="modal-login" role="dialog" aria-modal="true" aria-labelledby="modal-login-title">
-    <div class="modal-card">
-      <button class="modal-close" id="modal-login-close" aria-label="Đóng">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-      <div class="modal-icon">🔐</div>
-      <h3 class="modal-title" id="modal-login-title">Đăng nhập</h3>
-      <p class="modal-subtitle" id="modal-login-subtitle">Nhập Username và Mật khẩu để tiếp tục.</p>
-
-      <form id="login-form" class="login-form" novalidate>
-        <div class="form-group">
-          <label for="login-username">Username <span class="required">*</span></label>
-          <input type="text" id="login-username" required maxlength="64" placeholder="vd: user123" autocomplete="username" />
-        </div>
-        <div class="form-group">
-          <label for="login-password">Mật khẩu <span class="required">*</span></label>
-          <input type="password" id="login-password" required minlength="6" maxlength="256" placeholder="Nhập mật khẩu..." autocomplete="current-password" />
-        </div>
-        
-        <div class="login-error" id="login-error"></div>
-        <div class="modal-actions">
-          <button type="button" class="btn-ghost" id="btn-login-cancel">Huỷ</button>
-          <button type="submit" class="btn-primary" id="btn-login-submit">Đăng nhập</button>
-        </div>
-      </form>
-
-      <div class="login-hint" style="text-align: center; margin-top: 1rem;">
-        <span id="auth-toggle-text">Chưa có tài khoản?</span> 
-        <a href="#" id="auth-toggle-btn" style="color: var(--primary-500); font-weight: 500;">Đăng ký ngay</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Main JS -->
-  <script src="src/landing-page.js"></script>
-  <script src="src/app.js"></script>
-  <script src="src/auth.js"></script>
-  <script>
-    // Boot: restore session, render header, gate UI
-=======
-  <!-- Main JS -->
   <script src="src/landing-page.js"></script>
   <script src="src/auth.js"></script>
-  <script src="src/app.js"></script>
   <script>
->>>>>>> 179b13818c1d4f93e72e0389f9fdc6f7414f6745
     (function bootAuth() {
       _restore();
       renderUserBadge();
       applyRoleGating();
-<<<<<<< HEAD
-      // Refresh session from server in the background
       if (AuthState.token) refreshMe().finally(() => { renderUserBadge(); applyRoleGating(); });
-
-      document.getElementById('login-form')?.addEventListener('submit', handleLoginSubmit);
-      document.getElementById('modal-login-close')?.addEventListener('click', hideLoginModal);
-      document.getElementById('btn-login-cancel')?.addEventListener('click', hideLoginModal);
-=======
-      if (AuthState.token) refreshMe().finally(() => { renderUserBadge(); applyRoleGating(); });
->>>>>>> 179b13818c1d4f93e72e0389f9fdc6f7414f6745
     })();
   </script>
 </body>
