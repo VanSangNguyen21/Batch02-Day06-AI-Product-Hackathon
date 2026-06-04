@@ -101,6 +101,12 @@
   <main class="workspace-page-shell hidden" id="app-container">
   <!-- ── RESULTS / TABS SECTION ────────────────────────────── -->
     <section class="results-section workspace-results hidden" id="results-section">
+      <div class="workspace-toolbar" aria-label="Tuỳ chọn hiển thị workspace">
+        <button class="btn-ghost btn-sm workspace-toggle" id="btn-toggle-summary" type="button" aria-pressed="false">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+          Ẩn phần điểm
+        </button>
+      </div>
 
       <!-- Confidence Score Header -->
       <div class="confidence-header">
@@ -151,6 +157,11 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             Trợ lý AI
             </h2>
+            <div class="workspace-panel-actions">
+              <button class="btn-icon btn-panel-action" id="btn-expand-chat" type="button" title="Expand chat" aria-label="Expand chat" aria-pressed="false">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H3v5"/><path d="M3 3l7 7"/><path d="M16 3h5v5"/><path d="M21 3l-7 7"/><path d="M8 21H3v-5"/><path d="M3 21l7-7"/><path d="M16 21h5v-5"/><path d="M21 21l-7-7"/></svg>
+              </button>
+            </div>
           </div>
           <div class="chat-container">
             <!-- Chat Messages -->
