@@ -751,6 +751,10 @@ img { max-width: 100%; display: block; }
   position: static;
 }
 
+.page-workspace .site-header .container {
+  max-width: none;
+}
+
 .workspace-page-shell {
   position: relative;
   z-index: 1;
@@ -801,6 +805,25 @@ img { max-width: 100%; display: block; }
 
 .workspace-results .roadmap-tree {
   flex: 1;
+}
+
+.page-workspace .workspace-page-shell {
+  max-width: none;
+}
+
+.page-workspace .workspace-results {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  animation: none;
+}
+
+.page-workspace .workspace-results .confidence-header {
+  margin-bottom: 0;
+}
+
+.page-workspace .workspace-results .split-workspace {
+  width: 100%;
 }
 
 /* ─── AUTH SECTION ──────────────────────────────────────────── */
