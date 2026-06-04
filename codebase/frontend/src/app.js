@@ -786,9 +786,25 @@ const Quiz = {
     this._prevBtn.addEventListener('click', () => this._navigate(-1));
   },
 
-  start() {
-    QUIZ_QUESTIONS = buildRandomQuizQuestions();
-    if (QUIZ_QUESTIONS.length === 0) {
+  async start() {
+    const useRag = document.getElementById('use-rag-quiz') && document.getElementById('use-rag-quiz').checked;
+    
+    let ragQuiz = null;
+    if (useRag && typeof initializeRAGQuiz === 'function') {
+      try {
+        ragQuiz = await initializeRAGQuiz(AppState.userData);
+      } catch (e) {
+        console.warn('RAG Quiz error, falling back to default:', e);
+      }
+    }
+
+    if (ragQuiz && ragQuiz.questions && ragQuiz.questions.length > 0) {
+      QUIZ_QUESTIONS = ragQuiz.questions;
+    } else {
+      QUIZ_QUESTIONS = buildRandomQuizQuestions();
+    }
+
+    if (!QUIZ_QUESTIONS || QUIZ_QUESTIONS.length === 0) {
       Toast.error('Không tải được câu hỏi', 'Kiểm tra file src/quiz_questions.json rồi tải lại trang.');
       return;
     }

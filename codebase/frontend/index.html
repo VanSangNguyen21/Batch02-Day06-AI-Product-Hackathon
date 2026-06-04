@@ -59,9 +59,9 @@
     <!-- Role-gated sub-nav (admin/reviewer only) -->
     <nav class="role-nav" id="role-nav" aria-label="Quản trị">
       <div class="container role-nav-inner">
-        <a href="#form-section" class="role-nav-link" data-role="guest,student,premium,reviewer,admin">Trang chủ</a>
-        <a href="#app-container" class="role-nav-link" data-role-min="student">Lộ trình</a>
-        <a href="#admin-dashboard" class="role-nav-link" data-role-min="reviewer" id="nav-admin">Quản trị</a>
+        <a href="index.html" class="role-nav-link" data-role="guest,student,premium,reviewer,admin">Trang chủ</a>
+        <a href="workspace.html" class="role-nav-link" data-role-min="student">Lộ trình</a>
+        <a href="main.html#admin-dashboard" class="role-nav-link" data-role-min="reviewer" id="nav-admin">Quản trị</a>
         <span class="role-nav-info" id="role-nav-info"></span>
       </div>
     </nav>
@@ -150,162 +150,16 @@
         </button>
       </div>
     </div>
-  </div>
-
-  <!-- ========================================================
-       MODAL: RESET & SUPPORT
-       ======================================================== -->
-  <div class="modal-overlay hidden" id="modal-support" role="dialog" aria-modal="true" aria-labelledby="modal-support-title">
-    <div class="modal-card">
-      <button class="modal-close" id="modal-support-close" aria-label="Đóng">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-      <div class="modal-icon">🛠️</div>
-      <h3 class="modal-title" id="modal-support-title">Hỗ trợ &amp; Đặt lại</h3>
-      <p class="modal-subtitle">Gặp vấn đề? Bạn có thể đặt lại toàn bộ phiên làm việc hoặc liên hệ hỗ trợ.</p>
-
-      <div class="support-options">
-        <div class="support-option">
-          <div class="support-option-icon">🔄</div>
-          <div class="support-option-content">
-            <strong>Đặt lại phiên</strong>
-            <p>Xoá toàn bộ dữ liệu và bắt đầu lại từ đầu.</p>
-          </div>
-          <button class="btn-danger btn-sm" id="btn-reset-session">Đặt lại</button>
-        </div>
-        <div class="support-option">
-          <div class="support-option-icon">📋</div>
-          <div class="support-option-content">
-            <strong>Lộ trình mặc định</strong>
-            <p>Khôi phục về lộ trình học AI cơ bản.</p>
-          </div>
-          <button class="btn-ghost btn-sm" id="btn-rollback">Khôi phục</button>
-        </div>
-        <div class="support-option">
-          <div class="support-option-icon">✉️</div>
-          <div class="support-option-content">
-            <strong>Liên hệ hỗ trợ</strong>
-            <p>ai-support@vinuni.edu.vn</p>
-          </div>
-          <a href="mailto:ai-support@vinuni.edu.vn" class="btn-ghost btn-sm">Email</a>
-        </div>
-      </div>
-
-      <button class="btn-ghost btn-full" id="btn-support-close-main" style="margin-top:1rem;">Đóng</button>
-    </div>
-  </div>
-
-  <!-- ========================================================
-       ADMIN DASHBOARD (reviewer / admin only)
-       ======================================================== -->
-  <section class="admin-dashboard container hidden" id="admin-dashboard" data-role-min="reviewer">
-    <h2 class="admin-title">Quản trị &amp; Giám sát</h2>
-    <p class="admin-subtitle">Hàng đợi xem xét thủ công và báo cáo chi phí theo ngày.</p>
-
-    <div class="admin-tabs" role="tablist">
-      <button class="admin-tab active" data-tab="review" role="tab">Hàng đợi xem xét</button>
-      <button class="admin-tab" data-tab="cost" role="tab">Báo cáo chi phí</button>
-    </div>
-
-    <!-- Tab: Review queue -->
-    <div class="admin-panel" id="admin-panel-review" role="tabpanel">
-      <div class="admin-toolbar">
-        <label for="review-status-filter">Trạng thái:</label>
-        <select id="review-status-filter">
-          <option value="pending">pending</option>
-          <option value="resolved">resolved</option>
-          <option value="all">all</option>
-        </select>
-        <button class="btn-primary btn-sm" id="btn-refresh-review">Tải lại</button>
-      </div>
-      <div class="admin-table-wrap">
-        <table class="admin-table" id="review-table">
-          <thead>
-            <tr>
-              <th>ID</th><th>User</th><th>Lý do</th><th>Confidence</th>
-              <th>Rating</th><th>Trạng thái</th><th>Hành động</th>
-            </tr>
-          </thead>
-          <tbody id="review-tbody">
-            <tr><td colspan="7" class="admin-empty">Đang tải...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Tab: Cost report -->
-    <div class="admin-panel hidden" id="admin-panel-cost" role="tabpanel">
-      <div class="admin-toolbar">
-        <label for="cost-date">Ngày:</label>
-        <input type="date" id="cost-date" />
-        <button class="btn-primary btn-sm" id="btn-refresh-cost">Tải lại</button>
-      </div>
-      <div class="cost-summary" id="cost-summary"></div>
-      <div class="admin-table-wrap">
-        <table class="admin-table" id="cost-table">
-          <thead>
-            <tr><th>User</th><th>Requests</th><th>Input tokens</th><th>Output tokens</th><th>Tổng USD</th></tr>
-          </thead>
-          <tbody id="cost-tbody">
-            <tr><td colspan="5" class="admin-empty">Đang tải...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================================================
-       MODAL: LOGIN
-       ======================================================== -->
-  <div class="modal-overlay hidden" id="modal-login" role="dialog" aria-modal="true" aria-labelledby="modal-login-title">
-    <div class="modal-card">
-      <button class="modal-close" id="modal-login-close" aria-label="Đóng">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-      <div class="modal-icon">🔐</div>
-      <h3 class="modal-title" id="modal-login-title">Đăng nhập</h3>
-      <p class="modal-subtitle" id="modal-login-subtitle">Nhập Username và Mật khẩu để tiếp tục.</p>
-
-      <form id="login-form" class="login-form" novalidate>
-        <div class="form-group">
-          <label for="login-username">Username <span class="required">*</span></label>
-          <input type="text" id="login-username" required maxlength="64" placeholder="vd: user123" autocomplete="username" />
-        </div>
-        <div class="form-group">
-          <label for="login-password">Mật khẩu <span class="required">*</span></label>
-          <input type="password" id="login-password" required minlength="6" maxlength="256" placeholder="Nhập mật khẩu..." autocomplete="current-password" />
-        </div>
-        
-        <div class="login-error" id="login-error"></div>
-        <div class="modal-actions">
-          <button type="button" class="btn-ghost" id="btn-login-cancel">Huỷ</button>
-          <button type="submit" class="btn-primary" id="btn-login-submit">Đăng nhập</button>
-        </div>
-      </form>
-
-      <div class="login-hint" style="text-align: center; margin-top: 1rem;">
-        <span id="auth-toggle-text">Chưa có tài khoản?</span> 
-        <a href="#" id="auth-toggle-btn" style="color: var(--primary-500); font-weight: 500;">Đăng ký ngay</a>
-      </div>
-    </div>
-  </div>
-
   <!-- Main JS -->
   <script src="src/landing-page.js"></script>
-  <script src="src/app.js"></script>
   <script src="src/auth.js"></script>
+  <script src="src/app.js"></script>
   <script>
-    // Boot: restore session, render header, gate UI
     (function bootAuth() {
       _restore();
       renderUserBadge();
       applyRoleGating();
-      // Refresh session from server in the background
       if (AuthState.token) refreshMe().finally(() => { renderUserBadge(); applyRoleGating(); });
-
-      document.getElementById('login-form')?.addEventListener('submit', handleLoginSubmit);
-      document.getElementById('modal-login-close')?.addEventListener('click', hideLoginModal);
-      document.getElementById('btn-login-cancel')?.addEventListener('click', hideLoginModal);
     })();
   </script>
 </body>

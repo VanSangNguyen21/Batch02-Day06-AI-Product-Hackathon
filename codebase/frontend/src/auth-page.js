@@ -99,8 +99,7 @@ const AuthPage = {
   async handleRegister(event) {
     event.preventDefault();
     await this.submit('register', {
-      name: sanitizeInput($('register-name').value),
-      email: sanitizeInput($('register-email').value),
+      username: sanitizeInput($('register-email').value),
       password: $('register-password').value,
     });
   },

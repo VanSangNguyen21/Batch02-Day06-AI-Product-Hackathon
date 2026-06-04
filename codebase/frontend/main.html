@@ -96,6 +96,16 @@
         </div>
       </div>
     </div>
+
+    <!-- Role-gated sub-nav (admin/reviewer only) -->
+    <nav class="role-nav" id="role-nav" aria-label="Quản trị">
+      <div class="container role-nav-inner">
+        <a href="index.html" class="role-nav-link" data-role="guest,student,premium,reviewer,admin">Trang chủ</a>
+        <a href="workspace.html" class="role-nav-link" data-role-min="student">Lộ trình</a>
+        <a href="#admin-dashboard" class="role-nav-link" data-role-min="reviewer" id="nav-admin">Quản trị</a>
+        <span class="role-nav-info" id="role-nav-info"></span>
+      </div>
+    </nav>
   </header>
 
   <!-- ========================================================
@@ -167,6 +177,14 @@
             <input type="text" id="goal-job" name="goal_job" maxlength="100" placeholder=" " autocomplete="off" required />
             <label for="goal-job">Công việc/Nghề nghiệp hiện tại của bạn <span class="required">*</span></label>
             <div class="field-error" id="err-job"></div>
+          </div>
+
+          <!-- RAG Quiz Toggle -->
+          <div class="form-group checkbox-group" style="margin-top: 1rem; display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 8px;">
+            <input type="checkbox" id="use-rag-quiz" checked style="width:18px; height:18px; accent-color: var(--primary-500);" />
+            <label for="use-rag-quiz" style="cursor: pointer; margin:0; font-size: 0.9rem; color: var(--text-200);">
+              Sử dụng AI RAG để tự động chọn Quiz phù hợp nhất với hồ sơ của tôi
+            </label>
           </div>
 
           <button type="submit" class="btn-primary btn-full" id="btn-step1-next">
@@ -269,6 +287,65 @@
   </div>
 
   <!-- ========================================================
+       ADMIN DASHBOARD (reviewer / admin only)
+       ======================================================== -->
+  <section class="admin-dashboard container hidden" id="admin-dashboard" data-role-min="reviewer">
+    <h2 class="admin-title">Quản trị &amp; Giám sát</h2>
+    <p class="admin-subtitle">Hàng đợi xem xét thủ công và báo cáo chi phí theo ngày.</p>
+
+    <div class="admin-tabs" role="tablist">
+      <button class="admin-tab active" data-tab="review" role="tab">Hàng đợi xem xét</button>
+      <button class="admin-tab" data-tab="cost" role="tab">Báo cáo chi phí</button>
+    </div>
+
+    <!-- Tab: Review queue -->
+    <div class="admin-panel" id="admin-panel-review" role="tabpanel">
+      <div class="admin-toolbar">
+        <label for="review-status-filter">Trạng thái:</label>
+        <select id="review-status-filter">
+          <option value="pending">pending</option>
+          <option value="resolved">resolved</option>
+          <option value="all">all</option>
+        </select>
+        <button class="btn-primary btn-sm" id="btn-refresh-review">Tải lại</button>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table" id="review-table">
+          <thead>
+            <tr>
+              <th>ID</th><th>User</th><th>Lý do</th><th>Confidence</th>
+              <th>Rating</th><th>Trạng thái</th><th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody id="review-tbody">
+            <tr><td colspan="7" class="admin-empty">Đang tải...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab: Cost report -->
+    <div class="admin-panel hidden" id="admin-panel-cost" role="tabpanel">
+      <div class="admin-toolbar">
+        <label for="cost-date">Ngày:</label>
+        <input type="date" id="cost-date" />
+        <button class="btn-primary btn-sm" id="btn-refresh-cost">Tải lại</button>
+      </div>
+      <div class="cost-summary" id="cost-summary"></div>
+      <div class="admin-table-wrap">
+        <table class="admin-table" id="cost-table">
+          <thead>
+            <tr><th>User</th><th>Requests</th><th>Input tokens</th><th>Output tokens</th><th>Tổng USD</th></tr>
+          </thead>
+          <tbody id="cost-tbody">
+            <tr><td colspan="5" class="admin-empty">Đang tải...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
        MODAL: RESET & SUPPORT
        ======================================================== -->
   <div class="modal-overlay hidden" id="modal-support" role="dialog" aria-modal="true" aria-labelledby="modal-support-title">
@@ -312,6 +389,16 @@
   </div>
 
   <!-- Main JS -->
+  <script src="src/rag-quiz-selector.js"></script>
+  <script src="src/auth.js"></script>
   <script src="src/app.js"></script>
+  <script>
+    (function bootAuth() {
+      _restore();
+      renderUserBadge();
+      applyRoleGating();
+      if (AuthState.token) refreshMe().finally(() => { renderUserBadge(); applyRoleGating(); });
+    })();
+  </script>
 </body>
 </html>
