@@ -9,6 +9,7 @@ import sqlite3
 import os
 import json
 import logging
+import hashlib
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 
@@ -22,6 +23,12 @@ COST_DB_PATH = os.path.join(DB_DIR, "cost_logs.db")
 FEEDBACK_DB_PATH = os.path.join(DB_DIR, "feedback.db")
 
 logger = logging.getLogger(__name__)
+
+
+def _hash_user_id(user_id: str) -> str:
+    salt = os.getenv("COST_USER_HASH_SALT", "ai-path-demo-local-salt")
+    digest = hashlib.sha256(f"{salt}:{user_id}".encode("utf-8")).hexdigest()
+    return f"user_{digest[:16]}"
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -256,7 +263,7 @@ def insert_cost_log(
                  calculated_cost, confidence_score, model_name, endpoint)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (
-            user_id,
+            _hash_user_id(user_id),
             datetime.utcnow().isoformat(),
             input_tokens,
             output_tokens,
@@ -283,13 +290,14 @@ def get_user_daily_cost(user_id: str, date_str: Optional[str] = None) -> float:
 
     conn = get_cost_db_connection()
     try:
+        hashed_user_id = _hash_user_id(user_id)
         cursor = conn.cursor()
         cursor.execute("""
             SELECT COALESCE(SUM(calculated_cost), 0.0) as daily_cost
             FROM cost_logs
             WHERE user_id = ?
               AND DATE(timestamp) = ?
-        """, (user_id, date_str))
+        """, (hashed_user_id, date_str))
         row = cursor.fetchone()
         return float(row["daily_cost"]) if row else 0.0
     finally:
