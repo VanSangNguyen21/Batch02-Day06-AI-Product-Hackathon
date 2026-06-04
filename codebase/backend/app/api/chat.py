@@ -8,22 +8,31 @@ Tác giả / Author: AI VinUni Batch02-Day05
 import os
 import re
 import time
-import logging
 import asyncio
+import logging
 from collections import defaultdict, deque
 import json
 from typing import List, Optional, Dict, Any
-import requests
-import base64
-from openai import OpenAI, AsyncOpenAI
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 
 from middleware.cost_logger import log_cost, is_user_rate_limited
 from models.database import upsert_session, get_session
 from middleware.data_masking import mask_sensitive_data
 from middleware.guardrails import guardrail_manager
+from middleware.auth import Role, get_role_limits
+from app.api.auth import get_current_session, require_session_role, _Session
+from app.llm_providers import resolve_config, chat_ollama, LLMProvider
+import requests
+import base64
+from openai import OpenAI, AsyncOpenAI
+
+from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel, Field
+
+from middleware.cost_logger import log_cost, is_user_rate_limited
+from models.database import upsert_session, get_session
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +59,8 @@ _rate_limit_lock = asyncio.Lock()
 
 class ChatRequest(BaseModel):
     """Yêu cầu chat / Chat request payload."""
+    model_config = {"protected_namespaces": ()}
+
     user_id:          str  = Field(..., description="ID người dùng / User identifier")
     message:          str  = Field(..., min_length=1, max_length=2000, description="Tin nhắn người dùng / User message")
     session_id:       str  = Field(..., description="ID phiên hội thoại / Session identifier")
@@ -99,7 +110,7 @@ def check_guardrails(message: str) -> Optional[str]:
     """
     for pattern in HARMFUL_PATTERNS:
         if pattern.search(message):
-            logger.warning(f"🚫 Guardrail triggered for pattern: {pattern.pattern}")
+            logger.warning(f" Guardrail triggered for pattern: {pattern.pattern}")
             return "Tin nhắn chứa nội dung không phù hợp / Message contains inappropriate content"
 
     # Kiểm tra độ dài bất thường / Check for abnormally long repetitive content
@@ -154,20 +165,27 @@ Always be encouraging, practical, and concise."""
 
 async def call_chat_llm(
     messages: List[Dict[str, str]],
-    model_name: str,
 ) -> Dict[str, Any]:
     """
-    Gọi LLM cho hội thoại chat
-    Call LLM API with conversation history.
+    Gọi LLM cho hội thoại chat.
+    Dispatch theo LLM_PROVIDER env (openai | ollama | gemini | nvidia | deepseek).
     """
-    model_lower = model_name.lower()
+    cfg = resolve_config()
+    full_messages = [{"role": "system", "content": CHAT_SYSTEM_PROMPT}] + messages
 
-    if "gpt" in model_lower or "deepseek" in model_lower or "nvidia" in model_lower or "nemotron" in model_lower or "llama" in model_lower:
-        return await _call_openai_chat(messages, model_name)
-    if "gemini" in model_lower:
-        return await _call_gemini_chat(messages, model_name)
+    if cfg.provider == LLMProvider.OLLAMA:
+        try:
+            logger.info(f"Ollama chat at {cfg.base_url} with model {cfg.model}")
+            return await chat_ollama(full_messages, cfg, temperature=0.7, max_tokens=1024)
+        except Exception as e:
+            logger.error(f"Ollama chat error: {e}")
+            raise HTTPException(status_code=502, detail=f"Ollama error: {str(e)}")
 
-    raise HTTPException(status_code=500, detail=f"Unsupported model: {model_name}")
+    if cfg.provider == LLMProvider.GEMINI:
+        return await _call_gemini_chat(full_messages, cfg.model)
+
+    # OpenAI / NVIDIA / DeepSeek
+    return await _call_openai_chat(full_messages, cfg.model)
 
 
 async def _call_openai_chat(messages: List[Dict], model_name: str) -> Dict[str, Any]:
@@ -178,7 +196,8 @@ async def _call_openai_chat(messages: List[Dict], model_name: str) -> Dict[str, 
         
         # Override API key for Nvidia models or if using Nvidia base URL
         if "nvidia" in model_name.lower() or "nemotron" in model_name.lower() or "nvidia" in base_url.lower():
-            api_key = "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"
+            api_key = os.getenv("NVIDIA_API_KEY") or os.getenv("OPENAI_API_KEY")
+            base_url = os.getenv("NVIDIA_API_BASE", "https://integrate.api.nvidia.com/v1")
 
         if not api_key:
             raise HTTPException(status_code=500, detail="API key not configured")
@@ -302,28 +321,97 @@ async def _call_gemini_chat(messages: List[Dict], model_name: str) -> Dict[str, 
 
 
 # ──────────────────────────────────────────────────────────────────────────────
+# Offline fallback khi LLM không khả dụng
+# ──────────────────────────────────────────────────────────────────────────────
+
+def _offline_chat_fallback(conversation_history: List[Dict[str, str]]) -> str:
+    """
+    Trả lời offline dựa trên từ khoá khi LLM API không hoạt động.
+    Used when Ollama/OpenAI/Gemini endpoints fail or are not configured.
+    """
+    last_user_msg = ""
+    for msg in reversed(conversation_history):
+        if msg.get("role") == "user":
+            last_user_msg = msg.get("content", "")
+            break
+
+    msg_lower = last_user_msg.lower()
+
+    if any(kw in msg_lower for kw in ["python", "lap trinh", "code", "coding"]):
+        return (
+            "Python cho AI/ML — lo trinh goi y:\n\n"
+            "1. Python co ban: bien, vong lap, ham, OOP\n"
+            "2. NumPy — tinh toan ma tran hieu qua\n"
+            "3. Pandas — xu ly du lieu bang\n"
+            "4. Matplotlib / Seaborn — truc quan hoa\n\n"
+            "Tai nguyen mien phi: Kaggle Learn, CS50P Harvard."
+        )
+    if any(kw in msg_lower for kw in ["deep learning", "neural", "dl", "mang noron"]):
+        return (
+            "Deep Learning nam o Giai doan 3 trong lo trinh cua ban. "
+            "Bat dau voi MLP / Backpropagation, sau do toi CNN (thi giac) "
+            "va Transformer (NLP/LLM). Tai nguyen: fast.ai, DeepLearning.AI."
+        )
+    if any(kw in msg_lower for kw in ["tai lieu", "sach", "course", "khoa hoc", "hoc o dau"]):
+        return (
+            "Tai nguyen hoc AI goi y:\n\n"
+            "- Coursera — Machine Learning Specialization (Andrew Ng)\n"
+            "- fast.ai — Practical Deep Learning\n"
+            "- Google ML Crash Course\n"
+            "- Kaggle Learn (mien phi)\n"
+            "- 'Hands-On ML' — Aurelien Geron (sach)"
+        )
+    if any(kw in msg_lower for kw in ["bao lau", "thoi gian", "how long"]):
+        return (
+            "Voi lich hoc deu dan (4–10 gio/tuan), lo trinh 4 giai doan "
+            "thuong mat khoang 6–9 thang de hoan thanh. Ban co the di nhanh hon "
+            "neu da co nen tang toan/lap trinh vung."
+        )
+    if any(kw in msg_lower for kw in ["lo trinh", "roadmap", "ke hoach", "buoc"]):
+        return (
+            "Lo trinh cua ban gom 4 giai doan:\n"
+            "1. Nen tang Toan & Python\n"
+            "2. Machine Learning co ban\n"
+            "3. Deep Learning & Neural Networks\n"
+            "4. Du an thuc te & Trien khai\n\n"
+            "Ban co the xem chi tiet trong tab Lo trinh hoc."
+        )
+    return (
+        "Xin chao! Hien tai may chu AI dang ban (che do offline). "
+        "Duoi day la vai goi y chung:\n\n"
+        "- Tap trung vao milestone dang active trong lo trinh\n"
+        "- Thuc hanh code moi ngay, du chi 30 phut\n"
+        "- Hoi cu the ve Python / ML / Deep Learning / tai lieu de nhan cau tra loi chinh xac hon."
+    )
+
+
+# ──────────────────────────────────────────────────────────────────────────────
 # Endpoint chính / Main endpoint
 # ──────────────────────────────────────────────────────────────────────────────
 
 @router.post("/chat", response_model=ChatResponse, summary="Conversational AI chat")
-async def chat(payload: ChatRequest):
+async def chat(payload: ChatRequest, sess: _Session = Depends(require_session_role(Role.STUDENT, Role.PREMIUM, Role.ADMIN))):
     """
     ## Hội thoại AI với kiểm tra bảo vệ nội dung và giới hạn tốc độ
     ## AI chat with content guardrails and rate limiting
 
     **Quy trình / Flow:**
-    1. Rate limit check: 5 tin nhắn/phút per user_id
-    2. Guardrail check: từ khóa & regex
-    3. Quiz gate: nếu chưa trả lời đủ 3 câu → chặn thân thiện
-    4. Daily cost check
-    5. Tải lịch sử hội thoại từ DB / Load conversation history from DB
-    6. Gọi LLM / Call LLM
-    7. Lưu lịch sử + ghi chi phí / Save history + log cost
+    1. Role check: STUDENT / PREMIUM / ADMIN
+    2. Rate limit check: per-role (STUDENT=5, PREMIUM=20, ADMIN=60 msg/min)
+    3. Guardrail check: từ khóa & regex
+    4. Quiz gate: nếu chưa trả lời đủ 3 câu → chặn thân thiện
+    5. Daily cost check
+    6. Tải lịch sử hội thoại từ DB / Load conversation history from DB
+    7. Gọi LLM / Call LLM
+    8. Lưu lịch sử + ghi chi phí / Save history + log cost
     """
     user_id    = payload.user_id
     session_id = payload.session_id
     message    = mask_sensitive_data(payload.message.strip())
     model_name = payload.model_override or os.getenv("MODEL_NAME", "gpt-4o")
+    role       = sess.role
+    limits     = get_role_limits(role)
+    logger.info(f"Chat request | user={user_id} role={role.value} rate_limit={limits['rate_per_minute']}/min cost_limit=${limits['daily_cost_usd']}/day")
 
     # ── Bước 1: Rate limit / Step 1: Rate limit ──────────────────────────────
     if await check_rate_limit(user_id):
@@ -343,7 +431,7 @@ async def chat(payload: ChatRequest):
     if guard_result and guard_result.get("blocked"):
         reason = guard_result.get("reason", "blocked")
         response_text = guard_result.get("response", "[Yêu cầu truy cập thông tin hệ thống bị từ chối do vi phạm quy tắc an toàn quốc tế]")
-        logger.info(f"🚫 Message blocked for user '{user_id}': {reason}")
+        logger.info(f" Message blocked for user '{user_id}': {reason}")
         return ChatResponse(
             response=response_text,
             session_id=session_id,
@@ -365,10 +453,10 @@ async def chat(payload: ChatRequest):
 
     if not quiz_completed and questions_answered < MIN_QUIZ_QUESTIONS:
         friendly_block = (
-            f"👋 Chào bạn! Để tôi có thể hỗ trợ tốt hơn, "
+            f" Chào bạn! Để tôi có thể hỗ trợ tốt hơn, "
             f"bạn cần hoàn thành ít nhất {MIN_QUIZ_QUESTIONS} câu hỏi khảo sát trước nhé.\n"
             f"Bạn đã trả lời {questions_answered}/{MIN_QUIZ_QUESTIONS} câu. "
-            f"Hãy quay lại phần khảo sát để tiếp tục! 📝\n\n"
+            f"Hãy quay lại phần khảo sát để tiếp tục! \n\n"
             f"Hi there! To provide you with better support, please complete at least "
             f"{MIN_QUIZ_QUESTIONS} quiz questions first. "
             f"You've answered {questions_answered}/{MIN_QUIZ_QUESTIONS}. "
@@ -406,12 +494,22 @@ async def chat(payload: ChatRequest):
     conversation_history.append({"role": "user", "content": message})
 
     # ── Bước 6: Gọi LLM / Step 6: Call LLM ──────────────────────────────────
-    logger.info(f"💬 Chat LLM call for user '{user_id}' | session='{session_id}' | model='{model_name}'")
-    llm_result = await call_chat_llm(conversation_history, model_name)
-
-    ai_response   = llm_result["content"]
-    input_tokens  = llm_result["input_tokens"]
-    output_tokens = llm_result["output_tokens"]
+    logger.info(f"Chat LLM call for user '{user_id}' | session='{session_id}' | model='{model_name}'")
+    try:
+        llm_result   = await call_chat_llm(conversation_history)
+        ai_response  = llm_result["content"]
+        input_tokens = llm_result["input_tokens"]
+        output_tokens = llm_result["output_tokens"]
+    except HTTPException as http_err:
+        logger.warning(f"LLM API failed for chat ({http_err.detail}); using offline fallback")
+        ai_response = _offline_chat_fallback(conversation_history)
+        input_tokens  = sum(len(str(m.get("content", ""))) for m in conversation_history) // 4
+        output_tokens = len(ai_response) // 4
+    except Exception as e:
+        logger.error(f"Unexpected chat LLM error: {e}; using offline fallback")
+        ai_response = _offline_chat_fallback(conversation_history)
+        input_tokens  = sum(len(str(m.get("content", ""))) for m in conversation_history) // 4
+        output_tokens = len(ai_response) // 4
 
     # Phản hồi fallback khi không chắc chắn câu trả lời / Fallback response if AI is uncertain
     uncertainty_keywords = [
@@ -425,12 +523,12 @@ async def chat(payload: ChatRequest):
     is_uncertain = any(uk in ai_response_lower for uk in uncertainty_keywords)
     
     if is_uncertain:
-        logger.info(f"⚠️ Detected low-confidence/uncertain AI chat response for user '{user_id}'. Appending human fallback information.")
+        logger.info(f" Detected low-confidence/uncertain AI chat response for user '{user_id}'. Appending human fallback information.")
         ai_response += (
             "\n\n---"
-            "\n💡 *Chú ý: Câu hỏi này có vẻ nằm ngoài phạm vi học tập thông thường của tôi hoặc tôi chưa hoàn toàn chắc chắn. "
+            "\n *Chú ý: Câu hỏi này có vẻ nằm ngoài phạm vi học tập thông thường của tôi hoặc tôi chưa hoàn toàn chắc chắn. "
             "Nếu bạn cần thêm thông tin chính xác, bạn có thể liên hệ trực tiếp với Cố vấn học tập VinUni qua email: "
-            "[ai-support@vinuni.edu.vn](mailto:ai-support@vinuni.edu.vn) hoặc bấm nút Trợ giúp (biểu tượng 🛠️ ở góc trên bên phải) để được hỗ trợ.*"
+            "[ai-support@vinuni.edu.vn](mailto:ai-support@vinuni.edu.vn) hoặc bấm nút Trợ giúp (biểu tượng  ở góc trên bên phải) để được hỗ trợ.*"
         )
 
     # ── Bước 7: Lưu lịch sử & ghi chi phí / Step 7: Save history & log cost ─
@@ -454,7 +552,7 @@ async def chat(payload: ChatRequest):
         intent_detected="chat_conversation"
     )
 
-    logger.info(f"✅ Chat response sent | user='{user_id}' | cost=${cost_info['calculated_cost']:.6f}")
+    logger.info(f" Chat response sent | user='{user_id}' | cost=${cost_info['calculated_cost']:.6f}")
 
     return ChatResponse(
         response=ai_response,

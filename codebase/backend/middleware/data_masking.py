@@ -35,6 +35,6 @@ def mask_sensitive_data(text: str) -> str:
     text = PHONE_STUDENT_ID_REGEX.sub("[ANONYMOUS_USER_ID]", text)
 
     if text != original_text:
-        logger.info("🔒 PII data detected and masked successfully.")
+        logger.info(" PII data detected and masked successfully.")
 
     return text

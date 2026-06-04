@@ -9,7 +9,7 @@
 import os
 import json
 import logging
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 from typing import List, Optional
 import httpx
@@ -17,6 +17,9 @@ import httpx
 from middleware.cost_logger import log_cost
 from middleware.data_masking import mask_sensitive_data
 from middleware.guardrails import guardrail_manager
+# from middleware.auth import require_student_or_above (removed)
+from app.api.auth import get_current_session, require_session_role, _Session
+from middleware.auth import Role
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -31,7 +34,7 @@ def load_system_prompt() -> str:
         with open(SYSTEM_PROMPT_PATH, "r", encoding="utf-8") as f:
             return f.read()
     except FileNotFoundError:
-        logger.warning("⚠️ System prompt file không tìm thấy, dùng prompt mặc định")
+        logger.warning(" System prompt file không tìm thấy, dùng prompt mặc định")
         return "You are an AI learning path advisor. Return JSON with milestones."
 
 
@@ -45,9 +48,9 @@ def save_to_sandbox_storage(data: dict):
         sandbox_file = os.path.join(sandbox_dir, "sandbox_storage.jsonl")
         with open(sandbox_file, "a", encoding="utf-8") as f:
             f.write(json.dumps(data, ensure_ascii=False) + "\n")
-        logger.info(f"📥 Saved low confidence case to Sandbox Storage: {sandbox_file}")
+        logger.info(f" Saved low confidence case to Sandbox Storage: {sandbox_file}")
     except Exception as e:
-        logger.error(f"❌ Failed to save to Sandbox Storage: {e}")
+        logger.error(f" Failed to save to Sandbox Storage: {e}")
 
 
 # ==================== REQUEST/RESPONSE MODELS ====================
@@ -56,7 +59,7 @@ class AnalyzeRequest(BaseModel):
     user_id: str
     session_id: str
     goal_description: str = Field(..., min_length=10, max_length=2000)
-    quiz_answers: List[Optional[int]] = Field(..., min_items=1, max_items=10)
+    quiz_answers: List[Optional[int]] = Field(..., min_length=1, max_length=10)
     time_per_week: str
     current_job: str
     background: Optional[str] = "none"
@@ -83,7 +86,7 @@ class AnalyzeResponse(BaseModel):
 # ==================== ENDPOINT ====================
 
 @router.post("/analyze", response_model=AnalyzeResponse, summary="Phân tích hồ sơ và tạo lộ trình học")
-async def analyze_profile(req: AnalyzeRequest):
+async def analyze_profile(req: AnalyzeRequest, sess: _Session = Depends(require_session_role(Role.STUDENT, Role.PREMIUM, Role.ADMIN))):
     """
     Nhận thông tin người học từ Form + Quiz, gọi LLM API,
     trả về lộ trình học cá nhân hóa dạng JSON.
@@ -111,10 +114,10 @@ async def analyze_profile(req: AnalyzeRequest):
             if guard_result and guard_result.get("blocked"):
                 reason = guard_result.get("reason", "blocked")
                 response_text = guard_result.get("response", "Yêu cầu vi phạm quy tắc an toàn.")
-                logger.warning(f"🚫 Analyze request blocked due to {field_name}: {reason}")
+                logger.warning(f" Analyze request blocked due to {field_name}: {reason}")
                 raise HTTPException(status_code=400, detail=response_text)
 
-    logger.info(f"📊 Analyze request | user={req.user_id} | job={req.current_job} | score={req.quiz_score}/10")
+    logger.info(f" Analyze request | user={req.user_id} | job={req.current_job} | score={req.quiz_score}/10")
     
     # Build user context prompt
     quiz_summary = f"Điểm quiz: {req.quiz_score}/10"
@@ -157,12 +160,14 @@ Trả về JSON theo đúng schema đã định nghĩa. KHÔNG thêm text ngoài
     roadmap_data = None
     input_tokens = 0
     output_tokens = 0
-    
+    raw_content = ""
+
     if "gpt" in model_lower or "deepseek" in model_lower or "nvidia" in model_lower or "nemotron" in model_lower or "llama" in model_lower:
         api_key = os.getenv("OPENAI_API_KEY")
         base_url = os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1")
         if "nvidia" in model_lower or "nemotron" in model_lower or "nvidia" in base_url.lower():
-            api_key = "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"
+            api_key = os.getenv("NVIDIA_API_KEY") or os.getenv("OPENAI_API_KEY")
+            base_url = os.getenv("NVIDIA_API_BASE", "https://integrate.api.nvidia.com/v1")
         if api_key:
             try:
                 from openai import AsyncOpenAI
@@ -184,7 +189,7 @@ Trả về JSON theo đúng schema đã định nghĩa. KHÔNG thêm text ngoài
                 else:
                     kwargs["response_format"] = {"type": "json_object"}
                 
-                logger.info(f"🤖 Calling OpenAI compatible API at {base_url} with model {model}")
+                logger.info(f" Calling OpenAI compatible API at {base_url} with model {model}")
                 response = await openai_client.chat.completions.create(**kwargs)
                 raw_content = response.choices[0].message.content
                 roadmap_data = json.loads(raw_content)
@@ -195,10 +200,10 @@ Trả về JSON theo đúng schema đã định nghĩa. KHÔNG thêm text ngoài
                     output_tokens = response.usage.completion_tokens or 0
                 
             except json.JSONDecodeError as e:
-                logger.error(f"❌ JSON parse error: {e}. Raw content: {raw_content if 'raw_content' in locals() else 'None'}")
+                logger.error(f" JSON parse error: {e}. Raw content: {raw_content if 'raw_content' in locals() else 'None'}")
                 roadmap_data = None
             except Exception as e:
-                logger.error(f"❌ Unexpected error calling OpenAI compatible API: {e}")
+                logger.error(f" Unexpected error calling OpenAI compatible API: {e}")
                 roadmap_data = None
                 
     elif "gemini" in model_lower:
@@ -230,18 +235,18 @@ Trả về JSON theo đúng schema đã định nghĩa. KHÔNG thêm text ngoài
                 output_tokens = usage.candidates_token_count if usage else 500
                 
             except json.JSONDecodeError as e:
-                logger.error(f"❌ JSON parse error from Gemini: {e}")
+                logger.error(f" JSON parse error from Gemini: {e}")
                 roadmap_data = None
             except Exception as e:
-                logger.error(f"❌ Unexpected error calling Gemini: {e}")
+                logger.error(f" Unexpected error calling Gemini: {e}")
                 roadmap_data = None
     else:
-        logger.warning(f"⚠️ Không nhận dạng được model: {model}, dùng default fallback")
+        logger.warning(f" Không nhận dạng được model: {model}, dùng default fallback")
     
     # Fallback nếu API không hoạt động hoặc không có key
     if roadmap_data is None:
-        logger.warning("⚠️ Dùng fallback roadmap")
-        roadmap_data = _get_fallback_roadmap(req.quiz_score, req.background, req.goal_description)
+        logger.warning("Using fallback roadmap")
+        roadmap_data = _get_fallback_roadmap(req.quiz_score or 0, req.background or "none", req.goal_description)
         input_tokens = 0
         output_tokens = 0
     
@@ -279,7 +284,7 @@ Trả về JSON theo đúng schema đã định nghĩa. KHÔNG thêm text ngoài
             }
             save_to_sandbox_storage(sandbox_data)
         except Exception as ex:
-            logger.error(f"❌ Failed to process sandbox storage save: {ex}")
+            logger.error(f" Failed to process sandbox storage save: {ex}")
 
     # Phân loại path_type dựa trên confidence_score theo đúng quy tắc SPEC:
     # > 0.80 -> "happy"
@@ -303,7 +308,7 @@ Trả về JSON theo đúng schema đã định nghĩa. KHÔNG thêm text ngoài
             cost_info=cost_info
         )
     except Exception as e:
-        logger.error(f"❌ Response validation error: {e}")
+        logger.error(f" Response validation error: {e}")
         raise HTTPException(status_code=500, detail="Lỗi xử lý kết quả AI. Vui lòng thử lại.")
 
 
@@ -312,21 +317,21 @@ def _get_fallback_roadmap(quiz_score: int, background: str, goal: str) -> dict:
     return {
         "milestones": [
             {
-                "milestone_title": "🌱 Nền tảng AI cho người mới",
+                "milestone_title": " Nền tảng AI cho người mới",
                 "duration": "Tuần 1-2 (4-6 giờ)",
                 "resource_links": ["https://www.elementsofai.com", "https://kaggle.com/learn"],
                 "difficulty": "beginner",
                 "description": "Hiểu AI là gì, ứng dụng thực tế, và bắt đầu hành trình học AI đúng hướng."
             },
             {
-                "milestone_title": "📊 Data & Thống kê cơ bản",
+                "milestone_title": " Data & Thống kê cơ bản",
                 "duration": "Tuần 3-4 (5-8 giờ)",
                 "resource_links": ["https://www.khanacademy.org/math/statistics-probability"],
                 "difficulty": "beginner",
                 "description": "Thống kê mô tả, xác suất cơ bản, biểu đồ dữ liệu. Nền tảng không thể thiếu cho ML."
             },
             {
-                "milestone_title": "🛠️ Công cụ AI thực hành",
+                "milestone_title": " Công cụ AI thực hành",
                 "duration": "Tuần 5-6 (5-7 giờ)",
                 "resource_links": ["https://openai.com/chatgpt", "https://claude.ai"],
                 "difficulty": "intermediate",

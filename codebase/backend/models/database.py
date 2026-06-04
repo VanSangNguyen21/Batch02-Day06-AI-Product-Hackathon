@@ -20,6 +20,7 @@ DB_DIR = os.path.join(BASE_DIR, "data")
 
 COST_DB_PATH = os.path.join(DB_DIR, "cost_logs.db")
 FEEDBACK_DB_PATH = os.path.join(DB_DIR, "feedback.db")
+USERS_DB_PATH = os.path.join(DB_DIR, "users.db")
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +41,14 @@ def get_feedback_db_connection() -> sqlite3.Connection:
     """Tạo kết nối đến feedback.db / Connect to feedback database."""
     os.makedirs(DB_DIR, exist_ok=True)
     conn = sqlite3.connect(FEEDBACK_DB_PATH, check_same_thread=False)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def get_users_db_connection() -> sqlite3.Connection:
+    """Tạo kết nối đến users.db / Connect to users database."""
+    os.makedirs(DB_DIR, exist_ok=True)
+    conn = sqlite3.connect(USERS_DB_PATH, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -80,9 +89,9 @@ def init_cost_db():
                 ON cost_logs(timestamp);
         """)
         conn.commit()
-        logger.info("✅ cost_logs table initialized")
+        logger.info(" cost_logs table initialized")
     except Exception as e:
-        logger.error(f"❌ Failed to init cost_logs table: {e}")
+        logger.error(f" Failed to init cost_logs table: {e}")
         raise
     finally:
         conn.close()
@@ -169,9 +178,46 @@ def init_feedback_db():
                 ON sessions(user_id);
         """)
         conn.commit()
-        logger.info("✅ Feedback database tables initialized")
+        logger.info(" Feedback database tables initialized")
     except Exception as e:
-        logger.error(f"❌ Failed to init feedback tables: {e}")
+        logger.error(f" Failed to init feedback tables: {e}")
+        raise
+    finally:
+        conn.close()
+
+
+def init_users_db():
+    """
+    Khởi tạo bảng users trong users.db
+    Initialize users table in users.db
+    """
+    conn = get_users_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.executescript("""
+            CREATE TABLE IF NOT EXISTS users (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                username        TEXT UNIQUE NOT NULL,
+                password_hash   TEXT NOT NULL,
+                role            TEXT DEFAULT 'student',
+                created_at      TEXT DEFAULT (datetime('now'))
+            );
+        """)
+        
+        # Hardcode default admin account
+        cursor.execute("SELECT COUNT(*) FROM users WHERE username = 'admin'")
+        if cursor.fetchone()[0] == 0:
+            default_admin_hash = hash_password("admin123")
+            cursor.execute("""
+                INSERT INTO users (username, password_hash, role)
+                VALUES (?, ?, ?)
+            """, ("admin", default_admin_hash, "admin"))
+            logger.info(" Default admin account (admin/admin123) created")
+            
+        conn.commit()
+        logger.info(" users table initialized")
+    except Exception as e:
+        logger.error(f" Failed to init users table: {e}")
         raise
     finally:
         conn.close()
@@ -182,11 +228,58 @@ def init_db():
     Hàm khởi tạo tất cả cơ sở dữ liệu
     Initialize all databases - called on app startup
     """
-    logger.info("🗄️  Initializing databases...")
+    logger.info("  Initializing databases...")
+    init_users_db()
     init_cost_db()
     init_feedback_db()
-    logger.info("✅ All databases initialized successfully")
+    logger.info(" All databases initialized successfully")
 
+
+# ──────────────────────────────────────────────────────────────────────────────
+# CRUD Helpers - users
+# ──────────────────────────────────────────────────────────────────────────────
+import hashlib
+import os as pyos
+
+def hash_password(password: str) -> str:
+    """Hash a password for storing."""
+    salt = pyos.urandom(16)
+    pwdhash = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
+    return salt.hex() + ':' + pwdhash.hex()
+
+def verify_password(stored_password: str, provided_password: str) -> bool:
+    """Verify a stored password against one provided by user."""
+    try:
+        salt, pwdhash = stored_password.split(':')
+        pwdhash_test = hashlib.pbkdf2_hmac('sha256', provided_password.encode('utf-8'), bytes.fromhex(salt), 100000)
+        return pwdhash == pwdhash_test.hex()
+    except Exception:
+        return False
+
+def create_user(username: str, password_hash: str, role: str = "student") -> int:
+    conn = get_users_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO users (username, password_hash, role)
+            VALUES (?, ?, ?)
+        """, (username, password_hash, role))
+        conn.commit()
+        return cursor.lastrowid
+    except sqlite3.IntegrityError:
+        raise ValueError(f"Username {username} already exists")
+    finally:
+        conn.close()
+
+def get_user_by_username(username: str) -> Optional[Dict[str, Any]]:
+    conn = get_users_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()
 
 # ──────────────────────────────────────────────────────────────────────────────
 # CRUD Helpers - cost_logs
